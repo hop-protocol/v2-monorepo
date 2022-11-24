@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  bonder:
+    image: hopprotocol/v2-bundle-relayer:latest
+    env_file:
+      - docker.env
+    restart: unless-stopped
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-east-1
+        awslogs-group: Hopv2BundleRelayer
+        awslogs-create-group: 'true'
