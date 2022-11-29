@@ -36,10 +36,9 @@ export class EventFetcher {
   }
 
   async fetchEvents (filters: InputFilter[], options: FetchOptions) {
-    const events :any[] = []
     const blockRanges = this.getChunkedBlockRanges(options.startBlock, options.endBlock)
 
-    const promises :any[] = []
+    const promiseFns :any[] = []
     for (const [batchStart, batchEnd] of blockRanges) {
       const batchOptions = {
         startBlock: batchStart,
@@ -48,14 +47,10 @@ export class EventFetcher {
 
       const aggregatedFilters = this.aggregateFilters(filters, batchOptions)
       const batchedEventsFn = () => this.fetchEventsWithAggregatedFilters(aggregatedFilters)
-      promises.push(batchedEventsFn)
+      promiseFns.push(batchedEventsFn)
     }
 
-    await promiseQueue(promises, async (fn: any) => {
-      const batchedEvents = await fn()
-      events.push(...batchedEvents)
-    }, { concurrency: 20 })
-
+    const events = await this.parallelFetch(promiseFns)
     return this.normalizeEvents(events)
   }
 
@@ -147,7 +142,16 @@ export class EventFetcher {
     return filteredEvents.sort(this.sortByBlockNumber)
   }
 
-  sortByBlockNumber (a: any, b: any): number {
+  private async parallelFetch (promiseFns: any[]) {
+    const events: any[] = []
+    await promiseQueue(promiseFns, async (fn: any) => {
+      const batchedEvents = await fn()
+      events.push(...batchedEvents)
+    }, { concurrency: 20 })
+    return events
+  }
+
+  private sortByBlockNumber (a: any, b: any): number {
     if (a.blockNumber > b.blockNumber) return 1
     if (a.blockNumber < b.blockNumber) return -1
 
