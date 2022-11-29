@@ -109,6 +109,7 @@ export class EventFetcher {
     const aggregatedFilters: Filter[] = []
     for (const address in filtersByAddress) {
       const filter = filtersByAddress[address]
+      filter.topics = filter.topics?.sort()
       aggregatedFilters.push({ ...filter, fromBlock: startBlock, toBlock: endBlock })
     }
 

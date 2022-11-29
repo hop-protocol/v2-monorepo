@@ -4,7 +4,7 @@ import { providers } from 'ethers'
 require('dotenv').config()
 
 describe('EventFetcher', () => {
-  it('should fetch all events from multiple filters', async () => {
+  it('should fetch all events from multiple filters and aggregate filter topics', async () => {
     const provider = new providers.StaticJsonRpcProvider(process.env.ETHEREUM_RPC_PROVIDER)
     const eventFetcher = new EventFetcher({
       provider
