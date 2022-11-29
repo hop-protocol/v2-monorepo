@@ -5,7 +5,7 @@ const DefaultBatchBlocks = 2000
 
 export type Options = {
   provider: providers.Provider
-  batchBlocks: number
+  batchBlocks?: number
 }
 
 export type FetchOptions = {
@@ -29,8 +29,25 @@ export class EventFetcher {
   }
 
   async fetchEvents (filters: any[], options: FetchOptions) {
-    const aggregatedFilters = this.aggregateFilters(filters, options)
-    return this.fetchEventsWithAggregatedFilters(aggregatedFilters)
+    const startBlock = options.startBlock
+    const endBlock = options.endBlock
+    const events :any[] = []
+    let batchStart = startBlock
+    let batchEnd = Math.min(batchStart + this.batchBlocks, endBlock)
+    while (batchEnd <= endBlock) {
+      const batchOptions = {
+        startBlock: batchStart,
+        endBlock: batchEnd
+      }
+
+      const aggregatedFilters = this.aggregateFilters(filters, batchOptions)
+      const batchedEvents = await this.fetchEventsWithAggregatedFilters(aggregatedFilters)
+      batchStart = batchEnd
+      batchEnd = batchStart + this.batchBlocks
+      events.push(...batchedEvents)
+    }
+
+    return events
   }
 
   aggregateFilters (filters: any[], options: FetchOptions) {

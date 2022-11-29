@@ -37,7 +37,10 @@
     "eventemitter3": "4.0.7",
     "fast-memoize": "2.5.2",
     "isomorphic-fetch": "3.0.0",
-    "luxon": "2.5.0"
+    "lodash": "^4.17.21",
+    "luxon": "2.5.0",
+    "p-queue": "^6.6.2",
+    "wait": "^0.4.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",
@@ -50,6 +53,7 @@
     "@babel/runtime": "^7.7.2",
     "@types/isomorphic-fetch": "0.0.35",
     "@types/jest": "^27.0.3",
+    "@types/lodash": "^4.14.190",
     "@types/luxon": "^1.27.1",
     "@types/node": "^17.0.21",
     "@types/node-fetch": "2.5.10",

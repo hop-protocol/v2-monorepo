@@ -4,7 +4,7 @@ import { providers } from 'ethers'
 require('dotenv').config()
 
 describe('EventFetcher', () => {
-  it('should fetch events', async () => {
+  it('should fetch all events from multiple filters', async () => {
     const provider = new providers.StaticJsonRpcProvider(process.env.ETHEREUM_RPC_PROVIDER)
     const eventFetcher = new EventFetcher({
       provider
@@ -89,5 +89,29 @@ describe('EventFetcher', () => {
     const expectedTotalEvents = events1.length + events2.length + events3.length
     expect(expectedTotalEvents).toBe(1725)
     expect(events.length).toBe(expectedTotalEvents)
+  }, 60 * 1000)
+
+  it('should fetch all events regardless of block range', async () => {
+    const provider = new providers.StaticJsonRpcProvider(process.env.ETHEREUM_RPC_PROVIDER)
+    const eventFetcher = new EventFetcher({
+      provider
+    })
+    const endBlock = 16072238
+    const startBlock = endBlock - 11000 // should be >10k block range
+    const filter1 = {
+      address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+      topics: [
+        '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef' // Transfer
+      ]
+    }
+
+    const filters = [filter1]
+    const options = {
+      startBlock,
+      endBlock
+    }
+
+    const events = await eventFetcher.fetchEvents(filters, options)
+    expect(events.length).toBe(117310)
   }, 60 * 1000)
 })
