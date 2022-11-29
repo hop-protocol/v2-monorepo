@@ -112,6 +112,71 @@ describe('EventFetcher', () => {
     }
 
     const events = await eventFetcher.fetchEvents(filters, options)
-    expect(events.length).toBe(117310)
+    expect(events.length).toBe(127889)
+  }, 60 * 1000)
+
+  it('should get correct block range for small range', async () => {
+    const batchBlocks = 2000
+    const provider = new providers.StaticJsonRpcProvider(process.env.ETHEREUM_RPC_PROVIDER)
+    const eventFetcher = new EventFetcher({
+      provider,
+      batchBlocks
+    })
+    const endBlock = 16072238
+    const startBlock = endBlock - 1
+    const blockRanges = eventFetcher.getChunkedBlockRanges(startBlock, endBlock)
+    expect(blockRanges.length).toBe(1)
+    expect(JSON.stringify(blockRanges)).toBe(JSON.stringify([[startBlock, endBlock]]))
+  })
+
+  it('should get correct block range for same values', async () => {
+    const batchBlocks = 2000
+    const provider = new providers.StaticJsonRpcProvider(process.env.ETHEREUM_RPC_PROVIDER)
+    const eventFetcher = new EventFetcher({
+      provider,
+      batchBlocks
+    })
+    const endBlock = 16072238
+    const startBlock = endBlock
+    const blockRanges = eventFetcher.getChunkedBlockRanges(startBlock, endBlock)
+    expect(blockRanges.length).toBe(1)
+    expect(JSON.stringify(blockRanges)).toBe(JSON.stringify([[startBlock, endBlock]]))
+  })
+
+  it('should get correct block range for startBlock > endBlock', async () => {
+    const batchBlocks = 2000
+    const provider = new providers.StaticJsonRpcProvider(process.env.ETHEREUM_RPC_PROVIDER)
+    const eventFetcher = new EventFetcher({
+      provider,
+      batchBlocks
+    })
+    const endBlock = 16072238
+    const startBlock = endBlock + 100
+    const blockRanges = eventFetcher.getChunkedBlockRanges(startBlock, endBlock)
+    expect(blockRanges.length).toBe(1)
+    expect(JSON.stringify(blockRanges)).toBe(JSON.stringify([[endBlock, endBlock]]))
+  })
+
+  it('should get correct chunked blocked range for large range', async () => {
+    const endBlock = 16072238
+    const startBlock = endBlock - 11000
+    const provider = new providers.StaticJsonRpcProvider(process.env.ETHEREUM_RPC_PROVIDER)
+    const batchBlocks = 2000
+    const eventFetcher = new EventFetcher({
+      provider,
+      batchBlocks
+    })
+    const blockRanges = eventFetcher.getChunkedBlockRanges(startBlock, endBlock)
+    const expectedRanges = [
+      [startBlock, startBlock + (batchBlocks * 1)],
+      [startBlock + (batchBlocks * 1), startBlock + (batchBlocks * 2)],
+      [startBlock + (batchBlocks * 2), startBlock + (batchBlocks * 3)],
+      [startBlock + (batchBlocks * 3), startBlock + (batchBlocks * 4)],
+      [startBlock + (batchBlocks * 4), startBlock + (batchBlocks * 5)],
+      [startBlock + (batchBlocks * 5), endBlock]
+    ]
+
+    expect(blockRanges.length).toBe(6) // (endBlock-startBlock)/2000
+    expect(JSON.stringify(blockRanges)).toBe(JSON.stringify(expectedRanges))
   }, 60 * 1000)
 })

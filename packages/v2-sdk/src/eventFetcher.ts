@@ -36,14 +36,11 @@ export class EventFetcher {
   }
 
   async fetchEvents (filters: InputFilter[], options: FetchOptions) {
-    const startBlock = options.startBlock
-    const endBlock = options.endBlock
     const events :any[] = []
-    let batchStart = startBlock
-    let batchEnd = Math.min(batchStart + this.batchBlocks, endBlock)
+    const blockRanges = this.getChunkedBlockRanges(options.startBlock, options.endBlock)
 
     const promises :any[] = []
-    while (batchEnd <= endBlock) {
+    for (const [batchStart, batchEnd] of blockRanges) {
       const batchOptions = {
         startBlock: batchStart,
         endBlock: batchEnd
@@ -52,8 +49,6 @@ export class EventFetcher {
       const aggregatedFilters = this.aggregateFilters(filters, batchOptions)
       const batchedEventsFn = () => this.fetchEventsWithAggregatedFilters(aggregatedFilters)
       promises.push(batchedEventsFn)
-      batchStart = batchEnd
-      batchEnd = batchStart + this.batchBlocks
     }
 
     await promiseQueue(promises, async (fn: any) => {
@@ -61,7 +56,27 @@ export class EventFetcher {
       events.push(...batchedEvents)
     }, { concurrency: 20 })
 
-    return events
+    return this.normalizeEvents(events)
+  }
+
+  getChunkedBlockRanges (startBlock: number, endBlock: number) {
+    startBlock = Math.min(startBlock, endBlock)
+    let batchStart = startBlock
+    let batchEnd = Math.min(batchStart + this.batchBlocks, endBlock)
+
+    const blockRanges: number[][] = []
+    while (batchEnd <= endBlock) {
+      blockRanges.push([batchStart, batchEnd])
+
+      if (batchEnd === endBlock) {
+        break
+      }
+
+      batchStart = batchEnd
+      batchEnd = Math.min(batchStart + this.batchBlocks, endBlock)
+    }
+
+    return blockRanges
   }
 
   aggregateFilters (filters: InputFilter[], options: FetchOptions): Filter[] {
@@ -117,5 +132,28 @@ export class EventFetcher {
       result.push(...events)
     }
     return result
+  }
+
+  private normalizeEvents (events: any[]) {
+    const filteredEvents : any[] = []
+    const seen :Record<string, boolean> = {}
+    for (const event of events) {
+      const key = `${event.transactionHash}-${event.logIndex}`
+      if (!seen[key]) {
+        seen[key] = true
+        filteredEvents.push(event)
+      }
+    }
+    return filteredEvents.sort(this.sortByBlockNumber)
+  }
+
+  sortByBlockNumber (a: any, b: any): number {
+    if (a.blockNumber > b.blockNumber) return 1
+    if (a.blockNumber < b.blockNumber) return -1
+
+    if (a.index > b.logIndex) return 1
+    if (a.index < b.logIndex) return -1
+
+    return 0
   }
 }
