@@ -1,4 +1,5 @@
 import { getAddress } from 'ethers/lib/utils'
+import { promiseQueue } from './promiseQueue'
 import { providers } from 'ethers'
 
 const DefaultBatchBlocks = 2000
@@ -34,6 +35,8 @@ export class EventFetcher {
     const events :any[] = []
     let batchStart = startBlock
     let batchEnd = Math.min(batchStart + this.batchBlocks, endBlock)
+
+    const promises :any[] = []
     while (batchEnd <= endBlock) {
       const batchOptions = {
         startBlock: batchStart,
@@ -41,11 +44,16 @@ export class EventFetcher {
       }
 
       const aggregatedFilters = this.aggregateFilters(filters, batchOptions)
-      const batchedEvents = await this.fetchEventsWithAggregatedFilters(aggregatedFilters)
+      const batchedEventsFn = () => this.fetchEventsWithAggregatedFilters(aggregatedFilters)
+      promises.push(batchedEventsFn)
       batchStart = batchEnd
       batchEnd = batchStart + this.batchBlocks
-      events.push(...batchedEvents)
     }
+
+    await promiseQueue(promises, async (fn: any, i: number) => {
+      const batchedEvents = await fn()
+      events.push(...batchedEvents)
+    }, { concurrency: 20 })
 
     return events
   }
