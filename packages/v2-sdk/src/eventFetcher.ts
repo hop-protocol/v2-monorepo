@@ -1,3 +1,4 @@
+import { Filter } from '@ethersproject/abstract-provider'
 import { getAddress } from 'ethers/lib/utils'
 import { promiseQueue } from './promiseQueue'
 import { providers } from 'ethers'
@@ -12,6 +13,11 @@ export type Options = {
 export type FetchOptions = {
   startBlock: number
   endBlock: number
+}
+
+export type InputFilter = {
+  address: string
+  topics: (string | string[])[]
 }
 
 export class EventFetcher {
@@ -29,7 +35,7 @@ export class EventFetcher {
     }
   }
 
-  async fetchEvents (filters: any[], options: FetchOptions) {
+  async fetchEvents (filters: InputFilter[], options: FetchOptions) {
     const startBlock = options.startBlock
     const endBlock = options.endBlock
     const events :any[] = []
@@ -50,7 +56,7 @@ export class EventFetcher {
       batchEnd = batchStart + this.batchBlocks
     }
 
-    await promiseQueue(promises, async (fn: any, i: number) => {
+    await promiseQueue(promises, async (fn: any) => {
       const batchedEvents = await fn()
       events.push(...batchedEvents)
     }, { concurrency: 20 })
@@ -58,10 +64,10 @@ export class EventFetcher {
     return events
   }
 
-  aggregateFilters (filters: any[], options: FetchOptions) {
+  aggregateFilters (filters: InputFilter[], options: FetchOptions): Filter[] {
     const startBlock = options.startBlock
     const endBlock = options.endBlock
-    const filtersByAddress :Record<string, any> = {}
+    const filtersByAddress :Record<string, Partial<Filter>> = {}
 
     for (const filter of filters) {
       if (filter.address) {
@@ -73,15 +79,15 @@ export class EventFetcher {
         if (!obj.address) {
           obj.address = address
         }
-        const topics = obj.topics ?? []
+        const topics: (string | string[])[] = obj.topics ?? []
         if (filter.topics) {
           for (let i = 0; i < filter.topics.length; i++) {
-            const topic = filter.topics[i]
+            const topic : any = filter.topics[i]
             if (!topics[i]) {
               topics[i] = []
             }
             if (!topics[i].includes(topic)) {
-              topics[i].push(topic)
+              (topics[i] as string[]).push(topic)
             }
           }
         }
@@ -90,7 +96,7 @@ export class EventFetcher {
       }
     }
 
-    const aggregatedFilters = []
+    const aggregatedFilters: Filter[] = []
     for (const address in filtersByAddress) {
       const filter = filtersByAddress[address]
       aggregatedFilters.push({ ...filter, fromBlock: startBlock, toBlock: endBlock })
@@ -99,7 +105,7 @@ export class EventFetcher {
     return aggregatedFilters
   }
 
-  private async fetchEventsWithAggregatedFilters (aggregatedFilters: any[]) {
+  private async fetchEventsWithAggregatedFilters (aggregatedFilters: Filter[]) {
     const promises = []
     for (const filter of aggregatedFilters) {
       promises.push(this.provider.getLogs({ ...filter }))
