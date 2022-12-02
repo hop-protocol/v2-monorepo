@@ -1,26 +1,27 @@
 import { BaseDb } from './BaseDb'
 import { EventBase, EventType } from './types'
 
-export interface MessageBundled extends EventBase {
+export interface BundleForwarded extends EventBase {
   bundleId: string
-  treeIndex: number
-  messageId: string
+  bundleRoot: string
+  fromChainId: number
+  toChainId: number
 }
 
-export class MessageBundledEventsDb extends BaseDb {
+export class BundleForwardedEventsDb extends BaseDb {
   constructor (dbPath: string) {
-    super(dbPath, `events:${EventType.MessageBundled}`)
+    super(dbPath, `events:${EventType.BundleForwarded}`)
   }
 
-  async put (bundleId: string, data: MessageBundled): Promise<boolean> {
+  async put (bundleId: string, data: BundleForwarded): Promise<boolean> {
     return await this._put(bundleId, this.normalizeDataForPut(data))
   }
 
-  async update (bundleId: string, data: Partial<MessageBundled>): Promise<boolean> {
+  async update (bundleId: string, data: Partial<BundleForwarded>): Promise<boolean> {
     return this._update(bundleId, this.normalizeDataForPut(data))
   }
 
-  async get (bundleId: string): Promise<MessageBundled | null> {
+  async get (bundleId: string): Promise<BundleForwarded| null> {
     const value = await this._get(bundleId)
     return this.normalizeDataForGet(value)
   }

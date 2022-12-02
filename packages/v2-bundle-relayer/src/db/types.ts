@@ -1,11 +1,11 @@
 
 export enum EventType {
-  BundleReceived = 'BundleReceived',
-  BundleForwarded = 'BundleForwarded',
-  BundleSet = 'BundleSet',
+  BundleReceived = 'BundleReceived', // event from HubMessageBridge
+  BundleForwarded = 'BundleForwarded', // event from HubMessageBridge
+  BundleSet = 'BundleSet', // event from MessageBridge
   BundleCommitted = 'BundleCommitted', // event from SpokeMessageBridge
-  FeesSentToHub = 'FeesSentToHub',
-  MessageBundled = 'MessageBundled'
+  FeesSentToHub = 'FeesSentToHub', // event from SpokeMessageBridge
+  MessageBundled = 'MessageBundled' // event from SpokeMessageBridge
 }
 
 export type EventContext = {
