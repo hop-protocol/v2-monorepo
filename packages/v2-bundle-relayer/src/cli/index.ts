@@ -1,1 +1,1 @@
-console.log('cli')
+import './cli'
