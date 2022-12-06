@@ -11,14 +11,6 @@ describe('sdk setup', () => {
     const hop = new Hop()
     expect(hop.version).toBe(pkg.version)
   })
-  it('getBundleCommittedEvents', async () => {
-    const hop = new Hop('goerli')
-    const chain = 'optimism'
-    const endBlock = await hop.providers[chain].getBlockNumber()
-    const startBlock = endBlock - 100
-    const events = await hop.getBundleCommittedEvents(chain, startBlock, endBlock)
-    expect(events).toStrictEqual([])
-  }, 60 * 1000)
   it('sendMessage', async () => {
     const signer = new Wallet(privateKey)
     const hop = new Hop('goerli')
@@ -68,5 +60,29 @@ describe('sdk setup', () => {
     expect(events[0].toChainId).toBe(5)
     expect(events[0].data).toBe('0x')
     expect(events[0]._event).toBeTruthy()
+  }, 60 * 1000)
+  it('getBundleCommittedEvents', async () => {
+    const hop = new Hop('goerli')
+    const chain = 'optimism'
+    const endBlock = 3218900
+    const startBlock = endBlock - 100
+    const events = await hop.getBundleCommittedEvents(chain, startBlock, endBlock)
+    console.log(events)
+    expect(events.length).toBe(1)
+    expect(events[0].bundleId).toBe('0x941b97adc8856fc13c566e5b9aaa9cd5fd953324452f0aa1fe24ca227a5e2ab6')
+    expect(events[0].bundleRoot).toBe('0x1ff2a2c860acb0772ae0aa3971f114f48a7df7649c3ee8978c41c3577c3dd0c8')
+    expect(events[0].bundleFees.toString()).toBe('8000000000000')
+    expect(events[0].toChainId).toBe(5)
+    expect(events[0].commitTime).toBe(1670287396)
+  }, 60 * 1000)
+  it('getFeesSentToHubEvents', async () => {
+    const hop = new Hop('goerli')
+    const chain = 'optimism'
+    const endBlock = 3218900
+    const startBlock = endBlock - 100
+    const events = await hop.getFeesSentToHubEvents(chain, startBlock, endBlock)
+    console.log(events)
+    expect(events.length).toBe(1)
+    expect(events[0].amount.toString()).toBe('8000000000000')
   }, 60 * 1000)
 })
