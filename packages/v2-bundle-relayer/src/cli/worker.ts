@@ -1,3 +1,4 @@
+import { Worker } from '../worker'
 import { actionHandler, parseBool, root } from './shared'
 
 root
@@ -15,4 +16,7 @@ async function main (source: any) {
 
   console.log('starting worker')
   console.log('dryMode:', !!dryMode)
+
+  const worker = new Worker()
+  await worker.start()
 }
