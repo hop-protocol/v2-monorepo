@@ -1,14 +1,14 @@
-import { BaseDb } from './BaseDb'
 import { BigNumber } from 'ethers'
 import { EventBase, EventType } from './types'
+import { EventsBaseDb } from './EventsBaseDb'
 
 export interface FeesSentToHub extends EventBase {
   amount: BigNumber
 }
 
-export class FeesSentToHubEventsDb extends BaseDb {
+export class FeesSentToHubEventsDb extends EventsBaseDb {
   constructor (dbPath: string) {
-    super(dbPath, `events:${EventType.FeesSentToHub}`)
+    super(dbPath, EventType.FeesSentToHub)
   }
 
   async put (bundleId: string, data: FeesSentToHub): Promise<boolean> {

@@ -1,5 +1,5 @@
-import { BaseDb } from './BaseDb'
 import { EventBase, EventType } from './types'
+import { EventsBaseDb } from './EventsBaseDb'
 
 export interface BundleSet extends EventBase {
   bundleId: string
@@ -7,9 +7,9 @@ export interface BundleSet extends EventBase {
   fromChainId: number
 }
 
-export class BundleSetEventsDb extends BaseDb {
+export class BundleSetEventsDb extends EventsBaseDb {
   constructor (dbPath: string) {
-    super(dbPath, `events:${EventType.BundleSet}`)
+    super(dbPath, EventType.BundleSet)
   }
 
   async put (bundleId: string, data: BundleSet): Promise<boolean> {

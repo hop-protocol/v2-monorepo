@@ -1,6 +1,6 @@
-import { BaseDb } from './BaseDb'
 import { BigNumber } from 'ethers'
 import { EventBase, EventType } from './types'
+import { EventsBaseDb } from './EventsBaseDb'
 
 export interface BundleCommitted extends EventBase {
   bundleId: string
@@ -10,9 +10,9 @@ export interface BundleCommitted extends EventBase {
   commitTime: number
 }
 
-export class BundleCommittedEventsDb extends BaseDb {
+export class BundleCommittedEventsDb extends EventsBaseDb {
   constructor (dbPath: string) {
-    super(dbPath, `events:${EventType.BundleCommitted}`)
+    super(dbPath, EventType.BundleCommitted)
   }
 
   async put (bundleId: string, data: BundleCommitted): Promise<boolean> {

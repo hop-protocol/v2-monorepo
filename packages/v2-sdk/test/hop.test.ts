@@ -115,6 +115,17 @@ describe('sdk setup', () => {
     console.log(amount)
     expect(typeof amount).toBe('number')
   }, 60 * 1000)
+  it('shouldAttemptForwardMessage', async () => {
+    const hop = new Hop('goerli')
+    const endBlock = 3218900
+    const startBlock = endBlock - 100
+    const chain = 'optimism'
+    const fromChainId = 420
+    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(fromChainId, startBlock, endBlock)
+    const shouldAttempt = await hop.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent)
+    console.log(shouldAttempt)
+    expect(shouldAttempt).toBe(false)
+  }, 60 * 1000)
   it.skip('getRelayBundlePopulatedTx', async () => {
     const hop = new Hop('goerli')
     const chain = 'optimism'

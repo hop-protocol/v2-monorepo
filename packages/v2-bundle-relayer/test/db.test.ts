@@ -17,6 +17,7 @@ describe('BundleCommittedEventsDb', () => {
         chainSlug: 'abc',
         chainId: 1,
         transactionHash: '0x456',
+        transactionIndex: 0,
         logIndex: 0,
         blockNumber: 1000,
         blockTimestamp: 1000000000
