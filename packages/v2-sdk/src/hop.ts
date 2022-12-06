@@ -5,8 +5,9 @@ import { BundleCommittedEvent, FeesSentToHubEvent, MessageBundledEvent, MessageS
 import { DateTime } from 'luxon'
 import { EventFetcher, InputFilter } from './eventFetcher'
 import { HubMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/HubMessageBridge__factory'
+import { OptimismRelayer } from './exitRelayers/OptimismRelayer'
 import { SpokeMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/SpokeMessageBridge__factory'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatEther, formatUnits } from 'ethers/lib/utils'
 import { getProvider } from './utils/getProvider'
 
 const contractAddresses: Record<string, any> = {
@@ -16,7 +17,8 @@ const contractAddresses: Record<string, any> = {
       ethFeeDistributor: '0x8fF09Ff3C87085Fe4607F2eE7514579FE50944C5'
     },
     optimism: {
-      spokeCoreMessenger: '0x4b844c25ef430e71d42eea89d87ffe929f8db927'
+      spokeCoreMessenger: '0x4b844c25ef430e71d42eea89d87ffe929f8db927',
+      hubMessageBridge: '0x342EA1227fC0e085704D30cd17a16cA98B58D08B'
     }
   }
 }
@@ -235,84 +237,70 @@ export class Hop {
     }
   }
 
-  async hasAuctionStarted (chain: string, bundleCommittedEvent: BundleCommitted): Promise<boolean> {
+  async hasAuctionStarted (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<boolean> {
     const { commitTime, toChainId } = bundleCommittedEvent
-    const exitTime = await this.getSpokeExitTime(chain, toChainId)
+    const exitTime = await this.getSpokeExitTime(fromChainId, toChainId)
     return commitTime + exitTime > DateTime.utc().toSeconds()
   }
 
-  async getSpokeExitTime (chain: string, chainId: number) {
-    const provider = this.providers[chain]
+  async getSpokeExitTime (fromChainId: number, toChainId: number) {
+    const toChainSlug = this.getChainSlug(toChainId)
+    const provider = this.providers[toChainSlug]
     if (!provider) {
-      throw new Error(`Invalid chain: ${chain}`)
+      throw new Error(`Invalid chain: ${toChainId}`)
     }
 
-    const address = this.getHubMessageBridgeContractAddress(chain)
+    const address = this.getHubMessageBridgeContractAddress(toChainSlug)
     const hubMessageBridge = HubMessageBridge__factory.connect(address, provider)
-    const exitTime = await hubMessageBridge.getSpokeExitTime(chainId)
+    const exitTime = await hubMessageBridge.getSpokeExitTime(fromChainId)
     const exitTimeSeconds = exitTime.toNumber()
     return exitTimeSeconds
   }
 
   // relayReward = (block.timestamp - relayWindowStart) * feesCollected / relayWindow
   // reference: https://github.com/hop-protocol/contracts-v2/blob/master/contracts/bridge/FeeDistributor/FeeDistributor.sol#L83-L106
-  async getRelayReward (chain: string, bundleCommittedEvent: BundleCommitted): Promise<number> {
-    const provider = this.providers[chain]
+  async getRelayReward (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<number> {
+    const fromChainSlug = this.getChainSlug(fromChainId)
+    const provider = this.providers[fromChainSlug]
     if (!provider) {
-      throw new Error(`Invalid chain: ${chain}`)
+      throw new Error(`Invalid chain: ${fromChainSlug}`)
     }
     const { commitTime, bundleFees, toChainId } = bundleCommittedEvent
-    const feesCollected = Number(formatUnits(bundleFees, 18))
+    const feesCollected = Number(formatEther(bundleFees))
     const { timestamp: blockTimestamp } = await provider.getBlock('latest')
-    const relayWindowStart = commitTime + await this.getSpokeExitTime(chain, toChainId)
+    const spokeExitTime = await this.getSpokeExitTime(fromChainId, toChainId)
+    const relayWindowStart = commitTime + spokeExitTime
     const relayWindow = this.getRelayWindowHours() * 60 * 60
     const relayReward = (blockTimestamp - relayWindowStart) * feesCollected / relayWindow
     return relayReward
   }
 
-  async getEstimatedTxCostForForwardMessage (chain: string, bundleCommittedEvent: BundleCommitted): Promise<number> {
+  async getEstimatedTxCostForForwardMessage (chainId: number, bundleCommittedEvent: BundleCommitted): Promise<number> {
+    const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
     if (!provider) {
       throw new Error(`Invalid chain: ${chain}`)
     }
-    const address = this.getHubMessageBridgeContractAddress(chain)
-    const hubMessageBridge = HubMessageBridge__factory.connect(address, provider)
-    const estimatedGas = await hubMessageBridge.estimateGas.receiveOrForwardMessageBundle(
-      bundleCommittedEvent.bundleId,
-      bundleCommittedEvent.bundleRoot,
-      bundleCommittedEvent.bundleFees,
-      bundleCommittedEvent.toChainId,
-      bundleCommittedEvent.commitTime
-    )
+    const estimatedGas = BigNumber.from(1_000_000) // TODO
     const gasPrice = await provider.getGasPrice()
     const estimatedTxCost = estimatedGas.mul(gasPrice)
-    return Number(formatUnits(estimatedTxCost, 18))
+    return Number(formatUnits(estimatedTxCost, 9))
   }
 
-  async shouldAttemptForwardMessage (chain: string, bundleCommittedEvent: BundleCommitted): Promise<boolean> {
-    const estimatedTxCost = await this.getEstimatedTxCostForForwardMessage(chain, bundleCommittedEvent)
-    const relayReward = await this.getRelayReward(chain, bundleCommittedEvent)
+  async shouldAttemptForwardMessage (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<boolean> {
+    const estimatedTxCost = await this.getEstimatedTxCostForForwardMessage(fromChainId, bundleCommittedEvent)
+    const relayReward = await this.getRelayReward(fromChainId, bundleCommittedEvent)
     const txOk = relayReward > estimatedTxCost
-    const timeOk = await this.hasAuctionStarted(chain, bundleCommittedEvent)
+    const timeOk = await this.hasAuctionStarted(fromChainId, bundleCommittedEvent)
     const shouldAttempt = txOk && timeOk
     return shouldAttempt
   }
 
-  async attemptForwardMessage (chain: string, bundleCommittedEvent: BundleCommitted): Promise<any> {
-    const provider = this.providers[chain]
-    if (!provider) {
-      throw new Error(`Invalid chain: ${chain}`)
-    }
-    const address = this.getHubMessageBridgeContractAddress(chain)
-    const hubMessageBridge = HubMessageBridge__factory.connect(address, provider)
-    const tx = await hubMessageBridge.receiveOrForwardMessageBundle(
-      bundleCommittedEvent.bundleId,
-      bundleCommittedEvent.bundleRoot,
-      bundleCommittedEvent.bundleFees,
-      bundleCommittedEvent.toChainId,
-      bundleCommittedEvent.commitTime
-    )
-    return tx
+  async getBundleExitPopulatedTx (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<any> {
+    const { _event } = bundleCommittedEvent
+    const transactionHash = _event.transactionHash
+    const exitRelayer = new OptimismRelayer(this.network, this.providers.ethereum, this.providers.optimism)
+    return exitRelayer.getExitPopulatedTx(transactionHash)
   }
 
   async getSendMessagePopulatedTx (fromChainId: number, toChainId: number, toAddress: string, toCalldata: string): Promise<any> {

@@ -11,20 +11,20 @@ describe('sdk setup', () => {
     const hop = new Hop()
     expect(hop.version).toBe(pkg.version)
   })
-  it('sendMessage', async () => {
-    const signer = new Wallet(privateKey)
+  it('getSendMessagePopulatedTx', async () => {
     const hop = new Hop('goerli')
-    const provider = await hop.providers.optimism
     const fromChainId = 420
     const toChainId = 5
     const toAddress = '0x0000000000000000000000000000000000000000'
     const toData = '0x'
-    const fee = parseEther('0.000001')
     const txData = await hop.getSendMessagePopulatedTx(fromChainId, toChainId, toAddress, toData)
     expect(txData.data.startsWith('0x7056f41f')).toBe(true)
     expect(txData.to).toBe('0x4b844c25EF430e71D42EEA89d87Ffe929f8db927')
     const shouldSend = false
     if (shouldSend) {
+      const signer = new Wallet(privateKey)
+      const provider = hop.providers.optimism
+      const fee = parseEther('0.000001')
       const tx = await signer.connect(provider).sendTransaction({
         to: txData.to,
         data: txData.data,
@@ -84,5 +84,52 @@ describe('sdk setup', () => {
     console.log(events)
     expect(events.length).toBe(1)
     expect(events[0].amount.toString()).toBe('8000000000000')
+  }, 60 * 1000)
+  it('getEstimatedTxCostForForwardMessage', async () => {
+    const hop = new Hop('goerli')
+    const endBlock = 3218900
+    const startBlock = endBlock - 100
+    const chain = 'optimism'
+    const toChain = 'ethereum'
+    const toChainId = 420
+    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(chain, startBlock, endBlock)
+    const estimatedTxCost = await hop.getEstimatedTxCostForForwardMessage(toChainId, bundleCommittedEvent)
+    console.log(estimatedTxCost)
+    expect(estimatedTxCost).toBeGreaterThan(0)
+  }, 60 * 1000)
+  it('getRelayReward', async () => {
+    const hop = new Hop('goerli')
+    const endBlock = 3218900
+    const startBlock = endBlock - 100
+    const chain = 'optimism'
+    const fromChainId = 420
+    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(chain, startBlock, endBlock)
+    const amount = await hop.getRelayReward(fromChainId, bundleCommittedEvent)
+    console.log(amount)
+    expect(typeof amount).toBe('number')
+  }, 60 * 1000)
+  it('getRelayBundlePopulatedTx', async () => {
+    const hop = new Hop('goerli')
+    const chain = 'optimism'
+    const fromChainId = 420
+    const endBlock = 3218900
+    const startBlock = endBlock - 100
+    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(chain, startBlock, endBlock)
+    const txData = await hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedEvent)
+    console.log(txData)
+    expect(txData.data).toBeTruthy()
+    expect(txData.to).toBeTruthy()
+    const shouldSend = false
+    if (shouldSend) {
+      const signer = new Wallet(privateKey)
+      const provider = hop.providers.ethereum
+      const tx = await signer.connect(provider).sendTransaction({
+        to: txData.to,
+        data: txData.data,
+        value: '0'
+      })
+      console.log(tx)
+      expect(tx.hash).toBeTruthy()
+    }
   }, 60 * 1000)
 })
