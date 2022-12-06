@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch'
-import { serializeQueryParams } from '../utils/serializeQueryParams'
 import wait from 'wait'
+import { serializeQueryParams } from '../utils/serializeQueryParams'
 
 interface IResult {
   id: string
