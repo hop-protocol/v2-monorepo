@@ -23,8 +23,21 @@ const contractAddresses: Record<string, any> = {
   }
 }
 
+const cache : Record<string, any> = {}
+
+export type EventContext = {
+  chainSlug: string
+  chainId: number
+  transactionHash: string
+  transactionIndex: number
+  logIndex: number
+  blockNumber: number
+  blockTimestamp: number
+}
+
 type EventBase = {
   _event: any
+  context?: EventContext
 }
 
 // event from SpokeMessageBridge
@@ -100,7 +113,8 @@ export class Hop {
     return address
   }
 
-  async getMessageSentEvents (chain: string, startBlock: number, endBlock?: number): Promise<MessageSent[]> {
+  async getMessageSentEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageSent[]> {
+    const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
     if (!provider) {
       throw new Error(`Invalid chain: ${chain}`)
@@ -114,8 +128,9 @@ export class Hop {
     if (!endBlock) {
       endBlock = await provider.getBlockNumber()
     }
-    const events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
-    return events.map(this.messageSentEventToTypedEvent)
+    let events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
+    events = events.map(this.messageSentEventToTypedEvent)
+    return Promise.all(events.map((event: any) => this.addContextToEvent(event, chainId)))
   }
 
   messageSentEventToTypedEvent (event: MessageSentEvent): MessageSent {
@@ -138,7 +153,8 @@ export class Hop {
     }
   }
 
-  async getMessageBundledEvents (chain: string, startBlock: number, endBlock?: number): Promise<MessageBundled[]> {
+  async getMessageBundledEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageBundled[]> {
+    const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
     if (!provider) {
       throw new Error(`Invalid chain: ${chain}`)
@@ -152,8 +168,9 @@ export class Hop {
     if (!endBlock) {
       endBlock = await provider.getBlockNumber()
     }
-    const events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
-    return events.map(this.messageBundledEventToTypedEvent)
+    let events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
+    events = events.map(this.messageBundledEventToTypedEvent)
+    return Promise.all(events.map((event: any) => this.addContextToEvent(event, chainId)))
   }
 
   messageBundledEventToTypedEvent (event: MessageBundledEvent): MessageBundled {
@@ -171,7 +188,8 @@ export class Hop {
     }
   }
 
-  async getBundleCommittedEvents (chain: string, startBlock: number, endBlock?: number): Promise<BundleCommitted[]> {
+  async getBundleCommittedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleCommitted[]> {
+    const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
     if (!provider) {
       throw new Error(`Invalid chain: ${chain}`)
@@ -185,8 +203,15 @@ export class Hop {
     if (!endBlock) {
       endBlock = await provider.getBlockNumber()
     }
-    const events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
-    return events.map(this.bundleCommittedEventToTypedEvent)
+    let events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
+    events = events.map(this.bundleCommittedEventToTypedEvent)
+    return Promise.all(events.map((event: any) => this.addContextToEvent(event, chainId)))
+  }
+
+  async addContextToEvent (event: any, chainId: number): Promise<any> {
+    const context = await this.getEventContext(event._event, chainId)
+    event.context = context
+    return event
   }
 
   bundleCommittedEventToTypedEvent (event: BundleCommittedEvent): BundleCommitted {
@@ -208,7 +233,8 @@ export class Hop {
     }
   }
 
-  async getFeesSentToHubEvents (chain: string, startBlock: number, endBlock?: number): Promise<FeesSentToHub[]> {
+  async getFeesSentToHubEvents (chainId: number, startBlock: number, endBlock?: number): Promise<FeesSentToHub[]> {
+    const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
     if (!provider) {
       throw new Error(`Invalid chain: ${chain}`)
@@ -222,8 +248,9 @@ export class Hop {
     if (!endBlock) {
       endBlock = await provider.getBlockNumber()
     }
-    const events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
-    return events.map(this.feesSentToHubToTypedEvent)
+    let events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
+    events = events.map(this.feesSentToHubToTypedEvent)
+    return Promise.all(events.map((event: any) => this.addContextToEvent(event, chainId)))
   }
 
   feesSentToHubToTypedEvent (event: FeesSentToHubEvent): FeesSentToHub {
@@ -313,6 +340,35 @@ export class Hop {
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
     const txData = await spokeMessageBridge.populateTransaction.sendMessage(toChainId, toAddress, toCalldata)
     return txData
+  }
+
+  async getEventContext (event: any, chainId: number): Promise<EventContext> {
+    const chainSlug = this.getChainSlug(chainId)
+    const transactionHash = event.transactionHash
+    const transactionIndex = event.transactionIndex
+    const logIndex = event.logIndex
+    const blockNumber = event.blockNumber
+    const { timestamp: blockTimestamp } = await this.getBlock(chainSlug, blockNumber)
+
+    return {
+      chainSlug,
+      chainId,
+      transactionHash,
+      transactionIndex,
+      logIndex,
+      blockNumber,
+      blockTimestamp
+    }
+  }
+
+  async getBlock (chainSlug: string, blockNumber: number): Promise<any> {
+    const cacheKey = `${chainSlug}-${blockNumber}`
+    if (cache[cacheKey]) {
+      return cache[cacheKey]
+    }
+    const block = await this.providers[chainSlug].getBlock(blockNumber)
+    cache[cacheKey] = block
+    return block
   }
 
   getChainSlug (chainId: number) {

@@ -36,10 +36,11 @@ describe('sdk setup', () => {
   }, 60 * 1000)
   it('getMessageBundledEvents', async () => {
     const hop = new Hop('goerli')
+    const chainId = 420
     const chain = 'optimism'
     const endBlock = 3216770
     const startBlock = endBlock - 100
-    const events = await hop.getMessageBundledEvents(chain, startBlock, endBlock)
+    const events = await hop.getMessageBundledEvents(chainId, startBlock, endBlock)
     console.log(events)
     expect(events.length).toBe(1)
     expect(events[0].bundleId).toBe('0x941b97adc8856fc13c566e5b9aaa9cd5fd953324452f0aa1fe24ca227a5e2ab6')
@@ -49,10 +50,11 @@ describe('sdk setup', () => {
   }, 60 * 1000)
   it('getMessageSentEvents', async () => {
     const hop = new Hop('goerli')
+    const chainId = 420
     const chain = 'optimism'
     const endBlock = 3216770
     const startBlock = endBlock - 100
-    const events = await hop.getMessageSentEvents(chain, startBlock, endBlock)
+    const events = await hop.getMessageSentEvents(chainId, startBlock, endBlock)
     console.log(events)
     expect(events.length).toBe(1)
     expect(events[0].messageId).toBe('0x1dcab020e2c5973e3461028e6d6cce6e8785c18c8d47257836800170d37b9e3e')
@@ -64,9 +66,10 @@ describe('sdk setup', () => {
   it('getBundleCommittedEvents', async () => {
     const hop = new Hop('goerli')
     const chain = 'optimism'
+    const chainId = 420
     const endBlock = 3218900
     const startBlock = endBlock - 100
-    const events = await hop.getBundleCommittedEvents(chain, startBlock, endBlock)
+    const events = await hop.getBundleCommittedEvents(chainId, startBlock, endBlock)
     console.log(events)
     expect(events.length).toBe(1)
     expect(events[0].bundleId).toBe('0x941b97adc8856fc13c566e5b9aaa9cd5fd953324452f0aa1fe24ca227a5e2ab6')
@@ -74,13 +77,16 @@ describe('sdk setup', () => {
     expect(events[0].bundleFees.toString()).toBe('8000000000000')
     expect(events[0].toChainId).toBe(5)
     expect(events[0].commitTime).toBe(1670287396)
+    expect(events[0].context).toBeTruthy()
+    expect(events[0]._event).toBeTruthy()
   }, 60 * 1000)
   it('getFeesSentToHubEvents', async () => {
     const hop = new Hop('goerli')
+    const chainId = 420
     const chain = 'optimism'
     const endBlock = 3218900
     const startBlock = endBlock - 100
-    const events = await hop.getFeesSentToHubEvents(chain, startBlock, endBlock)
+    const events = await hop.getFeesSentToHubEvents(chainId, startBlock, endBlock)
     console.log(events)
     expect(events.length).toBe(1)
     expect(events[0].amount.toString()).toBe('8000000000000')
@@ -89,10 +95,11 @@ describe('sdk setup', () => {
     const hop = new Hop('goerli')
     const endBlock = 3218900
     const startBlock = endBlock - 100
+    const chainId = 420
     const chain = 'optimism'
     const toChain = 'ethereum'
-    const toChainId = 420
-    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(chain, startBlock, endBlock)
+    const toChainId = 5
+    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(chainId, startBlock, endBlock)
     const estimatedTxCost = await hop.getEstimatedTxCostForForwardMessage(toChainId, bundleCommittedEvent)
     console.log(estimatedTxCost)
     expect(estimatedTxCost).toBeGreaterThan(0)
@@ -103,18 +110,18 @@ describe('sdk setup', () => {
     const startBlock = endBlock - 100
     const chain = 'optimism'
     const fromChainId = 420
-    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(chain, startBlock, endBlock)
+    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(fromChainId, startBlock, endBlock)
     const amount = await hop.getRelayReward(fromChainId, bundleCommittedEvent)
     console.log(amount)
     expect(typeof amount).toBe('number')
   }, 60 * 1000)
-  it('getRelayBundlePopulatedTx', async () => {
+  it.skip('getRelayBundlePopulatedTx', async () => {
     const hop = new Hop('goerli')
     const chain = 'optimism'
     const fromChainId = 420
     const endBlock = 3218900
     const startBlock = endBlock - 100
-    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(chain, startBlock, endBlock)
+    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(fromChainId, startBlock, endBlock)
     const txData = await hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedEvent)
     console.log(txData)
     expect(txData.data).toBeTruthy()
