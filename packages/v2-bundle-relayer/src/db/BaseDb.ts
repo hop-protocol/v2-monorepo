@@ -2,6 +2,23 @@ import level from 'level-party'
 import sub from 'subleveldown'
 import { Mutex } from 'async-mutex'
 
+// this are options that leveldb createReadStream accepts
+export type KeyValueFilter = {
+  gt?: string
+  gte?: string
+  lt?: string
+  lte?: string
+  limit?: number
+  reverse?: boolean
+  keys?: boolean
+  values?: boolean
+}
+
+export type KV = {
+  key: string
+  value: any
+}
+
 export class BaseDb {
   db: any
   mutex: Mutex = new Mutex()
@@ -61,5 +78,30 @@ export class BaseDb {
     }
 
     return value ?? null
+  }
+
+  async _getKeyValues (filter: KeyValueFilter = { keys: true, values: true }): Promise<KV[]> {
+    return await new Promise((resolve, reject) => {
+      const kv: KV[] = []
+      const s = this.db.createReadStream(filter)
+      s.on('data', (key: any, value: any) => {
+        // the parameter types depend on what key/value enabled options were used
+        if (typeof key === 'object') {
+          value = key.value
+          key = key.key
+        }
+        if (typeof key === 'string') {
+          kv.push({ key, value: Object.assign({}, value) })
+        }
+      })
+        .on('end', () => {
+          s.destroy()
+          resolve(kv)
+        })
+        .on('error', (err: any) => {
+          s.destroy()
+          reject(err)
+        })
+    })
   }
 }

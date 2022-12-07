@@ -1,17 +1,24 @@
 import wait from 'wait'
 import { Hop } from '@hop-protocol/v2-sdk'
+import { Indexer } from '../indexer'
 
 export class Worker {
   hop: Hop
   pollIntervalMs: number = 1 * 60 * 1000
+  indexer: Indexer
 
   constructor () {
-    const hop = new Hop('goerli')
-    this.hop = hop
+    this.hop = new Hop('goerli')
+    this.indexer = new Indexer()
   }
 
   async start () {
-    await this.poll()
+    try {
+      this.indexer.start()
+      await this.poll()
+    } catch (err: any) {
+      console.error('worker poll error', err)
+    }
   }
 
   async poll () {

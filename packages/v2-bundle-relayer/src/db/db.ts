@@ -23,31 +23,31 @@ function getDb (DbClass: any) {
 }
 
 export const db = {
-  getBundleCommittedEventsDb () {
+  get bundleCommittedEventsDb () {
     return getDb(BundleCommittedEventsDb)
   },
-  getBundleForwardedEventsDb () {
+  get bundleForwardedEventsDb () {
     return getDb(BundleForwardedEventsDb)
   },
-  getBundleReceivedEventsDb () {
+  get bundleReceivedEventsDb () {
     return getDb(BundleReceivedEventsDb)
   },
-  getBundleSetEventsDb () {
+  get bundleSetEventsDb () {
     return getDb(BundleSetEventsDb)
   },
-  getFeesSentToHubEventsDb () {
+  get feesSentToHubEventsDb () {
     return getDb(FeesSentToHubEventsDb)
   },
-  getMessageBundledEventsDb () {
+  get messageBundledEventsDb () {
     return getDb(MessageBundledEventsDb)
   },
-  getMessageSentEventsDb () {
+  get messageSentEventsDb () {
     return getDb(MessageSentEventsDb)
   },
-  getMessageRelayedEventsDb () {
+  get messageRelayedEventsDb () {
     return getDb(MessageRelayedEventsDb)
   },
-  getMessageRevertedEventsDb () {
+  get messageRevertedEventsDb () {
     return getDb(MessageRevertedEventsDb)
   }
 }

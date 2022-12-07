@@ -70,10 +70,15 @@ interface FeesSentToHub extends EventBase {
   amount: BigNumber
 }
 
+type Options = {
+  batchBlocks?: number
+}
+
 export class Hop {
   eventFetcher: EventFetcher
   providers: Record<string, providers.Provider>
   network: string
+  batchBlocks?: number
 
   chainSlugMap: Record<string, string> = {
     1: 'ethereum', // mainnet
@@ -86,7 +91,7 @@ export class Hop {
     80001: 'polygon' // goerli
   }
 
-  constructor (network: string = 'goerli') {
+  constructor (network: string = 'goerli', options?: Options) {
     if (!['mainnet', 'goerli'].includes(network)) {
       throw new Error(`Invalid network: ${network}`)
     }
@@ -96,6 +101,10 @@ export class Hop {
       optimism: getProvider(network, 'optimism'),
       arbitrum: getProvider(network, 'arbitrum'),
       polygon: getProvider(network, 'polygon')
+    }
+
+    if (options?.batchBlocks) {
+      this.batchBlocks = options.batchBlocks
     }
   }
 
@@ -123,7 +132,8 @@ export class Hop {
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
     const filter = spokeMessageBridge.filters.MessageSent()
     const eventFetcher = new EventFetcher({
-      provider
+      provider,
+      batchBlocks: this.batchBlocks
     })
     if (!endBlock) {
       endBlock = await provider.getBlockNumber()
@@ -163,7 +173,8 @@ export class Hop {
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
     const filter = spokeMessageBridge.filters.MessageBundled()
     const eventFetcher = new EventFetcher({
-      provider
+      provider,
+      batchBlocks: this.batchBlocks
     })
     if (!endBlock) {
       endBlock = await provider.getBlockNumber()
@@ -198,7 +209,8 @@ export class Hop {
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
     const filter = spokeMessageBridge.filters.BundleCommitted()
     const eventFetcher = new EventFetcher({
-      provider
+      provider,
+      batchBlocks: this.batchBlocks
     })
     if (!endBlock) {
       endBlock = await provider.getBlockNumber()
@@ -243,7 +255,8 @@ export class Hop {
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
     const filter = spokeMessageBridge.filters.FeesSentToHub()
     const eventFetcher = new EventFetcher({
-      provider
+      provider,
+      batchBlocks: this.batchBlocks
     })
     if (!endBlock) {
       endBlock = await provider.getBlockNumber()

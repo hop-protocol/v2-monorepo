@@ -10,8 +10,12 @@ export class SyncStateDb extends BaseDb {
     super(dbPath, `syncState:${dbName}`)
   }
 
-  async updateBlocks (state: SyncState): Promise<boolean> {
+  async updateSyncState (state: SyncState): Promise<boolean> {
     await this._put('state', state)
     return true
+  }
+
+  async getSyncState (): Promise<SyncState> {
+    return this._get('state')
   }
 }
