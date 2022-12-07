@@ -337,8 +337,11 @@ export class Hop {
   }
 
   async getBundleExitPopulatedTx (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<any> {
-    const { _event } = bundleCommittedEvent
-    const transactionHash = _event.transactionHash
+    const { _event, context } = bundleCommittedEvent
+    const transactionHash = _event.transactionHash ?? context?.transactionHash
+    if (!transactionHash) {
+      throw new Error('expected transaction hash')
+    }
     const exitRelayer = new OptimismRelayer(this.network, this.providers.ethereum, this.providers.optimism)
     return exitRelayer.getExitPopulatedTx(transactionHash)
   }

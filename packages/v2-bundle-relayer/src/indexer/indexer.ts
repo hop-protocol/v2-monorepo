@@ -15,19 +15,20 @@ export class Indexer {
     await this.syncer()
   }
 
-  async syncer () {
-    console.log('syncer')
-    const fromChainId = 420
-    const provider = this.hop.providers.optimism
-    const startBlock = _startBlock
-    const endBlock = _startBlock + 1000 // await provider.getBlockNumber()
-    console.log('diff', endBlock - startBlock)
-
-    const rangeItems = await db.bundleCommittedEventsDb.getFromRange({ lt: Math.floor(Date.now() / 1000), gt: Math.floor(Date.now() / 1000) - (604800) })
-    console.log('rangeItems', rangeItems)
-
+  async syncBundleCommittedEvents () {
     const syncState = await db.bundleCommittedEventsDb.getSyncState()
     console.log('syncState', syncState)
+
+    const fromChainId = 420
+    const provider = this.hop.providers.optimism
+    let startBlock = _startBlock
+    let endBlock = _startBlock + 1000 // await provider.getBlockNumber()
+    if (syncState?.endBlock) {
+      startBlock = syncState.endBlock + 1
+      endBlock = startBlock + 1000 // await provider.getBlockNumber()
+    }
+
+    console.log('syncBundleCommittedEvents', fromChainId, startBlock, endBlock)
 
     const events = await this.hop.getBundleCommittedEvents(fromChainId, startBlock, endBlock)
     console.log('events', events.length)
@@ -51,6 +52,13 @@ export class Indexer {
     }
 
     await db.bundleCommittedEventsDb.updateSyncState({ startBlock, endBlock })
+  }
+
+  async syncer () {
+    console.log('syncer start')
+
+    await this.syncBundleCommittedEvents()
+
     console.log('syncer done')
   }
 }

@@ -77,7 +77,6 @@ export class BundleCommittedEventsDb extends EventsBaseDb {
 
   async getFromRange (range: RangeLookup): Promise<BundleCommitted[]> {
     const bundleIds = await this.getByBlockTimestamp(range)
-    console.log(bundleIds)
     const promises = bundleIds.map(async bundleId => await this.get(bundleId) as BundleCommitted)
     return Promise.all(promises)
   }
