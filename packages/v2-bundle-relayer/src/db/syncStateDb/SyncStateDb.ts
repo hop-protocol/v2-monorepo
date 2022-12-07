@@ -1,4 +1,4 @@
-import { BaseDb } from './BaseDb'
+import { BaseDb } from '../BaseDb'
 
 export interface SyncState {
   fromBlock: number
@@ -10,7 +10,7 @@ export class SyncStateDb extends BaseDb {
     super(dbPath, `syncState:${dbName}`)
   }
 
-  async updateSyncState (state: SyncState): Promise<boolean> {
+  async putSyncState (state: SyncState): Promise<boolean> {
     await this._put('state', state)
     return true
   }

@@ -38,10 +38,10 @@ export class Worker {
           const { bundleId } = bundleCommittedEvent
           const { chainId: fromChainId } = bundleCommittedEvent.context
           console.log('checking shouldAttemp for bundle', bundleId)
-          const shouldAttempt = await this.hop.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent)
+          const shouldAttempt = await this.hop.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent as any)
           console.log('shouldAttempt:', shouldAttempt, bundleId)
           if (shouldAttempt) {
-            const txData = await this.hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedEvent)
+            const txData = await this.hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedEvent as any)
             console.log('txData', txData)
 
             // TODO: send tx

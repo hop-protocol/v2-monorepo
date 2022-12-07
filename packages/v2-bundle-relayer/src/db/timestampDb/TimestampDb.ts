@@ -1,4 +1,4 @@
-import { BaseDb } from './BaseDb'
+import { BaseDb } from '../BaseDb'
 
 export type RangeLookup = {
   lt?: number
@@ -10,7 +10,7 @@ export class TimestampDb extends BaseDb {
     super(dbPath, `syncState:${dbName}`)
   }
 
-  async put (timestampKey: string, id: string): Promise<boolean> {
+  async putTimestampKey (timestampKey: string, id: string): Promise<boolean> {
     await this._put(timestampKey, { id })
     return true
   }

@@ -1,15 +1,16 @@
-import { BundleCommittedEventsDb } from './BundleCommittedEventsDb'
-import { BundleForwardedEventsDb } from './BundleForwardedEventsDb'
-import { BundleReceivedEventsDb } from './BundleReceivedEventsDb'
-import { BundleSetEventsDb } from './BundleSetEventsDb'
-import { FeesSentToHubEventsDb } from './FeesSentToHubEventsDb'
-import { MessageBundledEventsDb } from './MessageBundledEventsDb'
-import { MessageRelayedEventsDb } from './MessageRelayedEventsDb'
-import { MessageRevertedEventsDb } from './MessageRevertedEventsDb'
-import { MessageSentEventsDb } from './MessageSentEventsDb'
+import { BundleCommittedEventsDb } from './eventsDb/BundleCommittedEventsDb'
+import { BundleForwardedEventsDb } from './eventsDb/BundleForwardedEventsDb'
+import { BundleReceivedEventsDb } from './eventsDb/BundleReceivedEventsDb'
+import { BundleSetEventsDb } from './eventsDb/BundleSetEventsDb'
+import { EventsBaseDb } from './eventsDb/EventsBaseDb'
+import { FeesSentToHubEventsDb } from './eventsDb/FeesSentToHubEventsDb'
+import { MessageBundledEventsDb } from './eventsDb/MessageBundledEventsDb'
+import { MessageRelayedEventsDb } from './eventsDb/MessageRelayedEventsDb'
+import { MessageRevertedEventsDb } from './eventsDb/MessageRevertedEventsDb'
+import { MessageSentEventsDb } from './eventsDb/MessageSentEventsDb'
 import { dbPath } from '../config'
 
-const instances: Record<string, any> = {}
+const instances: Record<string, EventsBaseDb<any>> = {}
 
 function getDb (DbClass: any) {
   const dbName = DbClass.name
@@ -23,31 +24,31 @@ function getDb (DbClass: any) {
 }
 
 export const db = {
-  get bundleCommittedEventsDb () {
+  get bundleCommittedEventsDb (): BundleCommittedEventsDb {
     return getDb(BundleCommittedEventsDb)
   },
-  get bundleForwardedEventsDb () {
+  get bundleForwardedEventsDb (): BundleForwardedEventsDb {
     return getDb(BundleForwardedEventsDb)
   },
-  get bundleReceivedEventsDb () {
+  get bundleReceivedEventsDb (): BundleReceivedEventsDb {
     return getDb(BundleReceivedEventsDb)
   },
-  get bundleSetEventsDb () {
+  get bundleSetEventsDb (): BundleSetEventsDb {
     return getDb(BundleSetEventsDb)
   },
-  get feesSentToHubEventsDb () {
+  get feesSentToHubEventsDb (): FeesSentToHubEventsDb {
     return getDb(FeesSentToHubEventsDb)
   },
-  get messageBundledEventsDb () {
+  get messageBundledEventsDb (): MessageBundledEventsDb {
     return getDb(MessageBundledEventsDb)
   },
-  get messageSentEventsDb () {
+  get messageSentEventsDb (): MessageSentEventsDb {
     return getDb(MessageSentEventsDb)
   },
-  get messageRelayedEventsDb () {
+  get messageRelayedEventsDb (): MessageRelayedEventsDb {
     return getDb(MessageRelayedEventsDb)
   },
-  get messageRevertedEventsDb () {
+  get messageRevertedEventsDb (): MessageRevertedEventsDb {
     return getDb(MessageRevertedEventsDb)
   }
 }
