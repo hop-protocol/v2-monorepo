@@ -11,4 +11,8 @@ export class BundleSetEventsDb extends EventsBaseDb<BundleSet> {
   constructor (dbPath: string) {
     super(dbPath, EventType.BundleSet)
   }
+
+  getKeyStringFromEvent (data: Partial<BundleSet>): string | null {
+    return data?.bundleId ?? null
+  }
 }

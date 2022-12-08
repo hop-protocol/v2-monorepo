@@ -12,4 +12,8 @@ export class MessageRevertedEventsDb extends EventsBaseDb<MessageReverted> {
   constructor (dbPath: string) {
     super(dbPath, EventType.MessageReverted)
   }
+
+  getKeyStringFromEvent (data: Partial<MessageReverted>): string | null {
+    return data?.messageId ?? null
+  }
 }

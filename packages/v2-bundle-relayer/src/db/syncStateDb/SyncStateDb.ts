@@ -10,12 +10,24 @@ export class SyncStateDb extends BaseDb {
     super(dbPath, `syncState:${dbName}`)
   }
 
-  async putSyncState (state: SyncState): Promise<boolean> {
-    await this._put('state', state)
+  getKeyString (chainId: number) {
+    return `${chainId}`
+  }
+
+  async putSyncState (chainId: number, state: SyncState): Promise<boolean> {
+    const key = this.getKeyString(chainId)
+    await this._put(key, state)
     return true
   }
 
-  async getSyncState (): Promise<SyncState> {
-    return this._get('state')
+  async getSyncState (chainId: number): Promise<SyncState> {
+    const key = this.getKeyString(chainId)
+    return this._get(key)
+  }
+
+  async resetSyncState (chainId: number): Promise<boolean> {
+    const key = this.getKeyString(chainId)
+    await this._delete(key)
+    return true
   }
 }

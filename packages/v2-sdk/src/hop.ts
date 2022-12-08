@@ -143,6 +143,36 @@ export class Hop {
     return eventFetcher.getEvents(startBlock, endBlock)
   }
 
+  async getEvents (eventName: string, chainId: number, startBlock: number, endBlock?: number): Promise<any[]> {
+    const chain = this.getChainSlug(chainId)
+    const provider = this.providers[chain]
+    if (!provider) {
+      throw new Error(`Invalid chain: ${chain}`)
+    }
+    switch (eventName) {
+      case 'BundleCommitted':
+        return this.getBundleCommittedEvents(chainId, startBlock, endBlock)
+      case 'BundleForwarded':
+        return this.getBundleForwardedEvents(chainId, startBlock, endBlock)
+      case 'BundleReceived':
+        return this.getBundleReceivedEvents(chainId, startBlock, endBlock)
+      case 'BundleSet':
+        return this.getBundleSetEvents(chainId, startBlock, endBlock)
+      case 'FeesSentToHub':
+        return this.getFeesSentToHubEvents(chainId, startBlock, endBlock)
+      case 'MessageBundled':
+        return this.getMessageBundledEvents(chainId, startBlock, endBlock)
+      case 'MessageRelayed':
+        return this.getMessageRelayedEvents(chainId, startBlock, endBlock)
+      case 'MessageReverted':
+        return this.getMessageRevertedEvents(chainId, startBlock, endBlock)
+      case 'MessageSent':
+        return this.getMessageSentEvents(chainId, startBlock, endBlock)
+      default:
+        throw new Error(`Invalid event name: ${eventName}`)
+    }
+  }
+
   async hasAuctionStarted (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<boolean> {
     const { commitTime, toChainId } = bundleCommittedEvent
     const exitTime = await this.getSpokeExitTime(fromChainId, toChainId)

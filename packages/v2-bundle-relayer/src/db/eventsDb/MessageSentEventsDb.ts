@@ -13,4 +13,8 @@ export class MessageSentEventsDb extends EventsBaseDb<MessageSent> {
   constructor (dbPath: string) {
     super(dbPath, EventType.MessageSent)
   }
+
+  getKeyStringFromEvent (data: Partial<MessageSent>): string | null {
+    return data?.messageId ?? null
+  }
 }

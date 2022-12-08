@@ -12,4 +12,8 @@ export class MessageRelayedEventsDb extends EventsBaseDb<MessageRelayed> {
   constructor (dbPath: string) {
     super(dbPath, EventType.MessageRelayed)
   }
+
+  getKeyStringFromEvent (data: Partial<MessageRelayed>): string | null {
+    return data?.messageId ?? null
+  }
 }

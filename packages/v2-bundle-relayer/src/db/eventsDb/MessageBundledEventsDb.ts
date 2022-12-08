@@ -11,4 +11,8 @@ export class MessageBundledEventsDb extends EventsBaseDb<MessageBundled> {
   constructor (dbPath: string) {
     super(dbPath, EventType.MessageBundled)
   }
+
+  getKeyStringFromEvent (data: Partial<MessageBundled>): string | null {
+    return data?.bundleId ?? null
+  }
 }

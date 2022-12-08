@@ -12,4 +12,8 @@ export class BundleForwardedEventsDb extends EventsBaseDb<BundleForwarded> {
   constructor (dbPath: string) {
     super(dbPath, EventType.BundleForwarded)
   }
+
+  getKeyStringFromEvent (data: Partial<BundleForwarded>): string | null {
+    return data?.bundleId ?? null
+  }
 }

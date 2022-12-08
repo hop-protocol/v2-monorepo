@@ -80,6 +80,12 @@ export class BaseDb {
     return value ?? null
   }
 
+  async _delete (key: string): Promise<any> {
+    return this.mutex.runExclusive(async () => {
+      return this.db.del(key)
+    })
+  }
+
   async _getKeyValues (filter: KeyValueFilter = { keys: true, values: true }): Promise<KV[]> {
     return await new Promise((resolve, reject) => {
       const kv: KV[] = []

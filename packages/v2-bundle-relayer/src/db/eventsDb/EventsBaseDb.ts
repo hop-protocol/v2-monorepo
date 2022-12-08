@@ -13,12 +13,16 @@ export class EventsBaseDb<T> extends BaseDb {
     this.timestampDb = new TimestampDb(dbPath, dbName)
   }
 
-  async putSyncState (syncState: SyncState): Promise<boolean> {
-    return this.syncStateDb.putSyncState(syncState)
+  async putSyncState (chainId: number, syncState: SyncState): Promise<boolean> {
+    return this.syncStateDb.putSyncState(chainId, syncState)
   }
 
-  async getSyncState (): Promise<SyncState> {
-    return this.syncStateDb.getSyncState()
+  async getSyncState (chainId: number): Promise<SyncState> {
+    return this.syncStateDb.getSyncState(chainId)
+  }
+
+  async resetSyncState (chainId: number): Promise<boolean> {
+    return this.syncStateDb.resetSyncState(chainId)
   }
 
   async getByBlockTimestamp (rangeLookup: RangeLookup): Promise<string[]> {
@@ -36,6 +40,10 @@ export class EventsBaseDb<T> extends BaseDb {
   async putEvent (key: string, data: T): Promise<boolean> {
     if (!key) {
       throw new Error('key is required')
+    }
+    // TODO: add validation is child
+    if ((data as any)._event) {
+      delete (data as any)._event
     }
     await this._put(key, this.normalizeDataForPut(data))
     const timestampKey = this.getTimestampKeyString(data)
@@ -80,6 +88,10 @@ export class EventsBaseDb<T> extends BaseDb {
       return values.join('-')
     }
     return null
+  }
+
+  getKeyStringFromEvent (data: Partial<T>): string | null {
+    throw new Error('Not implemented')
   }
 
   normalizeDataForGet (getData: Partial<T>): Partial<T> {

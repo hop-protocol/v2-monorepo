@@ -11,6 +11,10 @@ export class FeesSentToHubEventsDb extends EventsBaseDb<FeesSentToHub> {
     super(dbPath, EventType.FeesSentToHub)
   }
 
+  getKeyStringFromEvent (data: Partial<FeesSentToHub>): string | null {
+    return data?.context?.transactionHash ?? null
+  }
+
   normalizeDataForGet (getData: Partial<FeesSentToHub>): Partial<FeesSentToHub> {
     if (!getData) {
       return getData

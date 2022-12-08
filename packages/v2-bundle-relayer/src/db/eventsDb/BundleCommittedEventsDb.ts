@@ -15,6 +15,10 @@ export class BundleCommittedEventsDb extends EventsBaseDb<BundleCommitted> {
     super(dbPath, EventType.BundleCommitted)
   }
 
+  getKeyStringFromEvent (data: Partial<BundleCommitted>): string | null {
+    return data?.bundleId ?? null
+  }
+
   normalizeDataForGet (getData: Partial<BundleCommitted>): Partial<BundleCommitted> {
     if (!getData) {
       return getData
