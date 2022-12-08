@@ -1,74 +1,31 @@
-import SpokeMessageBridgeAbi from '@hop-protocol/v2-core/abi/generated/SpokeMessageBridge.json'
 import pkg from '../package.json'
-import { BigNumber, ethers, providers } from 'ethers'
-import { BundleCommittedEvent, FeesSentToHubEvent, MessageBundledEvent, MessageSentEvent } from '@hop-protocol/v2-core/contracts/SpokeMessageBridge'
+import { BigNumber, providers } from 'ethers'
+import { BundleCommitted, BundleCommittedEventFetcher } from './events/BundleCommitted'
+import { BundleForwarded, BundleForwardedEventFetcher } from './events/BundleForwarded'
+import { BundleReceived, BundleReceivedEventFetcher } from './events/BundleReceived'
+import { BundleSet, BundleSetEventFetcher } from './events/BundleSet'
 import { DateTime } from 'luxon'
-import { EventFetcher, InputFilter } from './eventFetcher'
+import { EventContext } from './events/types'
+import { EventFetcher } from './eventFetcher'
+import { FeesSentToHub, FeesSentToHubEventFetcher } from './events/FeesSentToHub'
 import { HubMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/HubMessageBridge__factory'
+import { MessageBundled, MessageBundledEventFetcher } from './events/MessageBundled'
+import { MessageRelayed, MessageRelayedEventFetcher } from './events/MessageRelayed'
+import { MessageReverted, MessageRevertedEventFetcher } from './events/MessageReverted'
+import { MessageSent, MessageSentEventFetcher } from './events/MessageSent'
 import { OptimismRelayer } from './exitRelayers/OptimismRelayer'
 import { SpokeMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/SpokeMessageBridge__factory'
+import { chainSlugMap } from './utils/chainSlugMap'
 import { formatEther, formatUnits } from 'ethers/lib/utils'
 import { getProvider } from './utils/getProvider'
+import { goerliAddresses } from '@hop-protocol/v2-core/addresses'
 
 const contractAddresses: Record<string, any> = {
-  goerli: {
-    ethereum: {
-      hubCoreMessenger: '0x9827315F7D2B1AAd0aa4705c06dafEE6cAEBF920',
-      ethFeeDistributor: '0x8fF09Ff3C87085Fe4607F2eE7514579FE50944C5'
-    },
-    optimism: {
-      spokeCoreMessenger: '0x4b844c25ef430e71d42eea89d87ffe929f8db927',
-      hubMessageBridge: '0x342EA1227fC0e085704D30cd17a16cA98B58D08B'
-    }
-  }
+  mainnet: {},
+  goerli: goerliAddresses
 }
 
 const cache : Record<string, any> = {}
-
-export type EventContext = {
-  chainSlug: string
-  chainId: number
-  transactionHash: string
-  transactionIndex: number
-  logIndex: number
-  blockNumber: number
-  blockTimestamp: number
-}
-
-type EventBase = {
-  _event: any
-  context?: EventContext
-}
-
-// event from SpokeMessageBridge
-interface BundleCommitted extends EventBase {
-  bundleId: string
-  bundleRoot: string
-  bundleFees: BigNumber
-  toChainId: number
-  commitTime: number
-}
-
-// event from SpokeMessageBridge
-interface MessageBundled extends EventBase {
-  bundleId: string
-  treeIndex: number
-  messageId: string
-}
-
-// event from SpokeMessageBridge
-interface MessageSent extends EventBase {
-  messageId: string
-  from: string
-  toChainId: number
-  to: string
-  data: string
-}
-
-// event from SpokeMessageBridge
-interface FeesSentToHub extends EventBase {
-  amount: BigNumber
-}
 
 type Options = {
   batchBlocks?: number
@@ -79,17 +36,6 @@ export class Hop {
   providers: Record<string, providers.Provider>
   network: string
   batchBlocks?: number
-
-  chainSlugMap: Record<string, string> = {
-    1: 'ethereum', // mainnet
-    5: 'ethereum', // goerli
-    10: 'optimism', // mainnet
-    420: 'optimism', // goerli
-    42161: 'arbitrum', // mainnet
-    421613: 'arbitrum', // goerli
-    137: 'polygon', // mainnet
-    80001: 'polygon' // goerli
-  }
 
   constructor (network: string = 'goerli', options?: Options) {
     if (!['mainnet', 'goerli'].includes(network)) {
@@ -122,6 +68,70 @@ export class Hop {
     return address
   }
 
+  async getBundleCommittedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleCommitted[]> {
+    const chain = this.getChainSlug(chainId)
+    const provider = this.providers[chain]
+    const address = this.getSpokeMessageBridgeContractAddress(chain)
+    const eventFetcher = new BundleCommittedEventFetcher(provider, chainId, this.batchBlocks, address)
+    return eventFetcher.getEvents(startBlock, endBlock)
+  }
+
+  async getBundleForwardedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleForwarded[]> {
+    const chain = this.getChainSlug(chainId)
+    const provider = this.providers[chain]
+    const address = this.getHubMessageBridgeContractAddress(chain)
+    const eventFetcher = new BundleForwardedEventFetcher(provider, chainId, this.batchBlocks, address)
+    return eventFetcher.getEvents(startBlock, endBlock)
+  }
+
+  async getBundleReceivedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleReceived[]> {
+    const chain = this.getChainSlug(chainId)
+    const provider = this.providers[chain]
+    const address = this.getHubMessageBridgeContractAddress(chain)
+    const eventFetcher = new BundleReceivedEventFetcher(provider, chainId, this.batchBlocks, address)
+    return eventFetcher.getEvents(startBlock, endBlock)
+  }
+
+  async getBundleSetEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleSet[]> {
+    const chain = this.getChainSlug(chainId)
+    const provider = this.providers[chain]
+    const address = this.getHubMessageBridgeContractAddress(chain)
+    const eventFetcher = new BundleSetEventFetcher(provider, chainId, this.batchBlocks, address)
+    return eventFetcher.getEvents(startBlock, endBlock)
+  }
+
+  async getFeesSentToHubEvents (chainId: number, startBlock: number, endBlock?: number): Promise<FeesSentToHub[]> {
+    const chain = this.getChainSlug(chainId)
+    const provider = this.providers[chain]
+    const address = this.getSpokeMessageBridgeContractAddress(chain)
+    const eventFetcher = new FeesSentToHubEventFetcher(provider, chainId, this.batchBlocks, address)
+    return eventFetcher.getEvents(startBlock, endBlock)
+  }
+
+  async getMessageBundledEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageBundled[]> {
+    const chain = this.getChainSlug(chainId)
+    const provider = this.providers[chain]
+    const address = this.getSpokeMessageBridgeContractAddress(chain)
+    const eventFetcher = new MessageBundledEventFetcher(provider, chainId, this.batchBlocks, address)
+    return eventFetcher.getEvents(startBlock, endBlock)
+  }
+
+  async getMessageRelayedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageRelayed[]> {
+    const chain = this.getChainSlug(chainId)
+    const provider = this.providers[chain]
+    const address = this.getSpokeMessageBridgeContractAddress(chain)
+    const eventFetcher = new MessageRelayedEventFetcher(provider, chainId, this.batchBlocks, address)
+    return eventFetcher.getEvents(startBlock, endBlock)
+  }
+
+  async getMessageRevertedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageReverted[]> {
+    const chain = this.getChainSlug(chainId)
+    const provider = this.providers[chain]
+    const address = this.getSpokeMessageBridgeContractAddress(chain)
+    const eventFetcher = new MessageRevertedEventFetcher(provider, chainId, this.batchBlocks, address)
+    return eventFetcher.getEvents(startBlock, endBlock)
+  }
+
   async getMessageSentEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageSent[]> {
     const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
@@ -129,152 +139,8 @@ export class Hop {
       throw new Error(`Invalid chain: ${chain}`)
     }
     const address = this.getSpokeMessageBridgeContractAddress(chain)
-    const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
-    const filter = spokeMessageBridge.filters.MessageSent()
-    const eventFetcher = new EventFetcher({
-      provider,
-      batchBlocks: this.batchBlocks
-    })
-    if (!endBlock) {
-      endBlock = await provider.getBlockNumber()
-    }
-    let events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
-    events = events.map(this.messageSentEventToTypedEvent)
-    return Promise.all(events.map((event: any) => this.addContextToEvent(event, chainId)))
-  }
-
-  messageSentEventToTypedEvent (event: MessageSentEvent): MessageSent {
-    const iface = new ethers.utils.Interface(SpokeMessageBridgeAbi)
-    const decoded = iface.parseLog(event)
-
-    const messageId = decoded.args.messageId.toString()
-    const from = decoded.args.from
-    const toChainId = decoded.args.toChainId.toNumber()
-    const to = decoded.args.to
-    const data = decoded.args.data
-
-    return {
-      messageId,
-      from,
-      toChainId,
-      to,
-      data,
-      _event: event
-    }
-  }
-
-  async getMessageBundledEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageBundled[]> {
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
-    if (!provider) {
-      throw new Error(`Invalid chain: ${chain}`)
-    }
-    const address = this.getSpokeMessageBridgeContractAddress(chain)
-    const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
-    const filter = spokeMessageBridge.filters.MessageBundled()
-    const eventFetcher = new EventFetcher({
-      provider,
-      batchBlocks: this.batchBlocks
-    })
-    if (!endBlock) {
-      endBlock = await provider.getBlockNumber()
-    }
-    let events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
-    events = events.map(this.messageBundledEventToTypedEvent)
-    return Promise.all(events.map((event: any) => this.addContextToEvent(event, chainId)))
-  }
-
-  messageBundledEventToTypedEvent (event: MessageBundledEvent): MessageBundled {
-    const iface = new ethers.utils.Interface(SpokeMessageBridgeAbi)
-    const decoded = iface.parseLog(event)
-
-    const bundleId = decoded.args.bundleId.toString()
-    const treeIndex = decoded.args.treeIndex.toNumber()
-    const messageId = decoded.args.messageId.toString()
-    return {
-      bundleId,
-      treeIndex,
-      messageId,
-      _event: event
-    }
-  }
-
-  async getBundleCommittedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleCommitted[]> {
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
-    if (!provider) {
-      throw new Error(`Invalid chain: ${chain}`)
-    }
-    const address = this.getSpokeMessageBridgeContractAddress(chain)
-    const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
-    const filter = spokeMessageBridge.filters.BundleCommitted()
-    const eventFetcher = new EventFetcher({
-      provider,
-      batchBlocks: this.batchBlocks
-    })
-    if (!endBlock) {
-      endBlock = await provider.getBlockNumber()
-    }
-    let events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
-    events = events.map(this.bundleCommittedEventToTypedEvent)
-    return Promise.all(events.map((event: any) => this.addContextToEvent(event, chainId)))
-  }
-
-  async addContextToEvent (event: any, chainId: number): Promise<any> {
-    const context = await this.getEventContext(event._event, chainId)
-    event.context = context
-    return event
-  }
-
-  bundleCommittedEventToTypedEvent (event: BundleCommittedEvent): BundleCommitted {
-    const iface = new ethers.utils.Interface(SpokeMessageBridgeAbi)
-    const decoded = iface.parseLog(event)
-
-    const bundleId = decoded.args.bundleId.toString()
-    const bundleRoot = decoded.args.bundleRoot.toString()
-    const bundleFees = decoded.args.bundleFees
-    const toChainId = decoded.args.toChainId.toNumber()
-    const commitTime = decoded.args.commitTime.toNumber()
-    return {
-      bundleId,
-      bundleRoot,
-      bundleFees,
-      toChainId,
-      commitTime,
-      _event: event
-    }
-  }
-
-  async getFeesSentToHubEvents (chainId: number, startBlock: number, endBlock?: number): Promise<FeesSentToHub[]> {
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
-    if (!provider) {
-      throw new Error(`Invalid chain: ${chain}`)
-    }
-    const address = this.getSpokeMessageBridgeContractAddress(chain)
-    const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
-    const filter = spokeMessageBridge.filters.FeesSentToHub()
-    const eventFetcher = new EventFetcher({
-      provider,
-      batchBlocks: this.batchBlocks
-    })
-    if (!endBlock) {
-      endBlock = await provider.getBlockNumber()
-    }
-    let events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
-    events = events.map(this.feesSentToHubToTypedEvent)
-    return Promise.all(events.map((event: any) => this.addContextToEvent(event, chainId)))
-  }
-
-  feesSentToHubToTypedEvent (event: FeesSentToHubEvent): FeesSentToHub {
-    const iface = new ethers.utils.Interface(SpokeMessageBridgeAbi)
-    const decoded = iface.parseLog(event)
-
-    const amount = decoded.args.amount
-    return {
-      amount,
-      _event: event
-    }
+    const eventFetcher = new MessageSentEventFetcher(provider, chainId, this.batchBlocks, address)
+    return eventFetcher.getEvents(startBlock, endBlock)
   }
 
   async hasAuctionStarted (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<boolean> {
@@ -388,7 +254,7 @@ export class Hop {
   }
 
   getChainSlug (chainId: number) {
-    const chainSlug = this.chainSlugMap[chainId]
+    const chainSlug = chainSlugMap[chainId]
     if (!chainSlug) {
       throw new Error(`Invalid chain: ${chainId}`)
     }

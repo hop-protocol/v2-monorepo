@@ -6,9 +6,9 @@ export enum EventType {
   BundleCommitted = 'BundleCommitted', // event from SpokeMessageBridge
   FeesSentToHub = 'FeesSentToHub', // event from SpokeMessageBridge
   MessageBundled = 'MessageBundled', // event from SpokeMessageBridge
-  MessageSent = 'MessageSent', // event from ICrossChainSource
-  MessageRelayed = 'MessageRelayed', // event from ICrossChainDestination
-  MessageReverted = 'MessageReverted' // event from ICrossChainDestination
+  MessageSent = 'MessageSent', // event from SpokeMessageBridge (ICrossChainSource)
+  MessageRelayed = 'MessageRelayed', // event from SpokeMessageBridge (ICrossChainDestination)
+  MessageReverted = 'MessageReverted' // event from SpokeMessageBridge (ICrossChainDestination)
 }
 
 export type EventContext = {

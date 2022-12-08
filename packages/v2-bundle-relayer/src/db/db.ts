@@ -42,13 +42,13 @@ export const db = {
   get messageBundledEventsDb (): MessageBundledEventsDb {
     return getDb(MessageBundledEventsDb)
   },
-  get messageSentEventsDb (): MessageSentEventsDb {
-    return getDb(MessageSentEventsDb)
-  },
   get messageRelayedEventsDb (): MessageRelayedEventsDb {
     return getDb(MessageRelayedEventsDb)
   },
   get messageRevertedEventsDb (): MessageRevertedEventsDb {
     return getDb(MessageRevertedEventsDb)
+  },
+  get messageSentEventsDb (): MessageSentEventsDb {
+    return getDb(MessageSentEventsDb)
   }
 }

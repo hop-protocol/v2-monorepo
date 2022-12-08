@@ -34,35 +34,6 @@ describe('sdk setup', () => {
       expect(tx.hash).toBeTruthy()
     }
   }, 60 * 1000)
-  it('getMessageBundledEvents', async () => {
-    const hop = new Hop('goerli')
-    const chainId = 420
-    const chain = 'optimism'
-    const endBlock = 3216770
-    const startBlock = endBlock - 100
-    const events = await hop.getMessageBundledEvents(chainId, startBlock, endBlock)
-    console.log(events)
-    expect(events.length).toBe(1)
-    expect(events[0].bundleId).toBe('0x941b97adc8856fc13c566e5b9aaa9cd5fd953324452f0aa1fe24ca227a5e2ab6')
-    expect(events[0].treeIndex).toBe(0)
-    expect(events[0].messageId).toBe('0x1dcab020e2c5973e3461028e6d6cce6e8785c18c8d47257836800170d37b9e3e')
-    expect(events[0]._event).toBeTruthy()
-  }, 60 * 1000)
-  it('getMessageSentEvents', async () => {
-    const hop = new Hop('goerli')
-    const chainId = 420
-    const chain = 'optimism'
-    const endBlock = 3216770
-    const startBlock = endBlock - 100
-    const events = await hop.getMessageSentEvents(chainId, startBlock, endBlock)
-    console.log(events)
-    expect(events.length).toBe(1)
-    expect(events[0].messageId).toBe('0x1dcab020e2c5973e3461028e6d6cce6e8785c18c8d47257836800170d37b9e3e')
-    expect(events[0].from).toBe('0x75f222420C75Da8a59091a23368f97De43F54D9b')
-    expect(events[0].toChainId).toBe(5)
-    expect(events[0].data).toBe('0x')
-    expect(events[0]._event).toBeTruthy()
-  }, 60 * 1000)
   it('getBundleCommittedEvents', async () => {
     const hop = new Hop('goerli')
     const chain = 'optimism'
@@ -80,6 +51,36 @@ describe('sdk setup', () => {
     expect(events[0].context).toBeTruthy()
     expect(events[0]._event).toBeTruthy()
   }, 60 * 1000)
+  it('getBundleForwardedEvents', async () => {
+    const hop = new Hop('goerli')
+    const chain = 'ethereum'
+    const chainId = 5
+    const endBlock = 3218900
+    const startBlock = endBlock - 100
+    const events = await hop.getBundleForwardedEvents(chainId, startBlock, endBlock)
+    console.log(events)
+    expect(events.length).toBe(0)
+  }, 60 * 1000)
+  it('getBundleReceivedEvents', async () => {
+    const hop = new Hop('goerli')
+    const chain = 'ethereum'
+    const chainId = 5
+    const endBlock = 3218900
+    const startBlock = endBlock - 100
+    const events = await hop.getBundleReceivedEvents(chainId, startBlock, endBlock)
+    console.log(events)
+    expect(events.length).toBe(0)
+  }, 60 * 1000)
+  it('getBundleSetEvents', async () => {
+    const hop = new Hop('goerli')
+    const chain = 'ethereum'
+    const chainId = 5
+    const endBlock = 3218900
+    const startBlock = endBlock - 100
+    const events = await hop.getBundleSetEvents(chainId, startBlock, endBlock)
+    console.log(events)
+    expect(events.length).toBe(0)
+  }, 60 * 1000)
   it('getFeesSentToHubEvents', async () => {
     const hop = new Hop('goerli')
     const chainId = 420
@@ -90,6 +91,55 @@ describe('sdk setup', () => {
     console.log(events)
     expect(events.length).toBe(1)
     expect(events[0].amount.toString()).toBe('8000000000000')
+  }, 60 * 1000)
+  it('getMessageBundledEvents', async () => {
+    const hop = new Hop('goerli')
+    const chainId = 420
+    const chain = 'optimism'
+    const endBlock = 3216770
+    const startBlock = endBlock - 100
+    const events = await hop.getMessageBundledEvents(chainId, startBlock, endBlock)
+    console.log(events)
+    expect(events.length).toBe(1)
+    expect(events[0].bundleId).toBe('0x941b97adc8856fc13c566e5b9aaa9cd5fd953324452f0aa1fe24ca227a5e2ab6')
+    expect(events[0].treeIndex).toBe(0)
+    expect(events[0].messageId).toBe('0x1dcab020e2c5973e3461028e6d6cce6e8785c18c8d47257836800170d37b9e3e')
+    expect(events[0]._event).toBeTruthy()
+  }, 60 * 1000)
+  it('getMessageRelayedEvents', async () => {
+    const hop = new Hop('goerli')
+    const chainId = 420
+    const chain = 'optimism'
+    const endBlock = 3216770
+    const startBlock = endBlock - 100
+    const events = await hop.getMessageRelayedEvents(chainId, startBlock, endBlock)
+    console.log(events)
+    expect(events.length).toBe(0)
+  }, 60 * 1000)
+  it('getMessageRevertedEvents', async () => {
+    const hop = new Hop('goerli')
+    const chainId = 420
+    const chain = 'optimism'
+    const endBlock = 3216770
+    const startBlock = endBlock - 100
+    const events = await hop.getMessageRevertedEvents(chainId, startBlock, endBlock)
+    console.log(events)
+    expect(events.length).toBe(0)
+  }, 60 * 1000)
+  it('getMessageSentEvents', async () => {
+    const hop = new Hop('goerli')
+    const chainId = 420
+    const chain = 'optimism'
+    const endBlock = 3216770
+    const startBlock = endBlock - 100
+    const events = await hop.getMessageSentEvents(chainId, startBlock, endBlock)
+    console.log(events)
+    expect(events.length).toBe(1)
+    expect(events[0].messageId).toBe('0x1dcab020e2c5973e3461028e6d6cce6e8785c18c8d47257836800170d37b9e3e')
+    expect(events[0].from).toBe('0x75f222420C75Da8a59091a23368f97De43F54D9b')
+    expect(events[0].toChainId).toBe(5)
+    expect(events[0].data).toBe('0x')
+    expect(events[0]._event).toBeTruthy()
   }, 60 * 1000)
   it('getEstimatedTxCostForForwardMessage', async () => {
     const hop = new Hop('goerli')
