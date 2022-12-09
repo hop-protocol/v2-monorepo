@@ -83,7 +83,7 @@ export class EventsBaseDb<T> extends BaseDb {
 
   getTimestampKeyString (data: Partial<T>): string | null {
     const values = this.getTimestampKey(data)
-    const isOk = !values.every(value => value !== undefined)
+    const isOk = values.every(value => value !== undefined)
     if (isOk) {
       return values.join('-')
     }

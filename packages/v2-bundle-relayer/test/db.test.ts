@@ -1,10 +1,9 @@
 import { BigNumber } from 'ethers'
-import { BundleCommittedEventsDb } from '../src/db/BundleCommittedEventsDb'
-
-const dbPath = '/tmp/testdb'
+import { BundleCommittedEventsDb } from '../src/db/eventsDb/BundleCommittedEventsDb'
 
 describe('BundleCommittedEventsDb', () => {
   it('should put, get, and update data', async () => {
+    const dbPath = '/tmp/test/testdb'
     const db = new BundleCommittedEventsDb(dbPath)
 
     const data = {
@@ -24,15 +23,15 @@ describe('BundleCommittedEventsDb', () => {
       }
     }
 
-    await db.put(data.bundleId, data)
-    expect(await db.get(data.bundleId)).toStrictEqual(data)
+    await db.putEvent(data.bundleId, data)
+    expect(await db.getEvent(data.bundleId)).toStrictEqual(data)
 
     const updatedData = Object.assign({}, data, {
       toChainId: 2
     })
 
-    await db.update(data.bundleId, { toChainId: 2 })
+    await db.updateEvent(data.bundleId, { toChainId: 2 })
 
-    expect(await db.get(data.bundleId)).toStrictEqual(updatedData)
+    expect(await db.getEvent(data.bundleId)).toStrictEqual(updatedData)
   }, 60 * 1000)
 })

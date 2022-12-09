@@ -2,6 +2,7 @@ import wait from 'wait'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { Indexer } from '../indexer'
 import { db } from '../db'
+import { goerliAddresses } from '@hop-protocol/v2-core/addresses'
 
 export class Worker {
   hop: Hop
@@ -10,7 +11,12 @@ export class Worker {
 
   constructor () {
     this.hop = new Hop('goerli')
-    this.indexer = new Indexer()
+    this.indexer = new Indexer({
+      startBlocks: {
+        5: goerliAddresses.ethereum.startBlock,
+        420: goerliAddresses.optimism.startBlock
+      }
+    })
   }
 
   async start () {

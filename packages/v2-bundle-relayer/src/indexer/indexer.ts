@@ -3,86 +3,130 @@ import { EventsBaseDb } from '../db/eventsDb/EventsBaseDb'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { db } from '../db'
 
-const _startBlockOp = 3218800
-const _startBlockEth = 16117269
+type StartBlocks = {
+  [chainId: string]: number
+}
+
+type Options = {
+  dbPath?: string
+  startBlocks: StartBlocks
+}
 
 export class Indexer {
   hop: Hop
   pollIntervalMs: number = 1 * 60 * 1000
+  startBlocks: StartBlocks = {}
   chainIds: any = {
     5: true, // goerli
     420: true // goerli optimism
   }
 
-  constructor () {
+  paused: boolean = false
+  syncIndex: number = 0
+  db = db
+
+  constructor (options?: Options) {
     this.hop = new Hop('goerli', {
       batchBlocks: 10_000
     })
+    if (options?.startBlocks) {
+      this.startBlocks = options.startBlocks
+    }
+    for (const chainId in this.chainIds) {
+      this.startBlocks[chainId] = this.startBlocks[chainId] ?? 0
+    }
+    if (options?.dbPath) {
+      this.db.setDbPath(options.dbPath)
+    }
   }
 
   async start () {
-    await this.syncer()
+    this.paused = false
+    await this.startPoller()
   }
 
-  async syncer () {
+  async stop () {
+    this.paused = true
+  }
+
+  async startPoller () {
     while (true) {
+      if (this.paused) {
+        return
+      }
       try {
-        console.log('syncer start')
-
-        const eventsToSync: Record<string, EventsBaseDb<any>> = {
-          BundleCommitted: db.bundleCommittedEventsDb,
-          BundleForwarded: db.bundleForwardedEventsDb, // hub
-          BundleReceived: db.bundleReceivedEventsDb, // hub
-          BundleSet: db.bundleSetEventsDb, // hub
-          FeesSentToHub: db.feesSentToHubEventsDb,
-          MessageBundled: db.messageBundledEventsDb,
-          MessageRelayed: db.messageRelayedEventsDb,
-          MessageReverted: db.messageRevertedEventsDb,
-          MessageSent: db.messageSentEventsDb
-        }
-
-        for (const eventName in eventsToSync) {
-          const _db = eventsToSync[eventName]
-          for (const _chainId in this.chainIds) {
-            const chainId = Number(_chainId)
-            const hubEvents = ['BundleForwarded', 'BundleReceived', 'BundleSet']
-            if (hubEvents.includes(eventName)) {
-              if (chainId !== 5) {
-                continue
-              }
-            } else {
-              if (chainId === 5) {
-                continue
-              }
-            }
-
-            // await _db.resetSyncState(chainId)
-            const syncState = await _db.getSyncState(chainId)
-            console.log('syncState', eventName, syncState)
-
-            const provider = this.hop.providers[chainId === 5 ? 'ethereum' : 'optimism']
-            let startBlock = chainId === 5 ? _startBlockEth : _startBlockOp
-            let endBlock = await provider.getBlockNumber()
-            if (syncState?.toBlock) {
-              startBlock = syncState.toBlock + 1
-              endBlock = await provider.getBlockNumber()
-            }
-
-            console.log('get', eventName, chainId, startBlock, endBlock)
-            const events = await this.hop.getEvents(eventName, chainId, startBlock, endBlock)
-            console.log('events', eventName, events.length)
-            for (const event of events) {
-              const key = _db.getKeyStringFromEvent(event)!
-              await _db.updateEvent(key, event)
-            }
-            await _db.putSyncState(chainId, { fromBlock: startBlock, toBlock: endBlock })
-          }
-        }
-        console.log('syncer done')
+        await this.poll()
       } catch (err: any) {
-        console.error('syncer error:', err)
+        console.error('indexer poll error:', err)
       }
       await wait(this.pollIntervalMs)
     }
+  }
+
+  async poll () {
+    console.log('poll start')
+
+    const eventsToSync: Record<string, EventsBaseDb<any>> = {
+      BundleCommitted: this.db.bundleCommittedEventsDb
+      /*
+      BundleForwarded: this.db.bundleForwardedEventsDb, // hub
+      BundleReceived: this.db.bundleReceivedEventsDb, // hub
+      BundleSet: this.db.bundleSetEventsDb, // hub
+      FeesSentToHub: this.db.feesSentToHubEventsDb,
+      MessageBundled: this.db.messageBundledEventsDb,
+      MessageRelayed: this.db.messageRelayedEventsDb,
+      MessageReverted: this.db.messageRevertedEventsDb,
+      MessageSent: this.db.messageSentEventsDb
+      */
+    }
+
+    for (const eventName in eventsToSync) {
+      const _db = eventsToSync[eventName]
+      for (const _chainId in this.chainIds) {
+        const chainId = Number(_chainId)
+        const hubEvents = ['BundleForwarded', 'BundleReceived', 'BundleSet']
+        if (hubEvents.includes(eventName)) {
+          if (chainId !== 5) {
+            continue
+          }
+        } else {
+          if (chainId === 5) {
+            continue
+          }
+        }
+
+        // await _db.resetSyncState(chainId)
+        const syncState = await _db.getSyncState(chainId)
+        console.log('syncState', eventName, syncState)
+
+        const provider = this.hop.providers[chainId === 5 ? 'ethereum' : 'optimism']
+        let startBlock = this.startBlocks[chainId]
+        let endBlock = await provider.getBlockNumber()
+        if (syncState?.toBlock) {
+          startBlock = syncState.toBlock + 1
+          endBlock = await provider.getBlockNumber()
+        }
+
+        console.log('get', eventName, chainId, startBlock, endBlock)
+        const events = await this.hop.getEvents(eventName, chainId, startBlock, endBlock)
+        console.log('events', eventName, events.length)
+        for (const event of events) {
+          const key = _db.getKeyStringFromEvent(event)!
+          await _db.updateEvent(key, event)
+        }
+        await _db.putSyncState(chainId, { fromBlock: startBlock, toBlock: endBlock })
+      }
+    }
+    this.syncIndex++
+    console.log('poll done')
+  }
+
+  async waitForSyncIndex (syncIndex: number): Promise<boolean> {
+    if (this.syncIndex === syncIndex) {
+      return true
+    }
+
+    await wait(100)
+    return await this.waitForSyncIndex(syncIndex)
   }
 }

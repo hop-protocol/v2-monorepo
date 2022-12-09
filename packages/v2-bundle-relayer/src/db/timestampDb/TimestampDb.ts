@@ -18,7 +18,7 @@ export class TimestampDb extends BaseDb {
   async getByRangeLookup (rangeLookup: RangeLookup): Promise<any[]> {
     return this._getKeyValues({
       gte: rangeLookup.gt?.toString(),
-      lte: rangeLookup.lt ? `${rangeLookup.lt?.toString()}~` : undefined // tilde is intentional
+      lte: rangeLookup.lt ? `${rangeLookup.lt?.toString() ?? ''}~` : undefined // tilde is intentional
     })
   }
 }

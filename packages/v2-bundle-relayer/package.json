@@ -8,6 +8,8 @@
   },
   "scripts": {
     "test": "jest test",
+    "test:db": "jest test/db.test.ts",
+    "test:indexer": "jest test/indexer.test.ts",
     "start": "npm run build-info && node bin/relayer",
     "typecheck": "tsc",
     "dev": "npm run build-info && tsc -p tsconfig.build.json --watch",
@@ -33,6 +35,7 @@
   "license": "MIT",
   "dependencies": {
     "@hop-protocol/v2-sdk": "0.0.0-beta.0",
+    "@hop-protocol/v2-core": "0.0.0-beta.0",
     "@ethersproject/hdnode": "5.0.9",
     "@slack/web-api": "6.7.2",
     "async-mutex": "0.3.2",

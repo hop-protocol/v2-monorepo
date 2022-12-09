@@ -1,3 +1,4 @@
+import fs from 'fs'
 import level from 'level-party'
 import sub from 'subleveldown'
 import { Mutex } from 'async-mutex'
@@ -26,6 +27,9 @@ export class BaseDb {
   constructor (dbPath: string, dbName: string) {
     if (!dbPath) {
       throw new Error('dbPath is required')
+    }
+    if (!fs.existsSync(dbPath)) {
+      fs.mkdirSync(dbPath, { recursive: true })
     }
     const eventsDb = level(dbPath)
     const subDb = sub(eventsDb, dbName, { valueEncoding: 'json' })
