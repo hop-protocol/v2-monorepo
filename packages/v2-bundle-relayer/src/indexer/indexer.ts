@@ -67,8 +67,7 @@ export class Indexer {
     console.log('poll start')
 
     const eventsToSync: Record<string, EventsBaseDb<any>> = {
-      BundleCommitted: this.db.bundleCommittedEventsDb
-      /*
+      BundleCommitted: this.db.bundleCommittedEventsDb,
       BundleForwarded: this.db.bundleForwardedEventsDb, // hub
       BundleReceived: this.db.bundleReceivedEventsDb, // hub
       BundleSet: this.db.bundleSetEventsDb, // hub
@@ -77,20 +76,20 @@ export class Indexer {
       MessageRelayed: this.db.messageRelayedEventsDb,
       MessageReverted: this.db.messageRevertedEventsDb,
       MessageSent: this.db.messageSentEventsDb
-      */
     }
 
     for (const eventName in eventsToSync) {
       const _db = eventsToSync[eventName]
       for (const _chainId in this.chainIds) {
         const chainId = Number(_chainId)
+        const isL1 = this.getIsL1(chainId)
         const hubEvents = ['BundleForwarded', 'BundleReceived', 'BundleSet']
         if (hubEvents.includes(eventName)) {
-          if (chainId !== 5) {
+          if (!isL1) {
             continue
           }
         } else {
-          if (chainId === 5) {
+          if (isL1) {
             continue
           }
         }
@@ -128,5 +127,9 @@ export class Indexer {
 
     await wait(100)
     return await this.waitForSyncIndex(syncIndex)
+  }
+
+  getIsL1(chainId: number) {
+    return chainId === 5 || chainId === 1
   }
 }
