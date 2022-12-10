@@ -129,7 +129,7 @@ export class Indexer {
     return await this.waitForSyncIndex(syncIndex)
   }
 
-  getIsL1(chainId: number) {
+  getIsL1 (chainId: number) {
     return chainId === 5 || chainId === 1
   }
 }

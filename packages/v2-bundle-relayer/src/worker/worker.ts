@@ -3,6 +3,7 @@ import { Hop } from '@hop-protocol/v2-sdk'
 import { Indexer } from '../indexer'
 import { db } from '../db'
 import { goerliAddresses } from '@hop-protocol/v2-core/addresses'
+import { signer } from '../signer'
 
 export class Worker {
   hop: Hop
@@ -41,17 +42,44 @@ export class Worker {
         console.log('items', items)
 
         for (const bundleCommittedEvent of items) {
-          const { bundleId } = bundleCommittedEvent
+          const { bundleId, toChainId } = bundleCommittedEvent
           const { chainId: fromChainId } = bundleCommittedEvent.context
           console.log('checking shouldAttemp for bundle', bundleId)
-          const shouldAttempt = await this.hop.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent as any)
+          let shouldAttempt = await this.hop.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent as any)
+
+          const bundleForwardedEvent = await db.bundleForwardedEventsDb.getEvent(bundleId)
+          if (bundleForwardedEvent) {
+            shouldAttempt = false
+          }
+
           console.log('shouldAttempt:', shouldAttempt, bundleId)
           if (shouldAttempt) {
             const txData = await this.hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedEvent as any)
             console.log('txData', txData)
 
-            // TODO: send tx
-            // TODO: mark tx as sent
+            const txState = await db.txStateDb.getTxState(bundleId)
+            const delayMs = 10 * 60 * 1000
+            const isOk = !txState || txState.lastAttemptedAtMs + delayMs < Date.now()
+            if (!isOk) {
+              throw new Error('not ok')
+            }
+
+            await db.txStateDb.putTxState(bundleId, {
+              id: bundleId,
+              lastAttemptedAtMs: Date.now()
+            })
+            const provider = toChainId === 5 ? this.hop.providers.ethereum : this.hop.providers.optimism
+            const tx = await signer?.connect(provider).sendTransaction({
+              to: txData.to,
+              data: txData.data
+            })
+
+            console.log('sent tx', tx?.hash)
+
+            await db.txStateDb.updateTxState(bundleId, {
+              id: bundleId,
+              transactionHash: tx?.hash
+            })
           }
         }
       } catch (err: any) {

@@ -59,19 +59,21 @@ export class BaseDb {
       })
   }
 
-  async _put (key: string, value: any): Promise<any> {
+  async _put (key: string, value: any): Promise<boolean> {
     return this.mutex.runExclusive(async () => {
-      return this.db.put(key, value)
+      await this.db.put(key, value)
+      return true
     })
   }
 
-  async _update (key: string, value: any): Promise<any> {
+  async _update (key: string, value: any): Promise<boolean> {
     const oldValue = await this._get(key)
     const newValue = Object.assign({}, oldValue ?? {}, value)
-    return this._put(key, newValue)
+    await this._put(key, newValue)
+    return true
   }
 
-  async _get (key: string): Promise<any> {
+  async _get (key: string): Promise<any | null> {
     let value: any = null
     try {
       value = await this.db.get(key)
@@ -84,9 +86,10 @@ export class BaseDb {
     return value ?? null
   }
 
-  async _delete (key: string): Promise<any> {
+  async _delete (key: string): Promise<boolean> {
     return this.mutex.runExclusive(async () => {
-      return this.db.del(key)
+      await this.db.del(key)
+      return true
     })
   }
 
