@@ -23,6 +23,7 @@ export class Worker {
   async start () {
     try {
       this.indexer.start()
+      await this.indexer.waitForSyncIndex(1)
       await this.poll()
     } catch (err: any) {
       console.error('worker poll error', err)
@@ -58,7 +59,7 @@ export class Worker {
             console.log('txData', txData)
 
             const txState = await db.txStateDb.getTxState(bundleId)
-            const delayMs = 10 * 60 * 1000
+            const delayMs = 10 * 60 * 1000 // 10min
             const isOk = !txState || txState.lastAttemptedAtMs + delayMs < Date.now()
             if (!isOk) {
               throw new Error('not ok')
@@ -68,7 +69,10 @@ export class Worker {
               id: bundleId,
               lastAttemptedAtMs: Date.now()
             })
+
             const provider = toChainId === 5 ? this.hop.providers.ethereum : this.hop.providers.optimism
+            console.log("HERE0000")
+            /*
             const tx = await signer?.connect(provider).sendTransaction({
               to: txData.to,
               data: txData.data
@@ -80,6 +84,7 @@ export class Worker {
               id: bundleId,
               transactionHash: tx?.hash
             })
+            */
           }
         }
       } catch (err: any) {
