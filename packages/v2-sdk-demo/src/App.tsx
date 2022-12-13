@@ -11,6 +11,8 @@ import { formatEther, formatUnits } from 'ethers/lib/utils'
 import { useQueryParams } from './hooks/useQueryParams'
 import Onboard from '@web3-onboard/core'
 import injectedModule from '@web3-onboard/injected-wallets'
+import { SendMessage } from './components/SendMessage'
+import { Hop } from '@hop-protocol/v2-sdk'
 
 const injected = injectedModule()
 const gnosis = gnosisModule()
@@ -54,6 +56,11 @@ function App () {
   const [balance, setBalance] = useState('-')
   const [onboardWallet, setOnboardWallet] = useState<any>()
   const [wallet, setWallet] = useState<any>()
+  const sdk = useMemo(() => {
+    const _sdk = new Hop('goerli')
+    ;(window as any).sdk = _sdk
+    return _sdk
+  }, [])
 
   async function onboardConnect() {
     const wallets = await onboard.connectWallet()
@@ -189,6 +196,9 @@ function App () {
             </Box>
           </Box>
         )}
+      </Box>
+      <Box>
+        <SendMessage signer={wallet} sdk={sdk} />
       </Box>
       {!!error && (
         <Box mb={4} style={{ maxWidth: '400px', wordBreak: 'break-word' }}>
