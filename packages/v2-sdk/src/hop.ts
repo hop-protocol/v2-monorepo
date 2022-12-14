@@ -190,7 +190,7 @@ export class Hop {
   async hasAuctionStarted (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<boolean> {
     const { commitTime, toChainId } = bundleCommittedEvent
     const exitTime = await this.getSpokeExitTime(fromChainId, toChainId)
-    return commitTime + exitTime > DateTime.utc().toSeconds()
+    return commitTime + exitTime < DateTime.utc().toSeconds()
   }
 
   async getSpokeExitTime (fromChainId: number, toChainId: number) {
@@ -240,7 +240,7 @@ export class Hop {
   async shouldAttemptForwardMessage (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<boolean> {
     const estimatedTxCost = await this.getEstimatedTxCostForForwardMessage(fromChainId, bundleCommittedEvent)
     const relayReward = await this.getRelayReward(fromChainId, bundleCommittedEvent)
-    const txOk = relayReward > estimatedTxCost
+    const txOk = relayReward > estimatedTxCost || relayReward > 0 // for testing
     const timeOk = await this.hasAuctionStarted(fromChainId, bundleCommittedEvent)
     const shouldAttempt = txOk && timeOk
     return shouldAttempt

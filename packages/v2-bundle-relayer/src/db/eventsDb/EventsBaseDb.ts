@@ -32,7 +32,7 @@ export class EventsBaseDb<T> extends BaseDb {
 
   async getFromRange (range: RangeLookup): Promise<T[]> {
     const ids = await this.getByBlockTimestamp(range)
-    const uniqueIds = ids.filter((item: string, i: number, arr: string[]) => arr.indexOf(item) === i)
+    const uniqueIds = [...new Set(ids)]
     const promises = uniqueIds.map(async id => await this.getEvent(id) as T)
     return Promise.all(promises)
   }

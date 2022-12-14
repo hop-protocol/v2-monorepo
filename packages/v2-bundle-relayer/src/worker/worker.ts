@@ -38,9 +38,9 @@ export class Worker {
         // TODO: only return if bundle is not set
         const items = await db.bundleCommittedEventsDb.getFromRange({
           lt: now,
-          gt: now - (604800)
+          gt: now - (604800 * 2)
         })
-        console.log('items', items)
+        console.log('items', items.length)
 
         for (const bundleCommittedEvent of items) {
           const { bundleId, toChainId } = bundleCommittedEvent
@@ -53,16 +53,17 @@ export class Worker {
             shouldAttempt = false
           }
 
-          console.log('shouldAttempt:', shouldAttempt, bundleId)
+          console.log('shouldAttempt:', shouldAttempt, bundleId, !!bundleForwardedEvent)
           if (shouldAttempt) {
             const txData = await this.hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedEvent as any)
             console.log('txData', txData)
 
             const txState = await db.txStateDb.getTxState(bundleId)
             const delayMs = 10 * 60 * 1000 // 10min
-            const isOk = !txState || txState.lastAttemptedAtMs + delayMs < Date.now()
+            const recentlyAttempted = txState && (txState.lastAttemptedAtMs + delayMs > Date.now())
+            const isOk = !txState || !recentlyAttempted
             if (!isOk) {
-              throw new Error('not ok')
+              throw new Error(`not ok, recently attempted: ${recentlyAttempted}`)
             }
 
             await db.txStateDb.putTxState(bundleId, {
@@ -71,8 +72,6 @@ export class Worker {
             })
 
             const provider = toChainId === 5 ? this.hop.providers.ethereum : this.hop.providers.optimism
-            console.log("HERE0000")
-            /*
             const tx = await signer?.connect(provider).sendTransaction({
               to: txData.to,
               data: txData.data
@@ -84,7 +83,7 @@ export class Worker {
               id: bundleId,
               transactionHash: tx?.hash
             })
-            */
+            console.log('updated txState', tx?.hash)
           }
         }
       } catch (err: any) {
