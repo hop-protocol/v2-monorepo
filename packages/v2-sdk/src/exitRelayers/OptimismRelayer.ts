@@ -1,17 +1,19 @@
 import { Contract, providers } from 'ethers'
-import { Watcher } from '@eth-optimism/core-utils'
+// import { Watcher } from '@eth-optimism/core-utils'
 import { getContractFactory, predeploys } from '@eth-optimism/contracts'
 import { getMessagesAndProofsForL2Transaction } from '@eth-optimism/message-relayer'
 
 const contractAddresses: Record<string, any> = {
+  // https://github.com/ethereum-optimism/optimism/tree/develop/packages/contracts/deployments/mainnet
   mainnet: {
     sccAddress: '0xBe5dAb4A2e9cd0F27300dB4aB94BeE3A233AEB19',
     l1MessengerAddress: '0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1',
     l2MessengerAddress: '0x4200000000000000000000000000000000000007'
   },
+  // https://github.com/ethereum-optimism/optimism/tree/develop/packages/contracts/deployments/goerli#readme
   goerli: {
-    sccAddress: '0xBe5dAb4A2e9cd0F27300dB4aB94BeE3A233AEB19',
-    l1MessengerAddress: '0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1',
+    sccAddress: '0x9c945aC97Baf48cB784AbBB61399beB71aF7A378',
+    l1MessengerAddress: '0x5086d1eEF304eb5284A0f6720f79403b4e9bE294',
     l2MessengerAddress: '0x4200000000000000000000000000000000000007'
   }
 }
@@ -22,7 +24,7 @@ export class OptimismRelayer {
   l2Provider: any
   l1Messenger: Contract
   scc: Contract
-  watcher: Watcher
+  // watcher: Watcher
 
   constructor (network: string = 'goerli', l1Provider: providers.Provider, l2Provider: providers.Provider) {
     this.network = network
@@ -30,8 +32,9 @@ export class OptimismRelayer {
     this.l2Provider = l2Provider
     const sccAddress = contractAddresses[this.network].sccAddress
     const l1MessengerAddress = contractAddresses[this.network].l1MessengerAddress
-    const l2MessengerAddress = contractAddresses[this.network].l2MessengerAddress
+    // const l2MessengerAddress = contractAddresses[this.network].l2MessengerAddress
 
+    /*
     this.watcher = new Watcher({
       l1: {
         provider: this.l1Provider,
@@ -42,11 +45,14 @@ export class OptimismRelayer {
         messengerAddress: l2MessengerAddress
       }
     })
+    */
 
     this.l1Messenger = getContractFactory('IL1CrossDomainMessenger')
-      .attach(this.watcher.l1.messengerAddress)
+      .attach(l1MessengerAddress)
+      .connect(this.l1Provider)
     this.scc = getContractFactory('IStateCommitmentChain')
       .attach(sccAddress)
+      .connect(this.l1Provider)
   }
 
   async getExitPopulatedTx (l2TxHash: string) {

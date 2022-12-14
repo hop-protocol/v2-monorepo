@@ -173,6 +173,20 @@ export class Hop {
     }
   }
 
+  getEventNames (): string[] {
+    return [
+      'BundleCommitted',
+      'BundleForwarded',
+      'BundleReceived',
+      'BundleSet',
+      'FeesSentToHub',
+      'MessageBundled',
+      'MessageRelayed',
+      'MessageReverted',
+      'MessageSent'
+    ]
+  }
+
   async hasAuctionStarted (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<boolean> {
     const { commitTime, toChainId } = bundleCommittedEvent
     const exitTime = await this.getSpokeExitTime(fromChainId, toChainId)
@@ -232,9 +246,14 @@ export class Hop {
     return shouldAttempt
   }
 
-  async getBundleExitPopulatedTx (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<any> {
-    const { _event, context } = bundleCommittedEvent
-    const transactionHash = _event.transactionHash ?? context?.transactionHash
+  async getBundleExitPopulatedTx (fromChainId: number, bundleCommittedEventOrTxHash: BundleCommitted | string): Promise<any> {
+    let transactionHash = ''
+    if (typeof bundleCommittedEventOrTxHash === 'string') {
+      transactionHash = bundleCommittedEventOrTxHash
+    } else {
+      const { _event, context } = bundleCommittedEventOrTxHash
+      transactionHash = _event.transactionHash ?? context?.transactionHash
+    }
     if (!transactionHash) {
       throw new Error('expected transaction hash')
     }

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
-import gnosisModule from '@web3-onboard/gnosis'
+// import gnosisModule from '@web3-onboard/gnosis'
 import { useInterval } from 'react-use'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -12,13 +12,15 @@ import { useQueryParams } from './hooks/useQueryParams'
 import Onboard from '@web3-onboard/core'
 import injectedModule from '@web3-onboard/injected-wallets'
 import { SendMessage } from './components/SendMessage'
+import { RelayBundle } from './components/RelayBundle'
+import { GetEvents } from './components/GetEvents'
 import { Hop } from '@hop-protocol/v2-sdk'
 
 const injected = injectedModule()
-const gnosis = gnosisModule()
+// const gnosis = gnosisModule()
 
 const onboard = Onboard({
-  wallets: [injected, gnosis],
+  wallets: [injected],
   chains: [
     {
       id: '0x1',
@@ -199,6 +201,12 @@ function App () {
       </Box>
       <Box>
         <SendMessage signer={wallet} sdk={sdk} />
+      </Box>
+      <Box>
+        <RelayBundle signer={wallet} sdk={sdk} />
+      </Box>
+      <Box>
+        <GetEvents signer={wallet} sdk={sdk} />
       </Box>
       {!!error && (
         <Box mb={4} style={{ maxWidth: '400px', wordBreak: 'break-word' }}>

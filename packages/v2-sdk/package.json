@@ -1,6 +1,6 @@
 {
   "name": "@hop-protocol/v2-sdk",
-  "version": "0.0.0-beta.0",
+  "version": "0.0.0-beta.1",
   "description": "The Hop Protocol v2 TypeScript SDK",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -32,10 +32,9 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@hop-protocol/v2-core": "0.0.0-beta.0",
     "@eth-optimism/contracts": "0.5.3",
-    "@eth-optimism/core-utils": "0.5.2",
-    "@eth-optimism/message-relayer": "0.2.4",
+    "@eth-optimism/message-relayer": "0.2.18",
+    "@hop-protocol/v2-core": "0.0.0-beta.0",
     "dotenv": "^16.0.3",
     "ethers": "5.7.1",
     "eventemitter3": "4.0.7",

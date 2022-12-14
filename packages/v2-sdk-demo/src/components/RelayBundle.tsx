@@ -7,28 +7,31 @@ import TextField from '@mui/material/TextField'
 import Textarea from '@mui/material/TextareaAutosize'
 import Checkbox from '@mui/material/Checkbox'
 import Typography from '@mui/material/Typography'
+const Buffer = require('buffer/').Buffer
+if (!(window as any).Buffer) {
+  (window as any).Buffer = Buffer
+}
 
 type Props = {
   signer: Signer
   sdk: any
 }
 
-export function SendMessage (props: Props) {
+export function RelayBundle (props: Props) {
   const { signer, sdk } = props
   const [fromChainId, setFromChainId] = useState('420')
-  const [toChainId, setToChainId] = useState('5')
-  const [toAddress, setToAddress] = useState('')
-  const [toCalldata, setToCalldata] = useState('')
+  const [bundleCommittedTxHash, setBundleCommittedTxHash] = useState('')
   const [txData, setTxData] = useState('')
   const [populateTxDataOnly, setPopulateTxDataOnly] = useState(true)
   const [txHash, setTxHash] = useState('')
 
   async function getSendTxData() {
     const args = [
-      Number(fromChainId), Number(toChainId), toAddress, toCalldata
+      Number(fromChainId),
+      bundleCommittedTxHash
     ]
     console.log('args', args)
-    const txData = await sdk.getSendMessagePopulatedTx(...args)
+    const txData = await sdk.getBundleExitPopulatedTx(fromChainId, bundleCommittedTxHash)
     return txData
   }
 
@@ -38,12 +41,11 @@ export function SendMessage (props: Props) {
       setTxData('')
       setTxHash('')
       const txData = await getSendTxData()
+      console.log('TX', txData)
       setTxData(JSON.stringify(txData, null, 2))
-      const fee = parseEther('0.000001')
       if (!populateTxDataOnly) {
         const tx = await signer.sendTransaction({
-          ...txData,
-          value: fee
+          ...txData
         })
         setTxHash(tx.hash)
       }
@@ -54,7 +56,7 @@ export function SendMessage (props: Props) {
 
   return (
     <Box>
-      <Typography variant="h5">Send Message</Typography>
+      <Typography variant="h5">Relay Bundle</Typography>
       <form onSubmit={handleSubmit}>
         <Box>
           <Box>
@@ -64,21 +66,9 @@ export function SendMessage (props: Props) {
         </Box>
         <Box>
           <Box>
-            <label>To Chain ID</label>
+            <label>From Chain Bundle Committed Tx Hash</label>
           </Box>
-          <TextField placeholder="5" value={toChainId} onChange={event => setToChainId(event.target.value)} />
-        </Box>
-        <Box>
-          <Box>
-            <label>To</label>
-          </Box>
-          <TextField placeholder="0x" value={toAddress} onChange={event => setToAddress(event.target.value)} />
-        </Box>
-        <Box>
-          <Box>
-            <label>Data</label>
-          </Box>
-          <Textarea cols={50} minRows={5} placeholder="0x" value={toCalldata} onChange={event => setToCalldata(event.target.value)} />
+          <TextField placeholder="0x" value={bundleCommittedTxHash} onChange={event => setBundleCommittedTxHash(event.target.value)} />
         </Box>
         <Box>
           <Box>

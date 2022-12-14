@@ -49,6 +49,7 @@ describe('sdk setup', () => {
     expect(events[0].toChainId).toBe(5)
     expect(events[0].commitTime).toBe(1670287396)
     expect(events[0].context).toBeTruthy()
+    expect(events[0].context?.transactionHash).toBe('0xed78039ec57b7f1bc882aa833c921d22f407363fc95834b670ae64f78f128fd4')
     expect(events[0]._event).toBeTruthy()
   }, 60 * 1000)
   it('getBundleForwardedEvents', async () => {
@@ -141,6 +142,20 @@ describe('sdk setup', () => {
     expect(events[0].data).toBe('0x')
     expect(events[0]._event).toBeTruthy()
   }, 60 * 1000)
+  it('getEventNames', async () => {
+    const hop = new Hop('goerli')
+    expect(hop.getEventNames()).toStrictEqual([
+      'BundleCommitted',
+      'BundleForwarded',
+      'BundleReceived',
+      'BundleSet',
+      'FeesSentToHub',
+      'MessageBundled',
+      'MessageRelayed',
+      'MessageReverted',
+      'MessageSent'
+    ])
+  }, 60 * 1000)
   it('getEstimatedTxCostForForwardMessage', async () => {
     const hop = new Hop('goerli')
     const endBlock = 3218900
@@ -176,7 +191,7 @@ describe('sdk setup', () => {
     console.log(shouldAttempt)
     expect(shouldAttempt).toBe(false)
   }, 60 * 1000)
-  it.skip('getRelayBundlePopulatedTx', async () => {
+  it('getRelayBundlePopulatedTx', async () => {
     const hop = new Hop('goerli')
     const chain = 'optimism'
     const fromChainId = 420
@@ -196,7 +211,6 @@ describe('sdk setup', () => {
         data: txData.data,
         value: '0'
       })
-      console.log(tx)
       expect(tx.hash).toBeTruthy()
     }
   }, 60 * 1000)
