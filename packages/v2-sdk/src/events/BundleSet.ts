@@ -29,7 +29,7 @@ export class BundleSetEventFetcher extends Event {
 
     const bundleId = decoded.args.bundleId.toString()
     const bundleRoot = decoded.args.bundleRoot.toString()
-    const fromChainId = decoded.args.toChainId.toNumber()
+    const fromChainId = decoded.args.fromChainId.toNumber()
 
     return {
       bundleId,

@@ -1,5 +1,6 @@
 import { Contract, providers } from 'ethers'
 // import { Watcher } from '@eth-optimism/core-utils'
+import { CrossChainMessenger, MessageStatus } from '@eth-optimism/sdk'
 import { getContractFactory, predeploys } from '@eth-optimism/contracts'
 import { getMessagesAndProofsForL2Transaction } from '@eth-optimism/message-relayer'
 
@@ -24,6 +25,7 @@ export class OptimismRelayer {
   l2Provider: any
   l1Messenger: Contract
   scc: Contract
+  csm: CrossChainMessenger
   // watcher: Watcher
 
   constructor (network: string = 'goerli', l1Provider: providers.Provider, l2Provider: providers.Provider) {
@@ -53,9 +55,33 @@ export class OptimismRelayer {
     this.scc = getContractFactory('IStateCommitmentChain')
       .attach(sccAddress)
       .connect(this.l1Provider)
+
+    this.csm = new CrossChainMessenger({
+      l1ChainId: 5,
+      l2ChainId: 420,
+      l1SignerOrProvider: l1Provider,
+      l2SignerOrProvider: l2Provider
+    })
   }
 
   async getExitPopulatedTx (l2TxHash: string) {
+    const messageStatus = await this.csm.getMessageStatus(l2TxHash)
+
+    if (messageStatus === MessageStatus.READY_FOR_RELAY) {
+      console.log('ready for relay')
+    } else {
+      console.log('status', messageStatus)
+      // throw new Error('not ready for relay')
+    }
+
+    const tx = await this.csm.populateTransaction.finalizeMessage(l2TxHash)
+
+    const tx1 = await this.getExitPopulatedTx2(l2TxHash)
+    console.log(JSON.stringify(tx1) === JSON.stringify(tx))
+    return tx
+  }
+
+  async getExitPopulatedTx2 (l2TxHash: string) {
     const messagePairs = await getMessagesAndProofsForL2Transaction(
       this.l1Provider,
       this.l2Provider,
@@ -67,6 +93,8 @@ export class OptimismRelayer {
     if (!messagePairs) {
       throw new Error('messagePairs not found')
     }
+
+    console.log('messagePairs', messagePairs.length)
 
     const { message, proof } = messagePairs[0]
     const inChallengeWindow = await this.scc.insideFraudProofWindow(proof.stateRootBatchHeader)

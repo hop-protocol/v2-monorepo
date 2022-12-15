@@ -20,15 +20,11 @@ import { formatEther, formatUnits } from 'ethers/lib/utils'
 import { getProvider } from './utils/getProvider'
 import { goerliAddresses } from '@hop-protocol/v2-core/addresses'
 
-const contractAddresses: Record<string, any> = {
-  mainnet: {},
-  goerli: goerliAddresses
-}
-
 const cache : Record<string, any> = {}
 
 type Options = {
-  batchBlocks?: number
+  batchBlocks?: number,
+  contractAddresses?: Record<string, any>
 }
 
 export class Hop {
@@ -36,6 +32,10 @@ export class Hop {
   providers: Record<string, providers.Provider>
   network: string
   batchBlocks?: number
+  contractAddresses: Record<string, any> = {
+    mainnet: {},
+    goerli: goerliAddresses
+  }
 
   constructor (network: string = 'goerli', options?: Options) {
     if (!['mainnet', 'goerli'].includes(network)) {
@@ -52,6 +52,10 @@ export class Hop {
     if (options?.batchBlocks) {
       this.batchBlocks = options.batchBlocks
     }
+
+    if (options?.contractAddresses) {
+      this.contractAddresses[network] = options.contractAddresses
+    }
   }
 
   get version () {
@@ -59,12 +63,12 @@ export class Hop {
   }
 
   getSpokeMessageBridgeContractAddress (chain: string): string {
-    const address = contractAddresses[this.network]?.[chain]?.spokeCoreMessenger
+    const address = this.contractAddresses[this.network]?.[chain]?.spokeCoreMessenger
     return address
   }
 
   getHubMessageBridgeContractAddress (chain: string): string {
-    const address = contractAddresses[this.network]?.[chain]?.hubCoreMessenger
+    const address = this.contractAddresses[this.network]?.[chain]?.hubCoreMessenger
     return address
   }
 
@@ -143,33 +147,67 @@ export class Hop {
     return eventFetcher.getEvents(startBlock, endBlock)
   }
 
-  async getEvents (eventName: string, chainId: number, startBlock: number, endBlock?: number): Promise<any[]> {
+  async getEvents (eventNames: string | string[], chainId: number, startBlock: number, endBlock?: number): Promise<any[]> {
     const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
     if (!provider) {
       throw new Error(`Invalid chain: ${chain}`)
     }
-    switch (eventName) {
-      case 'BundleCommitted':
-        return this.getBundleCommittedEvents(chainId, startBlock, endBlock)
-      case 'BundleForwarded':
-        return this.getBundleForwardedEvents(chainId, startBlock, endBlock)
-      case 'BundleReceived':
-        return this.getBundleReceivedEvents(chainId, startBlock, endBlock)
-      case 'BundleSet':
-        return this.getBundleSetEvents(chainId, startBlock, endBlock)
-      case 'FeesSentToHub':
-        return this.getFeesSentToHubEvents(chainId, startBlock, endBlock)
-      case 'MessageBundled':
-        return this.getMessageBundledEvents(chainId, startBlock, endBlock)
-      case 'MessageRelayed':
-        return this.getMessageRelayedEvents(chainId, startBlock, endBlock)
-      case 'MessageReverted':
-        return this.getMessageRevertedEvents(chainId, startBlock, endBlock)
-      case 'MessageSent':
-        return this.getMessageSentEvents(chainId, startBlock, endBlock)
-      default:
-        throw new Error(`Invalid event name: ${eventName}`)
+
+    if (Array.isArray(eventNames)) {
+      // TODO
+      /*
+      const filters :any[] = []
+      const eventFetcher = new EventFetcher({
+        provider
+      })
+      for (const eventName of eventNames) {
+        if (eventName === 'BundleCommitted') {
+          const address = this.getSpokeMessageBridgeContractAddress(chain)
+          const filter = {
+            address,
+            topics: [
+
+            ]
+          }
+        }
+        filters.push(filter)
+      }
+      const options = {
+        startBlock,
+        endBlock
+      }
+      const events = await eventFetcher.fetchEvents(filters, options)
+      const decoded : any[] = []
+      for (const event of events) {
+        decoded.push(event)
+      }
+      return decoded
+      */
+    } else {
+      const eventName = eventNames
+      switch (eventName) {
+        case 'BundleCommitted':
+          return this.getBundleCommittedEvents(chainId, startBlock, endBlock)
+        case 'BundleForwarded':
+          return this.getBundleForwardedEvents(chainId, startBlock, endBlock)
+        case 'BundleReceived':
+          return this.getBundleReceivedEvents(chainId, startBlock, endBlock)
+        case 'BundleSet':
+          return this.getBundleSetEvents(chainId, startBlock, endBlock)
+        case 'FeesSentToHub':
+          return this.getFeesSentToHubEvents(chainId, startBlock, endBlock)
+        case 'MessageBundled':
+          return this.getMessageBundledEvents(chainId, startBlock, endBlock)
+        case 'MessageRelayed':
+          return this.getMessageRelayedEvents(chainId, startBlock, endBlock)
+        case 'MessageReverted':
+          return this.getMessageRevertedEvents(chainId, startBlock, endBlock)
+        case 'MessageSent':
+          return this.getMessageSentEvents(chainId, startBlock, endBlock)
+        default:
+          throw new Error(`Invalid event name: ${eventName}`)
+      }
     }
   }
 
@@ -240,7 +278,7 @@ export class Hop {
   async shouldAttemptForwardMessage (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<boolean> {
     const estimatedTxCost = await this.getEstimatedTxCostForForwardMessage(fromChainId, bundleCommittedEvent)
     const relayReward = await this.getRelayReward(fromChainId, bundleCommittedEvent)
-    const txOk = relayReward > estimatedTxCost || relayReward > 0 // for testing
+    const txOk = relayReward > estimatedTxCost
     const timeOk = await this.hasAuctionStarted(fromChainId, bundleCommittedEvent)
     const shouldAttempt = txOk && timeOk
     return shouldAttempt
@@ -313,5 +351,28 @@ export class Hop {
   // reference: https://github.com/hop-protocol/contracts-v2/blob/cdc3377d6a1f964554ba0e6e1fef0b504d43fc6a/contracts/bridge/FeeDistributor/FeeDistributor.sol#L42
   getRelayWindowHours (): number {
     return 12
+  }
+
+  async getRouteData (fromChainId: number, toChainId: number) {
+    const chain = this.getChainSlug(fromChainId)
+    const provider = this.providers[chain]
+    const address = this.getSpokeMessageBridgeContractAddress(chain)
+    const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
+    const routeData = await spokeMessageBridge.routeData(toChainId)
+
+    return {
+      messageFee: routeData.messageFee,
+      maxBundleMessages: routeData.maxBundleMessages.toNumber()
+    }
+  }
+
+  async getMessageFee (fromChainId: number, toChainId: number) {
+    const routeData = await this.getRouteData(fromChainId, toChainId)
+    return routeData.messageFee
+  }
+
+  async getMaxBundleMessageCount (fromChainId: number, toChainId: number) {
+    const routeData = await this.getRouteData(fromChainId, toChainId)
+    return routeData.maxBundleMessages
   }
 }

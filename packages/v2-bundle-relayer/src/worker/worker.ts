@@ -48,8 +48,9 @@ export class Worker {
           console.log('checking shouldAttemp for bundle', bundleId)
           let shouldAttempt = await this.hop.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent as any)
 
-          const bundleForwardedEvent = await db.bundleForwardedEventsDb.getEvent(bundleId)
-          if (bundleForwardedEvent) {
+          const bundleSetEvent = await db.bundleSetEventsDb.getEvent(bundleId)
+          if (bundleSetEvent) {
+            console.log('found bundleSetEvent for bundle')
             shouldAttempt = false
           }
 
