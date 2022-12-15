@@ -6,8 +6,8 @@ import Button from '@mui/material/Button'
 import Alert from '@mui/material/Alert'
 import Typography from '@mui/material/Typography'
 import './App.css'
-import { Contract, BigNumber, providers, constants } from 'ethers'
-import { formatEther, formatUnits } from 'ethers/lib/utils'
+import { providers } from 'ethers'
+import { formatEther } from 'ethers/lib/utils'
 import { useQueryParams } from './hooks/useQueryParams'
 import Onboard from '@web3-onboard/core'
 import injectedModule from '@web3-onboard/injected-wallets'
@@ -18,9 +18,6 @@ import { Hop } from '@hop-protocol/v2-sdk'
 import Card from '@mui/material/Card'
 
 const Buffer = require('buffer/').Buffer
-if (!(window as any).Buffer) {
-  (window as any).Buffer = Buffer
-}
 
 const injected = injectedModule()
 // const gnosis = gnosisModule()
@@ -54,6 +51,11 @@ const onboard = Onboard({
     }
   ]
 })
+
+if (!(window as any).Buffer) {
+  ;(window as any).Buffer = Buffer
+  ;(window as any).onboard = onboard
+}
 
 function App () {
   // const { sdk, connected, safe } = useSafeAppsSDK()

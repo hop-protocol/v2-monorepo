@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Signer } from 'ethers'
+import { Signer, providers } from 'ethers'
 import { parseEther } from 'ethers/lib/utils'
 import Box from '@mui/material/Box'
 import LoadingButton from '@mui/lab/LoadingButton'
@@ -43,11 +43,21 @@ export function SendMessage (props: Props) {
       setLoading(true)
       const txData = await getSendTxData()
       setTxData(JSON.stringify(txData, null, 2))
-      const fee = parseEther('0.000001')
+      const fee = await sdk.getMessageFee(Number(fromChainId), Number(toChainId))
       if (!populateTxDataOnly) {
+        let _signer = signer
+        if (!_signer) {
+          const wallets = await onboard.connectWallet()
+          const ethersProvider = new providers.Web3Provider(
+            wallets[0].provider,
+            'any'
+          )
+          _signer = ethersProvider.getSigner()
+        }
+
         const success = await onboard.setChain({ chainId: Number(fromChainId) })
         if (success) {
-          const tx = await signer.sendTransaction({
+          const tx = await _signer.sendTransaction({
             ...txData,
             value: fee
           })

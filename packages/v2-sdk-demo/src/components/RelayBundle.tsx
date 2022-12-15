@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Signer } from 'ethers'
+import { Signer, providers } from 'ethers'
 import Box from '@mui/material/Box'
 import LoadingButton from '@mui/lab/LoadingButton'
 import TextField from '@mui/material/TextField'
@@ -41,9 +41,19 @@ export function RelayBundle (props: Props) {
       const txData = await getSendTxData()
       setTxData(JSON.stringify(txData, null, 2))
       if (!populateTxDataOnly) {
+        let _signer = signer
+        if (!_signer) {
+          const wallets = await onboard.connectWallet()
+          const ethersProvider = new providers.Web3Provider(
+            wallets[0].provider,
+            'any'
+          )
+          _signer = ethersProvider.getSigner()
+        }
+
         const success = await onboard.setChain({ chainId: Number(fromChainId) })
         if (success) {
-          const tx = await signer.sendTransaction({
+          const tx = await _signer.sendTransaction({
             ...txData
           })
           setTxHash(tx.hash)
