@@ -36,7 +36,7 @@ describe('sdk setup', () => {
     const hop = new Hop()
     expect(hop.version).toBe(pkg.version)
   })
-  it.only('getSendMessagePopulatedTx', async () => {
+  it('getSendMessagePopulatedTx', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
     })
@@ -48,7 +48,7 @@ describe('sdk setup', () => {
     expect(txData.data.startsWith('0x7056f41f')).toBe(true)
     // expect(txData.to).toBe('0x4b844c25EF430e71D42EEA89d87Ffe929f8db927')
     expect(txData.to).toBe('0xeA35E10f763ef2FD5634dF9Ce9ad00434813bddB')
-    const shouldSend = true
+    const shouldSend = false
     const times = 8
     if (shouldSend) {
       for (let i = 0; i < times; i++) {
