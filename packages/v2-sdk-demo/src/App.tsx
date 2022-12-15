@@ -177,7 +177,9 @@ function App () {
       <Box width="100%" mb={4} display="flex" justifyContent="space-between">
         <Box>
           <Typography variant="h4">
-            Hop v2 SDK Playground
+            <Box display="flex" justifyContent="center" alignItems="center">
+              <Box mr={1}><img width="32px" src="https://assets.hop.exchange/images/hop_logo.png" style={{ borderRadius: '50%' }}/></Box><Box>Hop v2 SDK Playground</Box>
+            </Box>
           </Typography>
         </Box>
         <Box>

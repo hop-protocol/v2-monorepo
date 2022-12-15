@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { Signer } from 'ethers'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
+import LoadingButton from '@mui/lab/LoadingButton'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { Hop } from '@hop-protocol/v2-sdk'
@@ -17,16 +17,15 @@ export function GetEvents (props: Props) {
   const [startBlock, setStartBlock] = useState('')
   const [endBlock, setEndBlock] = useState('')
   const [events, setEvents] = useState('')
+  const [loading, setLoading] = useState(false)
   const eventNames = useMemo(() => {
     return sdk?.getEventNames() ?? []
   }, [sdk])
   const [selectedEventName, setSelectedEventName] = useState(eventNames[0] || '')
 
   async function getEvents() {
-    if (!signer?.provider) {
-      return []
-    }
-    const latestBlock = await signer.provider.getBlockNumber()
+    const provider = sdk.providers[sdk.getChainSlug(Number(chainId))]
+    const latestBlock = await provider.getBlockNumber()
     let _startBlock = Number(startBlock)
     let _endBlock = Number(endBlock)
     if (latestBlock) {
@@ -59,11 +58,14 @@ export function GetEvents (props: Props) {
     event.preventDefault()
     try {
       setEvents('')
+      setLoading(true)
       const _events = await getEvents()
       setEvents(JSON.stringify(_events, null, 2))
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
+      alert(err.message)
     }
+    setLoading(false)
   }
 
   return (
@@ -103,16 +105,16 @@ export function GetEvents (props: Props) {
           <TextField fullWidth placeholder="0" value={endBlock} onChange={event => setEndBlock(event.target.value)} />
         </Box>
         <Box mb={2} display="flex" justifyContent="center">
-          <Button fullWidth type="submit" variant="contained" size="large">Get events</Button>
+          <LoadingButton loading={loading} fullWidth type="submit" variant="contained" size="large">Get events</LoadingButton>
         </Box>
       </form>
       <Box>
-        <Box>
+        {!!events && (
           <pre style={{
             maxWidth: '500px',
             overflow: 'auto'
           }}>{events}</pre>
-        </Box>
+        )}
       </Box>
     </Box>
   )

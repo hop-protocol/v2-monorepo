@@ -425,9 +425,15 @@ export class Hop {
     }
   }
 
-  async getSendMessagePopulatedTx (fromChainId: number, toChainId: number, toAddress: string, toCalldata: string): Promise<any> {
+  async getSendMessagePopulatedTx (fromChainId: number, toChainId: number, toAddress: string, toCalldata: string = '0x'): Promise<any> {
     if (fromChainId === toChainId) {
       throw new Error('fromChainId and toChainId must be different')
+    }
+    if (!toAddress) {
+      throw new Error('toAddress is required')
+    }
+    if (!toCalldata) {
+      toCalldata = '0x'
     }
     const fromChainSlug = this.getChainSlug(fromChainId)
     const provider = this.providers[fromChainSlug]
@@ -436,6 +442,9 @@ export class Hop {
     }
 
     const address = this.getSpokeMessageBridgeContractAddress(fromChainSlug)
+    if (!address) {
+      throw new Error(`Invalid address: ${fromChainSlug}`)
+    }
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
     const txData = await spokeMessageBridge.populateTransaction.sendMessage(toChainId, toAddress, toCalldata)
 

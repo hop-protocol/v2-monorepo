@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Signer } from 'ethers'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
+import LoadingButton from '@mui/lab/LoadingButton'
 import TextField from '@mui/material/TextField'
 import Checkbox from '@mui/material/Checkbox'
 import Typography from '@mui/material/Typography'
@@ -20,6 +20,7 @@ export function RelayBundle (props: Props) {
   const [txData, setTxData] = useState('')
   const [populateTxDataOnly, setPopulateTxDataOnly] = useState(true)
   const [txHash, setTxHash] = useState('')
+  const [loading, setLoading] = useState(false)
 
   async function getSendTxData() {
     const args = [
@@ -36,21 +37,23 @@ export function RelayBundle (props: Props) {
     try {
       setTxData('')
       setTxHash('')
+      setLoading(true)
       const txData = await getSendTxData()
       setTxData(JSON.stringify(txData, null, 2))
       if (!populateTxDataOnly) {
         const success = await onboard.setChain({ chainId: Number(fromChainId) })
-        if (!success) {
-          return
+        if (success) {
+          const tx = await signer.sendTransaction({
+            ...txData
+          })
+          setTxHash(tx.hash)
         }
-        const tx = await signer.sendTransaction({
-          ...txData
-        })
-        setTxHash(tx.hash)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
+      alert(err.message)
     }
+    setLoading(false)
   }
 
   return (
@@ -78,13 +81,18 @@ export function RelayBundle (props: Props) {
           </Box>
         </Box>
         <Box mb={2} display="flex" justifyContent="center">
-          <Button fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</Button>
+          <LoadingButton loading={loading} fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</LoadingButton>
         </Box>
       </form>
       <Box>
-        <Box>
-          <textarea readOnly value={txData} />
-        </Box>
+        {!!txData && (
+          <pre style={{
+            maxWidth: '500px',
+            overflow: 'auto'
+          }}>
+            {txData}
+          </pre>
+        )}
         {!!txHash && (
           <Box>
             tx hash: {txHash}
