@@ -68,10 +68,12 @@ export function GetEvents (props: Props) {
 
   return (
     <Box>
-      <Typography variant="h5">Get Events</Typography>
+      <Box mb={4}>
+        <Typography variant="h5">Get Events</Typography>
+      </Box>
       <form onSubmit={handleSubmit}>
-        <Box>
-          <Box>
+        <Box mb={2}>
+          <Box mb={1}>
             <label>Event name</label>
           </Box>
           <select onChange={event => setSelectedEventName(event.target.value)}>
@@ -82,25 +84,27 @@ export function GetEvents (props: Props) {
             })}
           </select>
         </Box>
-        <Box>
-          <Box>
-            <label>Chain ID</label>
+        <Box mb={2}>
+          <Box mb={1}>
+            <label>Chain ID <small><em>(number)</em></small></label>
           </Box>
-          <TextField placeholder="420" value={chainId} onChange={event => setChainId(event.target.value)} />
+          <TextField fullWidth placeholder="420" value={chainId} onChange={event => setChainId(event.target.value)} />
         </Box>
-        <Box>
-          <Box>
-            <label>Start block</label>
+        <Box mb={2}>
+          <Box mb={1}>
+            <label>Start block <small><em>(number)</em></small></label>
           </Box>
-          <TextField placeholder="0" value={startBlock} onChange={event => setStartBlock(event.target.value)} />
+          <TextField fullWidth placeholder="0" value={startBlock} onChange={event => setStartBlock(event.target.value)} />
         </Box>
-        <Box>
-          <Box>
-            <label>End block</label>
+        <Box mb={2}>
+          <Box mb={1}>
+            <label>End block <small><em>(number)</em></small></label>
           </Box>
-          <TextField placeholder="0" value={endBlock} onChange={event => setEndBlock(event.target.value)} />
+          <TextField fullWidth placeholder="0" value={endBlock} onChange={event => setEndBlock(event.target.value)} />
         </Box>
-        <Button type="submit">Get events</Button>
+        <Box mb={2} display="flex" justifyContent="center">
+          <Button fullWidth type="submit" variant="contained" size="large">Get events</Button>
+        </Box>
       </form>
       <Box>
         <Box>

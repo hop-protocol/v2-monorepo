@@ -15,6 +15,7 @@ import { SendMessage } from './components/SendMessage'
 import { RelayBundle } from './components/RelayBundle'
 import { GetEvents } from './components/GetEvents'
 import { Hop } from '@hop-protocol/v2-sdk'
+import Card from '@mui/material/Card'
 
 const Buffer = require('buffer/').Buffer
 if (!(window as any).Buffer) {
@@ -169,49 +170,69 @@ function App () {
     }
   }
 
+  const showAccountInfo = false
+
   return (
-    <Box width="400px" p={4} m="0 auto" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-      <Box mb={4}>
-        <Typography variant="h4">
-          Hop v2 SDK Demo
-        </Typography>
-      </Box>
-      <Box mb={4} display="flex" flexDirection="column">
-        {!!address && (
-            <Box mb={2} display="flex">
-              <Typography variant="body2">
-                account address: {address}
-              </Typography>
+    <Box p={4} m="0 auto" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
+      <Box width="100%" mb={4} display="flex" justifyContent="space-between">
+        <Box>
+          <Typography variant="h4">
+            Hop v2 SDK Playground
+          </Typography>
+        </Box>
+        <Box>
+          {!address && (
+            <Box>
+              <Button onClick={connect} variant="contained">Connect</Button>
             </Box>
-        )}
-        {!!address && (
-          <Box mb={2}>
-            <Typography variant="body2">
-              account balance: <span>{balance} ETH</span>
-            </Typography>
-          </Box>
-        )}
-        {!address && (
-          <Box mb={4}>
-            <Button onClick={connect} variant="contained">Connect</Button>
-          </Box>
-        )}
-        {!!address && (
-          <Box mb={4}>
-            <Box mb={2}>
+          )}
+          {!!address && (
+            <Box>
               <Button onClick={disconnect}>disconnect</Button>
             </Box>
-          </Box>
-        )}
+          )}
+        </Box>
       </Box>
-      <Box>
-        <SendMessage signer={wallet} sdk={sdk} onboard={onboard} />
-      </Box>
-      <Box>
-        <RelayBundle signer={wallet} sdk={sdk} onboard={onboard} />
-      </Box>
-      <Box>
-        <GetEvents signer={wallet} sdk={sdk} />
+      {showAccountInfo && (
+        <Box mb={4} display="flex" flexDirection="column">
+          {!!address && (
+              <Box mb={2} display="flex">
+                <Typography variant="body2">
+                  account address: {address}
+                </Typography>
+              </Box>
+          )}
+          {!!address && (
+            <Box mb={2}>
+              <Typography variant="body2">
+                account balance: <span>{balance} ETH</span>
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      )}
+      <Box display="flex" flexWrap="wrap">
+        <Box m={2}>
+          <Card>
+            <Box p={4} minWidth="400px">
+              <SendMessage signer={wallet} sdk={sdk} onboard={onboard} />
+            </Box>
+          </Card>
+        </Box>
+        <Box m={2}>
+          <Card>
+            <Box p={4} minWidth="400px">
+              <RelayBundle signer={wallet} sdk={sdk} onboard={onboard} />
+            </Box>
+          </Card>
+        </Box>
+        <Box m={2}>
+          <Card>
+            <Box p={4} minWidth="400px">
+              <GetEvents signer={wallet} sdk={sdk} />
+            </Box>
+          </Card>
+        </Box>
       </Box>
       {!!error && (
         <Box mb={4} style={{ maxWidth: '400px', wordBreak: 'break-word' }}>

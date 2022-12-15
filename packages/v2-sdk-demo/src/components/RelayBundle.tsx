@@ -55,27 +55,31 @@ export function RelayBundle (props: Props) {
 
   return (
     <Box>
-      <Typography variant="h5">Relay Bundle</Typography>
+      <Box mb={4}>
+        <Typography variant="h5">Relay Bundle</Typography>
+      </Box>
       <form onSubmit={handleSubmit}>
-        <Box>
-          <Box>
-            <label>From Chain ID</label>
+        <Box mb={2}>
+          <Box mb={1}>
+            <label>From Chain ID <small><em>(number)</em></small></label>
           </Box>
-          <TextField placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />
+          <TextField fullWidth placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />
         </Box>
-        <Box>
-          <Box>
-            <label>From Chain Bundle Committed Tx Hash</label>
+        <Box mb={2}>
+          <Box mb={1}>
+            <label>From Chain Bundle Committed Tx Hash <small><em>(hex string)</em></small></label>
           </Box>
-          <TextField placeholder="0x" value={bundleCommittedTxHash} onChange={event => setBundleCommittedTxHash(event.target.value)} />
+          <TextField fullWidth placeholder="0x" value={bundleCommittedTxHash} onChange={event => setBundleCommittedTxHash(event.target.value)} />
         </Box>
-        <Box>
-          <Box>
+        <Box mb={2}>
+          <Box mb={1}>
+            <Checkbox onChange={event => setPopulateTxDataOnly(event.target.checked)} checked={populateTxDataOnly} />
             <label>Populate Tx Only</label>
           </Box>
-          <Checkbox onChange={event => setPopulateTxDataOnly(event.target.checked)} checked={populateTxDataOnly} />
         </Box>
-        <Button type="submit">Send</Button>
+        <Box mb={2} display="flex" justifyContent="center">
+          <Button fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</Button>
+        </Box>
       </form>
       <Box>
         <Box>

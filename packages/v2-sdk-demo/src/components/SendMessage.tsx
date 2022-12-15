@@ -60,39 +60,43 @@ export function SendMessage (props: Props) {
 
   return (
     <Box>
-      <Typography variant="h5">Send Message</Typography>
+      <Box mb={4}>
+        <Typography variant="h5">Send Message</Typography>
+      </Box>
       <form onSubmit={handleSubmit}>
-        <Box>
-          <Box>
-            <label>From Chain ID</label>
+        <Box mb={2}>
+          <Box mb={1}>
+            <label>From Chain ID <small><em>(number)</em></small></label>
           </Box>
-          <TextField placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />
+          <TextField fullWidth placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />
         </Box>
-        <Box>
-          <Box>
-            <label>To Chain ID</label>
+        <Box mb={2}>
+          <Box mb={1}>
+            <label>To Chain ID <small><em>(number)</em></small></label>
           </Box>
-          <TextField placeholder="5" value={toChainId} onChange={event => setToChainId(event.target.value)} />
+          <TextField fullWidth placeholder="5" value={toChainId} onChange={event => setToChainId(event.target.value)} />
         </Box>
-        <Box>
-          <Box>
-            <label>To</label>
+        <Box mb={2}>
+          <Box mb={1}>
+            <label>To <small><em>(address)</em></small></label>
           </Box>
-          <TextField placeholder="0x" value={toAddress} onChange={event => setToAddress(event.target.value)} />
+          <TextField fullWidth placeholder="0x" value={toAddress} onChange={event => setToAddress(event.target.value)} />
         </Box>
-        <Box>
-          <Box>
-            <label>Data</label>
+        <Box mb={2}>
+          <Box mb={1}>
+            <label>Data <small><em>(hex string)</em></small></label>
           </Box>
-          <Textarea cols={50} minRows={5} placeholder="0x" value={toCalldata} onChange={event => setToCalldata(event.target.value)} />
+          <Textarea minRows={5} placeholder="0x" value={toCalldata} onChange={event => setToCalldata(event.target.value)} style={{ width: '100%' }} />
         </Box>
-        <Box>
+        <Box mb={2}>
           <Box>
+            <Checkbox onChange={event => setPopulateTxDataOnly(event.target.checked)} checked={populateTxDataOnly} />
             <label>Populate Tx Only</label>
           </Box>
-          <Checkbox onChange={event => setPopulateTxDataOnly(event.target.checked)} checked={populateTxDataOnly} />
         </Box>
-        <Button type="submit">Send</Button>
+        <Box mb={2} display="flex" justifyContent="center">
+          <Button fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</Button>
+        </Box>
       </form>
       <Box>
         <Box>

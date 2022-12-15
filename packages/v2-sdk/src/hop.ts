@@ -426,6 +426,9 @@ export class Hop {
   }
 
   async getSendMessagePopulatedTx (fromChainId: number, toChainId: number, toAddress: string, toCalldata: string): Promise<any> {
+    if (fromChainId === toChainId) {
+      throw new Error('fromChainId and toChainId must be different')
+    }
     const fromChainSlug = this.getChainSlug(fromChainId)
     const provider = this.providers[fromChainSlug]
     if (!provider) {
@@ -485,6 +488,9 @@ export class Hop {
   }
 
   async getRouteData (fromChainId: number, toChainId: number) {
+    if (fromChainId === toChainId) {
+      throw new Error('fromChainId and toChainId must be different')
+    }
     const chain = this.getChainSlug(fromChainId)
     const provider = this.providers[chain]
     const address = this.getSpokeMessageBridgeContractAddress(chain)
@@ -498,11 +504,17 @@ export class Hop {
   }
 
   async getMessageFee (fromChainId: number, toChainId: number) {
+    if (fromChainId === toChainId) {
+      throw new Error('fromChainId and toChainId must be different')
+    }
     const routeData = await this.getRouteData(fromChainId, toChainId)
     return routeData.messageFee
   }
 
   async getMaxBundleMessageCount (fromChainId: number, toChainId: number) {
+    if (fromChainId === toChainId) {
+      throw new Error('fromChainId and toChainId must be different')
+    }
     const routeData = await this.getRouteData(fromChainId, toChainId)
     return routeData.maxBundleMessages
   }
