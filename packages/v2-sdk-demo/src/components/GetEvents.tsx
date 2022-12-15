@@ -4,10 +4,11 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import { Hop } from '@hop-protocol/v2-sdk'
 
 type Props = {
   signer: Signer
-  sdk: any
+  sdk: Hop
 }
 
 export function GetEvents (props: Props) {
@@ -48,7 +49,7 @@ export function GetEvents (props: Props) {
       Number(chainId),
       _startBlock,
       _endBlock
-    ]
+    ] as const
     console.log('args', args)
     const _events = await sdk.getEvents(...args)
     return _events

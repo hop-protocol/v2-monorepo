@@ -63,95 +63,212 @@ export class Hop {
   }
 
   getSpokeMessageBridgeContractAddress (chain: string): string {
+    if (!chain) {
+      throw new Error('chain is required')
+    }
     const address = this.contractAddresses[this.network]?.[chain]?.spokeCoreMessenger
     return address
   }
 
   getHubMessageBridgeContractAddress (chain: string): string {
+    if (!chain) {
+      throw new Error('chain is required')
+    }
     const address = this.contractAddresses[this.network]?.[chain]?.hubCoreMessenger
     return address
   }
 
   async getBundleCommittedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleCommitted[]> {
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    if (!startBlock) {
+      throw new Error('startBlock is required')
+    }
     const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${chainId}`)
+    }
     const address = this.getSpokeMessageBridgeContractAddress(chain)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${chainId}`)
+    }
     const eventFetcher = new BundleCommittedEventFetcher(provider, chainId, this.batchBlocks, address)
     return eventFetcher.getEvents(startBlock, endBlock)
   }
 
   async getBundleForwardedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleForwarded[]> {
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    if (!startBlock) {
+      throw new Error('startBlock is required')
+    }
     const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${chainId}`)
+    }
     const address = this.getHubMessageBridgeContractAddress(chain)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${chainId}`)
+    }
     const eventFetcher = new BundleForwardedEventFetcher(provider, chainId, this.batchBlocks, address)
     return eventFetcher.getEvents(startBlock, endBlock)
   }
 
   async getBundleReceivedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleReceived[]> {
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    if (!startBlock) {
+      throw new Error('startBlock is required')
+    }
     const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${chainId}`)
+    }
     const address = this.getHubMessageBridgeContractAddress(chain)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${chainId}`)
+    }
     const eventFetcher = new BundleReceivedEventFetcher(provider, chainId, this.batchBlocks, address)
     return eventFetcher.getEvents(startBlock, endBlock)
   }
 
   async getBundleSetEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleSet[]> {
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    if (!startBlock) {
+      throw new Error('startBlock is required')
+    }
     const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${chainId}`)
+    }
     const address = this.getHubMessageBridgeContractAddress(chain)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${chainId}`)
+    }
     const eventFetcher = new BundleSetEventFetcher(provider, chainId, this.batchBlocks, address)
     return eventFetcher.getEvents(startBlock, endBlock)
   }
 
   async getFeesSentToHubEvents (chainId: number, startBlock: number, endBlock?: number): Promise<FeesSentToHub[]> {
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    if (!startBlock) {
+      throw new Error('startBlock is required')
+    }
     const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${chainId}`)
+    }
     const address = this.getSpokeMessageBridgeContractAddress(chain)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${chainId}`)
+    }
     const eventFetcher = new FeesSentToHubEventFetcher(provider, chainId, this.batchBlocks, address)
     return eventFetcher.getEvents(startBlock, endBlock)
   }
 
   async getMessageBundledEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageBundled[]> {
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    if (!startBlock) {
+      throw new Error('startBlock is required')
+    }
     const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${chainId}`)
+    }
     const address = this.getSpokeMessageBridgeContractAddress(chain)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${chainId}`)
+    }
     const eventFetcher = new MessageBundledEventFetcher(provider, chainId, this.batchBlocks, address)
     return eventFetcher.getEvents(startBlock, endBlock)
   }
 
   async getMessageRelayedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageRelayed[]> {
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    if (!startBlock) {
+      throw new Error('startBlock is required')
+    }
     const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${chainId}`)
+    }
     const address = this.getSpokeMessageBridgeContractAddress(chain)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${chainId}`)
+    }
     const eventFetcher = new MessageRelayedEventFetcher(provider, chainId, this.batchBlocks, address)
     return eventFetcher.getEvents(startBlock, endBlock)
   }
 
   async getMessageRevertedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageReverted[]> {
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    if (!startBlock) {
+      throw new Error('startBlock is required')
+    }
     const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${chainId}`)
+    }
     const address = this.getSpokeMessageBridgeContractAddress(chain)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${chainId}`)
+    }
     const eventFetcher = new MessageRevertedEventFetcher(provider, chainId, this.batchBlocks, address)
     return eventFetcher.getEvents(startBlock, endBlock)
   }
 
   async getMessageSentEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageSent[]> {
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    if (!startBlock) {
+      throw new Error('startBlock is required')
+    }
     const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
     if (!provider) {
-      throw new Error(`Invalid chain: ${chain}`)
+      throw new Error(`Provider not found for chainId: ${chainId}`)
     }
     const address = this.getSpokeMessageBridgeContractAddress(chain)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${chainId}`)
+    }
     const eventFetcher = new MessageSentEventFetcher(provider, chainId, this.batchBlocks, address)
     return eventFetcher.getEvents(startBlock, endBlock)
   }
 
   async getEvents (eventNames: string | string[], chainId: number, startBlock: number, endBlock?: number): Promise<any[]> {
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    if (!startBlock) {
+      throw new Error('startBlock is required')
+    }
     const chain = this.getChainSlug(chainId)
     const provider = this.providers[chain]
     if (!provider) {
-      throw new Error(`Invalid chain: ${chain}`)
+      throw new Error(`Provider not found for chainId: ${chainId}`)
     }
 
     if (Array.isArray(eventNames)) {
@@ -288,6 +405,9 @@ export class Hop {
     let transactionHash = ''
     if (typeof bundleCommittedEventOrTxHash === 'string') {
       transactionHash = bundleCommittedEventOrTxHash
+      if (!this.isValidTxHash(transactionHash)) {
+        throw new Error(`Invalid transaction hash: ${transactionHash}`)
+      }
     } else {
       const { _event, context } = bundleCommittedEventOrTxHash
       transactionHash = _event.transactionHash ?? context?.transactionHash
@@ -295,8 +415,14 @@ export class Hop {
     if (!transactionHash) {
       throw new Error('expected transaction hash')
     }
+
     const exitRelayer = new OptimismRelayer(this.network, this.providers.ethereum, this.providers.optimism)
-    return exitRelayer.getExitPopulatedTx(transactionHash)
+    const txData = await exitRelayer.getExitPopulatedTx(transactionHash)
+
+    return {
+      ...txData,
+      chainId: fromChainId
+    }
   }
 
   async getSendMessagePopulatedTx (fromChainId: number, toChainId: number, toAddress: string, toCalldata: string): Promise<any> {
@@ -305,10 +431,15 @@ export class Hop {
     if (!provider) {
       throw new Error(`Invalid chain: ${fromChainId}`)
     }
+
     const address = this.getSpokeMessageBridgeContractAddress(fromChainSlug)
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
     const txData = await spokeMessageBridge.populateTransaction.sendMessage(toChainId, toAddress, toCalldata)
-    return txData
+
+    return {
+      ...txData,
+      chainId: fromChainId
+    }
   }
 
   async getEventContext (event: any, chainId: number): Promise<EventContext> {
@@ -374,5 +505,9 @@ export class Hop {
   async getMaxBundleMessageCount (fromChainId: number, toChainId: number) {
     const routeData = await this.getRouteData(fromChainId, toChainId)
     return routeData.maxBundleMessages
+  }
+
+  isValidTxHash (txHash: string): boolean {
+    return txHash.slice(0, 2) === '0x' && txHash.length === 66
   }
 }

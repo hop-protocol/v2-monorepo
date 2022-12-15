@@ -7,14 +7,16 @@ import TextField from '@mui/material/TextField'
 import Textarea from '@mui/material/TextareaAutosize'
 import Checkbox from '@mui/material/Checkbox'
 import Typography from '@mui/material/Typography'
+import { Hop } from '@hop-protocol/v2-sdk'
 
 type Props = {
   signer: Signer
-  sdk: any
+  sdk: Hop
+  onboard: any
 }
 
 export function SendMessage (props: Props) {
-  const { signer, sdk } = props
+  const { signer, sdk, onboard } = props
   const [fromChainId, setFromChainId] = useState('420')
   const [toChainId, setToChainId] = useState('5')
   const [toAddress, setToAddress] = useState('')
@@ -26,7 +28,7 @@ export function SendMessage (props: Props) {
   async function getSendTxData() {
     const args = [
       Number(fromChainId), Number(toChainId), toAddress, toCalldata
-    ]
+    ] as const
     console.log('args', args)
     const txData = await sdk.getSendMessagePopulatedTx(...args)
     return txData
@@ -41,6 +43,10 @@ export function SendMessage (props: Props) {
       setTxData(JSON.stringify(txData, null, 2))
       const fee = parseEther('0.000001')
       if (!populateTxDataOnly) {
+        const success = await onboard.setChain({ chainId: Number(fromChainId) })
+        if (!success) {
+          return
+        }
         const tx = await signer.sendTransaction({
           ...txData,
           value: fee

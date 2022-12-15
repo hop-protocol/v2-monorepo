@@ -1,24 +1,20 @@
 import React, { useState } from 'react'
 import { Signer } from 'ethers'
-import { parseEther } from 'ethers/lib/utils'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
-import Textarea from '@mui/material/TextareaAutosize'
 import Checkbox from '@mui/material/Checkbox'
 import Typography from '@mui/material/Typography'
-const Buffer = require('buffer/').Buffer
-if (!(window as any).Buffer) {
-  (window as any).Buffer = Buffer
-}
+import { Hop } from '@hop-protocol/v2-sdk'
 
 type Props = {
   signer: Signer
-  sdk: any
+  sdk: Hop
+  onboard: any
 }
 
 export function RelayBundle (props: Props) {
-  const { signer, sdk } = props
+  const { signer, sdk, onboard } = props
   const [fromChainId, setFromChainId] = useState('420')
   const [bundleCommittedTxHash, setBundleCommittedTxHash] = useState('')
   const [txData, setTxData] = useState('')
@@ -29,9 +25,9 @@ export function RelayBundle (props: Props) {
     const args = [
       Number(fromChainId),
       bundleCommittedTxHash
-    ]
+    ] as const
     console.log('args', args)
-    const txData = await sdk.getBundleExitPopulatedTx(fromChainId, bundleCommittedTxHash)
+    const txData = await sdk.getBundleExitPopulatedTx(...args)
     return txData
   }
 
@@ -41,9 +37,12 @@ export function RelayBundle (props: Props) {
       setTxData('')
       setTxHash('')
       const txData = await getSendTxData()
-      console.log('TX', txData)
       setTxData(JSON.stringify(txData, null, 2))
       if (!populateTxDataOnly) {
+        const success = await onboard.setChain({ chainId: Number(fromChainId) })
+        if (!success) {
+          return
+        }
         const tx = await signer.sendTransaction({
           ...txData
         })

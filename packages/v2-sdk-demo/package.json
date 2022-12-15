@@ -26,7 +26,8 @@
     "react-use": "^17.4.0",
     "typescript": "^4.7.3",
     "wait": "^0.4.2",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "zlib": "^1.0.5"
   },
   "devDependencies": {
     "@types/react-dom": "^18.0.5",

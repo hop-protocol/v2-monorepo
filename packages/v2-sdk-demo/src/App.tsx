@@ -16,6 +16,11 @@ import { RelayBundle } from './components/RelayBundle'
 import { GetEvents } from './components/GetEvents'
 import { Hop } from '@hop-protocol/v2-sdk'
 
+const Buffer = require('buffer/').Buffer
+if (!(window as any).Buffer) {
+  (window as any).Buffer = Buffer
+}
+
 const injected = injectedModule()
 // const gnosis = gnosisModule()
 
@@ -200,10 +205,10 @@ function App () {
         )}
       </Box>
       <Box>
-        <SendMessage signer={wallet} sdk={sdk} />
+        <SendMessage signer={wallet} sdk={sdk} onboard={onboard} />
       </Box>
       <Box>
-        <RelayBundle signer={wallet} sdk={sdk} />
+        <RelayBundle signer={wallet} sdk={sdk} onboard={onboard} />
       </Box>
       <Box>
         <GetEvents signer={wallet} sdk={sdk} />
