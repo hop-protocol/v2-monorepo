@@ -44,7 +44,7 @@ export class BundleCommittedEventFetcher extends Event {
       bundleRoot,
       bundleFees,
       toChainId,
-      commitTime,
+      commitTime
     }
   }
 }

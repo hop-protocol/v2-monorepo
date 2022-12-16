@@ -193,12 +193,19 @@ function App () {
   return (
     <Box p={4} m="0 auto" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
       <Box width="100%" mb={4} display="flex" justifyContent="space-between">
-        <Box>
-          <Typography variant="h4">
-            <Box display="flex" justifyContent="center" alignItems="center">
-              <Box mr={1}><img width="32px" src="https://assets.hop.exchange/images/hop_logo.png" style={{ borderRadius: '50%' }}/></Box><Box>Hop v2 SDK Playground</Box>
-            </Box>
-          </Typography>
+        <Box display="flex" justifyItems="center" alignItems="center">
+          <Box>
+            <Typography variant="h4">
+              <Box display="flex" justifyContent="center" alignItems="center">
+                <Box mr={1}><img width="32px" src="https://assets.hop.exchange/images/hop_logo.png" style={{ borderRadius: '50%' }}/></Box><Box>Hop v2 SDK Playground</Box>
+              </Box>
+            </Typography>
+          </Box>
+          <Box ml={2}>
+            <Typography variant="subtitle1">
+              Goerli
+            </Typography>
+          </Box>
         </Box>
         <Box>
           {!address && (

@@ -103,7 +103,12 @@ export function RelayBundle (props: Props) {
   }
 
   const code = `
+${populateTxDataOnly ? `
 import { Hop } from '@hop-protocol/v2-sdk'
+`.trim() : `
+import { Hop } from '@hop-protocol/v2-sdk'
+import { ethers } from 'ethers'
+`.trim()}
 
 async function main() {
   const fromChainId = ${fromChainId || 'undefined'}
@@ -115,6 +120,8 @@ async function main() {
   'console.log(txData)'
   ) : (
   `
+  const provider = new ethers.providers.Web3Provider(window.ethereum, 'any')
+  const signer = provider.getSigner()
   const tx = await signer.sendTransaction(txData)
   console.log(tx)
   `.trim()
