@@ -232,27 +232,33 @@ function App () {
           )}
         </Box>
       )}
-      <Box mb={6} display="flex" flexWrap="wrap">
-        <Box m={2}>
-          <Card>
-            <Box p={4} minWidth="400px">
-              <SendMessage signer={wallet} sdk={sdk} onboard={onboard} />
-            </Box>
-          </Card>
+      <Box width="100%" mb={6} display="flex" flexDirection="column">
+        <Box mb={8}>
+          <Box maxWidth="1400px" m="0 auto">
+            <Card>
+              <Box p={4} minWidth="400px">
+                <SendMessage signer={wallet} sdk={sdk} onboard={onboard} />
+              </Box>
+            </Card>
+          </Box>
         </Box>
-        <Box m={2}>
-          <Card>
-            <Box p={4} minWidth="400px">
-              <RelayBundle signer={wallet} sdk={sdk} onboard={onboard} />
-            </Box>
-          </Card>
+        <Box mb={8}>
+          <Box maxWidth="1400px" m="0 auto">
+            <Card>
+              <Box p={4} minWidth="400px">
+                <RelayBundle signer={wallet} sdk={sdk} onboard={onboard} />
+              </Box>
+            </Card>
+          </Box>
         </Box>
-        <Box m={2}>
-          <Card>
-            <Box p={4} minWidth="400px">
-              <GetEvents signer={wallet} sdk={sdk} />
-            </Box>
-          </Card>
+        <Box mb={8}>
+          <Box maxWidth="1400px" m="0 auto">
+            <Card>
+              <Box p={4} minWidth="400px">
+                <GetEvents signer={wallet} sdk={sdk} />
+              </Box>
+            </Card>
+          </Box>
         </Box>
       </Box>
       {!!error && (

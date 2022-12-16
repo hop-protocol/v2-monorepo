@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Signer, providers } from 'ethers'
-import { parseEther } from 'ethers/lib/utils'
 import Box from '@mui/material/Box'
 import LoadingButton from '@mui/lab/LoadingButton'
 import TextField from '@mui/material/TextField'
@@ -8,6 +7,7 @@ import Textarea from '@mui/material/TextareaAutosize'
 import Checkbox from '@mui/material/Checkbox'
 import Typography from '@mui/material/Typography'
 import { Hop } from '@hop-protocol/v2-sdk'
+import { Syntax } from './Syntax'
 
 type Props = {
   signer: Signer
@@ -71,60 +71,102 @@ export function SendMessage (props: Props) {
     setLoading(false)
   }
 
+  const code = `
+import { Hop } from '@hop-protocol/v2-sdk'
+
+async function main() {
+  const fromChainId = ${fromChainId || 'undefined'}
+  const toChainId = ${toChainId || 'undefined'}
+  const toAddress = "${toAddress}"
+  const toCalldata = "${toCalldata}"
+
+  const hop = new Hop('goerli')
+  const txData = await hop.getSendMessagePopulatedTx(fromChainId, toChainId, toAddress, toCalldata)
+  ${populateTxDataOnly ? (
+  'console.log(txData)'
+  ) : (
+  `
+  const fee = await hop.getMessageFee(fromChainId, toChainId)
+  const tx = await signer.sendTransaction({
+    ...txData,
+    value: fee
+  })
+  console.log(tx)
+  `.trim()
+  )}
+}
+
+main().catch(console.error)
+`.trim()
+
   return (
     <Box>
       <Box mb={4}>
         <Typography variant="h5">Send Message</Typography>
       </Box>
-      <form onSubmit={handleSubmit}>
-        <Box mb={2}>
-          <Box mb={1}>
-            <label>From Chain ID <small><em>(number)</em></small></label>
-          </Box>
-          <TextField fullWidth placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />
-        </Box>
-        <Box mb={2}>
-          <Box mb={1}>
-            <label>To Chain ID <small><em>(number)</em></small></label>
-          </Box>
-          <TextField fullWidth placeholder="5" value={toChainId} onChange={event => setToChainId(event.target.value)} />
-        </Box>
-        <Box mb={2}>
-          <Box mb={1}>
-            <label>To <small><em>(address)</em></small></label>
-          </Box>
-          <TextField fullWidth placeholder="0x" value={toAddress} onChange={event => setToAddress(event.target.value)} />
-        </Box>
-        <Box mb={2}>
-          <Box mb={1}>
-            <label>Data <small><em>(hex string)</em></small></label>
-          </Box>
-          <Textarea minRows={5} placeholder="0x" value={toCalldata} onChange={event => setToCalldata(event.target.value)} style={{ width: '100%' }} />
-        </Box>
-        <Box mb={2}>
+      <Box width="100%" display="flex" justifyContent="space-between">
+        <Box minWidth="400px" mr={4}>
           <Box>
-            <Checkbox onChange={event => setPopulateTxDataOnly(event.target.checked)} checked={populateTxDataOnly} />
-            <label>Populate Tx Only</label>
+            <form onSubmit={handleSubmit}>
+              <Box mb={2}>
+                <Box mb={1}>
+                  <label>From Chain ID <small><em>(number)</em></small></label>
+                </Box>
+                <TextField fullWidth placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />
+              </Box>
+              <Box mb={2}>
+                <Box mb={1}>
+                  <label>To Chain ID <small><em>(number)</em></small></label>
+                </Box>
+                <TextField fullWidth placeholder="5" value={toChainId} onChange={event => setToChainId(event.target.value)} />
+              </Box>
+              <Box mb={2}>
+                <Box mb={1}>
+                  <label>To <small><em>(address)</em></small></label>
+                </Box>
+                <TextField fullWidth placeholder="0x" value={toAddress} onChange={event => setToAddress(event.target.value)} />
+              </Box>
+              <Box mb={2}>
+                <Box mb={1}>
+                  <label>Data <small><em>(hex string)</em></small></label>
+                </Box>
+                <Textarea minRows={5} placeholder="0x" value={toCalldata} onChange={event => setToCalldata(event.target.value)} style={{ width: '100%' }} />
+              </Box>
+              <Box mb={2}>
+                <Box>
+                  <Checkbox onChange={event => setPopulateTxDataOnly(event.target.checked)} checked={populateTxDataOnly} />
+                  <label>Populate Tx Only</label>
+                </Box>
+              </Box>
+              <Box mb={2} display="flex" justifyContent="center">
+                <LoadingButton loading={loading} fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</LoadingButton>
+              </Box>
+            </form>
           </Box>
-        </Box>
-        <Box mb={2} display="flex" justifyContent="center">
-          <LoadingButton loading={loading} fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</LoadingButton>
-        </Box>
-      </form>
-      <Box>
-        {!!txData && (
-          <pre style={{
-            maxWidth: '500px',
-            overflow: 'auto'
-          }}>
-            {txData}
-          </pre>
-        )}
-        {!!txHash && (
           <Box>
-            Tx hash: {txHash}
+            {!!txData && (
+              <pre style={{
+                maxWidth: '500px',
+                overflow: 'auto'
+              }}>
+                {txData}
+              </pre>
+            )}
+            {!!txHash && (
+              <Box>
+                Tx hash: {txHash}
+              </Box>
+            )}
           </Box>
-        )}
+        </Box>
+        <Box width="100%">
+          <Box mb={2}>
+            <Typography variant="subtitle1">Code example</Typography>
+          </Box>
+          <Box>
+            <Syntax code={code} />
+          </Box>
+        </Box>
       </Box>
     </Box>
   )

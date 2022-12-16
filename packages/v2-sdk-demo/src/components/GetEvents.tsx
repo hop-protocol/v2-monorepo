@@ -5,6 +5,7 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { Hop } from '@hop-protocol/v2-sdk'
+import { Syntax } from './Syntax'
 
 type Props = {
   signer: Signer
@@ -68,53 +69,84 @@ export function GetEvents (props: Props) {
     setLoading(false)
   }
 
+  const code = `
+import { Hop } from '@hop-protocol/v2-sdk'
+
+async function main() {
+  const eventNames = ${JSON.stringify(selectedEventNames)}
+  const chainId = ${chainId || 'undefined'}
+  const startBlock = ${startBlock || 'undefined'}
+  const endBlock = ${endBlock || 'undefined'}
+
+  const hop = new Hop('goerli')
+  const events = await hop.getEvents(eventNames, chainId, startBlock, endBlock)
+  console.log(events)
+}
+
+main().catch(console.error)
+`.trim()
+
   return (
     <Box>
       <Box mb={4}>
         <Typography variant="h5">Get Events</Typography>
       </Box>
-      <form onSubmit={handleSubmit}>
-        <Box mb={2}>
-          <Box mb={1}>
-            <label>Event names <small><em>(multiple selection allowed)</em></small></label>
+      <Box width="100%" display="flex" justifyContent="space-between">
+        <Box minWidth="400px" mr={4}>
+          <Box>
+            <form onSubmit={handleSubmit}>
+              <Box mb={2}>
+                <Box mb={1}>
+                  <label>Event names <small><em>(multiple selection allowed)</em></small></label>
+                </Box>
+                <select multiple value={selectedEventNames} onChange={event => setSelectedEventNames(Object.values(event.target.selectedOptions).map(x => x.value))} style={{ width: '100%', height: '200px' }}>
+                  {eventNames.map((eventName: string) => {
+                    return (
+                      <option key={eventName} value={eventName}>{eventName}</option>
+                    )
+                  })}
+                </select>
+              </Box>
+              <Box mb={2}>
+                <Box mb={1}>
+                  <label>Chain ID <small><em>(number)</em></small></label>
+                </Box>
+                <TextField fullWidth placeholder="420" value={chainId} onChange={event => setChainId(event.target.value)} />
+              </Box>
+              <Box mb={2}>
+                <Box mb={1}>
+                  <label>Start block <small><em>(number)</em></small></label>
+                </Box>
+                <TextField fullWidth placeholder="0" value={startBlock} onChange={event => setStartBlock(event.target.value)} />
+              </Box>
+              <Box mb={2}>
+                <Box mb={1}>
+                  <label>End block <small><em>(number)</em></small></label>
+                </Box>
+                <TextField fullWidth placeholder="0" value={endBlock} onChange={event => setEndBlock(event.target.value)} />
+              </Box>
+              <Box mb={2} display="flex" justifyContent="center">
+                <LoadingButton loading={loading} fullWidth type="submit" variant="contained" size="large">Get events</LoadingButton>
+              </Box>
+            </form>
           </Box>
-          <select multiple value={selectedEventNames} onChange={event => setSelectedEventNames(Object.values(event.target.selectedOptions).map(x => x.value))} style={{ width: '100%', height: '200px' }}>
-            {eventNames.map((eventName: string) => {
-              return (
-                <option key={eventName} value={eventName}>{eventName}</option>
-              )
-            })}
-          </select>
-        </Box>
-        <Box mb={2}>
-          <Box mb={1}>
-            <label>Chain ID <small><em>(number)</em></small></label>
+          <Box>
+            {!!events && (
+              <pre style={{
+                maxWidth: '500px',
+                overflow: 'auto'
+              }}>{events}</pre>
+            )}
           </Box>
-          <TextField fullWidth placeholder="420" value={chainId} onChange={event => setChainId(event.target.value)} />
         </Box>
-        <Box mb={2}>
-          <Box mb={1}>
-            <label>Start block <small><em>(number)</em></small></label>
+        <Box width="100%">
+          <Box mb={2}>
+            <Typography variant="subtitle1">Code example</Typography>
           </Box>
-          <TextField fullWidth placeholder="0" value={startBlock} onChange={event => setStartBlock(event.target.value)} />
-        </Box>
-        <Box mb={2}>
-          <Box mb={1}>
-            <label>End block <small><em>(number)</em></small></label>
+          <Box>
+            <Syntax code={code} />
           </Box>
-          <TextField fullWidth placeholder="0" value={endBlock} onChange={event => setEndBlock(event.target.value)} />
         </Box>
-        <Box mb={2} display="flex" justifyContent="center">
-          <LoadingButton loading={loading} fullWidth type="submit" variant="contained" size="large">Get events</LoadingButton>
-        </Box>
-      </form>
-      <Box>
-        {!!events && (
-          <pre style={{
-            maxWidth: '500px',
-            overflow: 'auto'
-          }}>{events}</pre>
-        )}
       </Box>
     </Box>
   )
