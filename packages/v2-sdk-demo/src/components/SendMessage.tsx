@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Signer, providers } from 'ethers'
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
@@ -18,15 +18,79 @@ type Props = {
 
 export function SendMessage (props: Props) {
   const { signer, sdk, onboard } = props
-  const [fromChainId, setFromChainId] = useState('420')
-  const [toChainId, setToChainId] = useState('5')
-  const [toAddress, setToAddress] = useState('')
-  const [toCalldata, setToCalldata] = useState('')
+  const [fromChainId, setFromChainId] = useState(() => {
+    try {
+      const cached = localStorage.getItem('sendMessage:fromChainId')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return '420'
+  })
+  const [toChainId, setToChainId] = useState(() => {
+    try {
+      const cached = localStorage.getItem('sendMessage:toChainId')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return '5'
+  })
+  const [toAddress, setToAddress] = useState(() => {
+    try {
+      const cached = localStorage.getItem('sendMessage:toAddress')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return ''
+  })
+  const [toCalldata, setToCalldata] = useState(() => {
+    try {
+      const cached = localStorage.getItem('sendMessage:toCalldata')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return ''
+  })
   const [txData, setTxData] = useState('')
   const [populateTxDataOnly, setPopulateTxDataOnly] = useState(true)
   const [txHash, setTxHash] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sendMessage:fromChainId', fromChainId)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [fromChainId])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sendMessage:toChainId', toChainId)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [toChainId])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sendMessage:toAddress', toAddress)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [toAddress])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sendMessage:toCalldata', toCalldata)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [toCalldata])
 
   async function getSendTxData() {
     const args = [

@@ -42,15 +42,15 @@ export class BundleReceivedEventFetcher extends Event {
     const relayer = decoded.args.relayer.toString()
 
     return {
-      _eventName: this.eventName,
+      eventName: this.eventName,
+      eventLog: ethersEvent,
       bundleId,
       bundleRoot,
       bundleFees,
       fromChainId,
       toChainId,
       relayWindowStart,
-      relayer,
-      _event: ethersEvent
+      relayer
     }
   }
 }

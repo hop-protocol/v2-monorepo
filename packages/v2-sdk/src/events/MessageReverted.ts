@@ -36,12 +36,12 @@ export class MessageRevertedEventFetcher extends Event {
     const to = decoded.args.to
 
     return {
-      _eventName: this.eventName,
+      eventName: this.eventName,
+      eventLog: ethersEvent,
       messageId,
       fromChainId,
       from,
-      to,
-      _event: ethersEvent
+      to
     }
   }
 }

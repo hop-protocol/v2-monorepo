@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Signer, providers } from 'ethers'
 import Box from '@mui/material/Box'
 import LoadingButton from '@mui/lab/LoadingButton'
@@ -17,13 +17,45 @@ type Props = {
 
 export function RelayBundle (props: Props) {
   const { signer, sdk, onboard } = props
-  const [fromChainId, setFromChainId] = useState('420')
-  const [bundleCommittedTxHash, setBundleCommittedTxHash] = useState('')
+  const [fromChainId, setFromChainId] = useState(() => {
+    try {
+      const cached = localStorage.getItem('relayBundle:fromChainId')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return '420'
+  })
+  const [bundleCommittedTxHash, setBundleCommittedTxHash] = useState(() => {
+    try {
+      const cached = localStorage.getItem('relayBundle:bundleCommittedTxHash')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return ''
+  })
   const [txData, setTxData] = useState('')
   const [populateTxDataOnly, setPopulateTxDataOnly] = useState(true)
   const [txHash, setTxHash] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('relayBundle:fromChainId', fromChainId)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [fromChainId])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('relayBundle:bundleCommittedTxHash', bundleCommittedTxHash)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [bundleCommittedTxHash])
 
   async function getSendTxData() {
     const args = [

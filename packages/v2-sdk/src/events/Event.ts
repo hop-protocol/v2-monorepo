@@ -42,7 +42,7 @@ export class Event {
   }
 
   async addContextToEvent (event: any, chainId: number): Promise<any> {
-    const context = await this.getEventContext(event._event, chainId)
+    const context = await this.getEventContext(event.eventLog, chainId)
     event.context = context
     return event
   }

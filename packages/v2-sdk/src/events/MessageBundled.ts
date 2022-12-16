@@ -34,11 +34,11 @@ export class MessageBundledEventFetcher extends Event {
     const messageId = decoded.args.messageId.toString()
 
     return {
-      _eventName: this.eventName,
+      eventName: this.eventName,
+      eventLog: ethersEvent,
       bundleId,
       treeIndex,
-      messageId,
-      _event: ethersEvent
+      messageId
     }
   }
 }

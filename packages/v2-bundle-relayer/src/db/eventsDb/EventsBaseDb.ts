@@ -42,8 +42,11 @@ export class EventsBaseDb<T> extends BaseDb {
       throw new Error('key is required')
     }
     // TODO: add validation is child
-    if ((data as any)._event) {
-      delete (data as any)._event
+    if ((data as any).eventLog) {
+      delete (data as any).eventLog
+    }
+    if ((data as any).eventName) {
+      delete (data as any).eventName
     }
     await this._put(key, this.normalizeDataForPut(data))
     const timestampKey = this.getTimestampKeyString(data)

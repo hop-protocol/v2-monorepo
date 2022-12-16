@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Signer } from 'ethers'
 import Box from '@mui/material/Box'
 import LoadingButton from '@mui/lab/LoadingButton'
@@ -9,22 +9,85 @@ import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
 
 type Props = {
-  signer: Signer
   sdk: Hop
 }
 
 export function GetEvents (props: Props) {
-  const { signer, sdk } = props
-  const [chainId, setChainId] = useState('420')
-  const [startBlock, setStartBlock] = useState('')
-  const [endBlock, setEndBlock] = useState('')
+  const { sdk } = props
+  const [chainId, setChainId] = useState(() => {
+    try {
+      const cached = localStorage.getItem('getEvents:chainId')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return '420'
+  })
+  const [startBlock, setStartBlock] = useState(() => {
+    try {
+      const cached = localStorage.getItem('getEvents:startBlock')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return ''
+  })
+  const [endBlock, setEndBlock] = useState(() => {
+    try {
+      const cached = localStorage.getItem('getEvents:endBlock')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return ''
+  })
   const [events, setEvents] = useState('')
   const [loading, setLoading] = useState(false)
   const eventNames = useMemo(() => {
     return sdk?.getEventNames() ?? []
   }, [sdk])
-  const [selectedEventNames, setSelectedEventNames] = useState<string[]>([eventNames[0]])
+  const [selectedEventNames, setSelectedEventNames] = useState<string[]>(() => {
+    try {
+      const cached = localStorage.getItem('getEvents:selectedEventNames')
+      if (cached) {
+        return JSON.parse(cached)
+      }
+    } catch (err: any) {}
+    return [eventNames[0]]
+  })
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('getEvents:selectedEventNames', JSON.stringify(selectedEventNames))
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [selectedEventNames])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('getEvents:chainId', chainId)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [chainId])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('getEvents:startBlock', startBlock)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [startBlock])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('getEvents:endBlock', endBlock)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [endBlock])
 
   async function getEvents() {
     const provider = sdk.providers[sdk.getChainSlug(Number(chainId))]

@@ -36,12 +36,12 @@ export class BundleForwardedEventFetcher extends Event {
     const toChainId = decoded.args.toChainId.toNumber()
 
     return {
-      _eventName: this.eventName,
+      eventName: this.eventName,
+      eventLog: ethersEvent,
       bundleId,
       bundleRoot,
       fromChainId,
-      toChainId,
-      _event: ethersEvent
+      toChainId
     }
   }
 }

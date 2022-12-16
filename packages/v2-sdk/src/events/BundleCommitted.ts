@@ -38,13 +38,13 @@ export class BundleCommittedEventFetcher extends Event {
     const commitTime = decoded.args.commitTime.toNumber()
 
     return {
-      _eventName: this.eventName,
+      eventName: this.eventName,
+      eventLog: ethersEvent,
       bundleId,
       bundleRoot,
       bundleFees,
       toChainId,
       commitTime,
-      _event: ethersEvent
     }
   }
 }

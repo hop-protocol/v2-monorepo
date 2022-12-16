@@ -30,9 +30,9 @@ export class FeesSentToHubEventFetcher extends Event {
     const amount = decoded.args.amount
 
     return {
-      _eventName: this.eventName,
-      amount,
-      _event: ethersEvent
+      eventName: this.eventName,
+      eventLog: ethersEvent,
+      amount
     }
   }
 }

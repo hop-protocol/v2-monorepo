@@ -254,7 +254,7 @@ function App () {
           <Box maxWidth="1400px" m="0 auto">
             <Card>
               <Box p={4} minWidth="400px">
-                <GetEvents signer={wallet} sdk={sdk} />
+                <GetEvents sdk={sdk} />
               </Box>
             </Card>
           </Box>

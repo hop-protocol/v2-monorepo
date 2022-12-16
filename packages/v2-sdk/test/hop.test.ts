@@ -101,7 +101,7 @@ describe('sdk setup', () => {
     expect(events[0].commitTime).toBe(1670287396)
     expect(events[0].context).toBeTruthy()
     expect(events[0].context?.transactionHash).toBe('0xed78039ec57b7f1bc882aa833c921d22f407363fc95834b670ae64f78f128fd4')
-    expect(events[0]._event).toBeTruthy()
+    expect(events[0].eventLog).toBeTruthy()
   }, 60 * 1000)
   it('getBundleForwardedEvents', async () => {
     const hop = new Hop('goerli', {
@@ -166,7 +166,7 @@ describe('sdk setup', () => {
     expect(events[0].bundleId).toBe('0x941b97adc8856fc13c566e5b9aaa9cd5fd953324452f0aa1fe24ca227a5e2ab6')
     expect(events[0].treeIndex).toBe(0)
     expect(events[0].messageId).toBe('0x1dcab020e2c5973e3461028e6d6cce6e8785c18c8d47257836800170d37b9e3e')
-    expect(events[0]._event).toBeTruthy()
+    expect(events[0].eventLog).toBeTruthy()
   }, 60 * 1000)
   it('getMessageRelayedEvents', async () => {
     const hop = new Hop('goerli', {
@@ -207,7 +207,7 @@ describe('sdk setup', () => {
     expect(events[0].from).toBe('0x75f222420C75Da8a59091a23368f97De43F54D9b')
     expect(events[0].toChainId).toBe(5)
     expect(events[0].data).toBe('0x')
-    expect(events[0]._event).toBeTruthy()
+    expect(events[0].eventLog).toBeTruthy()
   }, 60 * 1000)
   it('getEventNames', async () => {
     const hop = new Hop('goerli')

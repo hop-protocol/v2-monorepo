@@ -34,11 +34,11 @@ export class BundleSetEventFetcher extends Event {
     const fromChainId = decoded.args.fromChainId.toNumber()
 
     return {
-      _eventName: this.eventName,
+      eventName: this.eventName,
+      eventLog: ethersEvent,
       bundleId,
       bundleRoot,
-      fromChainId,
-      _event: ethersEvent
+      fromChainId
     }
   }
 }

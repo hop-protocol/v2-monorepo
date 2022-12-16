@@ -431,8 +431,8 @@ export class Hop {
         throw new Error(`Invalid transaction hash: ${transactionHash}`)
       }
     } else {
-      const { _event, context } = bundleCommittedEventOrTxHash
-      transactionHash = _event.transactionHash ?? context?.transactionHash
+      const { eventLog, context } = bundleCommittedEventOrTxHash
+      transactionHash = eventLog.transactionHash ?? context?.transactionHash
     }
     if (!transactionHash) {
       throw new Error('expected transaction hash')

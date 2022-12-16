@@ -9,7 +9,7 @@ export type EventContext = {
 }
 
 export type EventBase = {
-  _eventName: string
-  _event?: any
+  eventName: string
+  eventLog?: any
   context?: EventContext
 }

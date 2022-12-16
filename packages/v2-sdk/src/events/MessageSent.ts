@@ -38,13 +38,13 @@ export class MessageSentEventFetcher extends Event {
     const data = decoded.args.data
 
     return {
-      _eventName: this.eventName,
+      eventName: this.eventName,
+      eventLog: ethersEvent,
       messageId,
       from,
       toChainId,
       to,
-      data,
-      _event: ethersEvent
+      data
     }
   }
 }
