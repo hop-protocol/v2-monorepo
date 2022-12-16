@@ -271,61 +271,83 @@ export class Hop {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
 
-    if (Array.isArray(eventNames)) {
-      // TODO
-      /*
-      const filters :any[] = []
-      const eventFetcher = new EventFetcher({
-        provider
-      })
-      for (const eventName of eventNames) {
-        if (eventName === 'BundleCommitted') {
-          const address = this.getSpokeMessageBridgeContractAddress(chain)
-          const filter = {
-            address,
-            topics: [
+    if (!Array.isArray(eventNames)) {
+      eventNames = [eventNames]
+    }
 
-            ]
-          }
-        }
+    const filters :any[] = []
+    const eventFetcher = new EventFetcher({
+      provider
+    })
+    const map : any = {}
+    for (const eventName of eventNames) {
+      if (eventName === 'BundleCommitted') {
+        const address = this.getSpokeMessageBridgeContractAddress(chain)
+        const _eventFetcher = new BundleCommittedEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
         filters.push(filter)
-      }
-      const options = {
-        startBlock,
-        endBlock
-      }
-      const events = await eventFetcher.fetchEvents(filters, options)
-      const decoded : any[] = []
-      for (const event of events) {
-        decoded.push(event)
-      }
-      return decoded
-      */
-    } else {
-      const eventName = eventNames
-      switch (eventName) {
-        case 'BundleCommitted':
-          return this.getBundleCommittedEvents(chainId, startBlock, endBlock)
-        case 'BundleForwarded':
-          return this.getBundleForwardedEvents(chainId, startBlock, endBlock)
-        case 'BundleReceived':
-          return this.getBundleReceivedEvents(chainId, startBlock, endBlock)
-        case 'BundleSet':
-          return this.getBundleSetEvents(chainId, startBlock, endBlock)
-        case 'FeesSentToHub':
-          return this.getFeesSentToHubEvents(chainId, startBlock, endBlock)
-        case 'MessageBundled':
-          return this.getMessageBundledEvents(chainId, startBlock, endBlock)
-        case 'MessageRelayed':
-          return this.getMessageRelayedEvents(chainId, startBlock, endBlock)
-        case 'MessageReverted':
-          return this.getMessageRevertedEvents(chainId, startBlock, endBlock)
-        case 'MessageSent':
-          return this.getMessageSentEvents(chainId, startBlock, endBlock)
-        default:
-          throw new Error(`Invalid event name: ${eventName}`)
+        map[filter.topics[0] as string] = _eventFetcher
+      } else if (eventName === 'BundleForwared') {
+        const address = this.getHubMessageBridgeContractAddress(chain)
+        const _eventFetcher = new BundleForwardedEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
+        filters.push(filter)
+        map[filter.topics[0] as string] = _eventFetcher
+      } else if (eventName === 'BundleReceived') {
+        const address = this.getHubMessageBridgeContractAddress(chain)
+        const _eventFetcher = new BundleReceivedEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
+        filters.push(filter)
+        map[filter.topics[0] as string] = _eventFetcher
+      } else if (eventName === 'BundleSet') {
+        const address = this.getHubMessageBridgeContractAddress(chain)
+        const _eventFetcher = new BundleSetEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
+        filters.push(filter)
+        map[filter.topics[0] as string] = _eventFetcher
+      } else if (eventName === 'FeesSentToHub') {
+        const address = this.getSpokeMessageBridgeContractAddress(chain)
+        const _eventFetcher = new FeesSentToHubEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
+        filters.push(filter)
+        map[filter.topics[0] as string] = _eventFetcher
+      } else if (eventName === 'MessageBundled') {
+        const address = this.getSpokeMessageBridgeContractAddress(chain)
+        const _eventFetcher = new MessageBundledEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
+        filters.push(filter)
+        map[filter.topics[0] as string] = _eventFetcher
+      } else if (eventName === 'MessageRelayed') {
+        const address = this.getSpokeMessageBridgeContractAddress(chain)
+        const _eventFetcher = new MessageRelayedEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
+        filters.push(filter)
+        map[filter.topics[0] as string] = _eventFetcher
+      } else if (eventName === 'MessageReverted') {
+        const address = this.getSpokeMessageBridgeContractAddress(chain)
+        const _eventFetcher = new MessageRevertedEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
+        filters.push(filter)
+        map[filter.topics[0] as string] = _eventFetcher
+      } else if (eventName === 'MessageSent') {
+        const address = this.getSpokeMessageBridgeContractAddress(chain)
+        const _eventFetcher = new MessageSentEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
+        filters.push(filter)
+        map[filter.topics[0] as string] = _eventFetcher
       }
     }
+    const options = {
+      startBlock,
+      endBlock
+    }
+    const events = await eventFetcher.fetchEvents(filters, options)
+    const decoded : any[] = []
+    for (const event of events) {
+      const res = await map[event.topics[0] as string].populateEvents([event])
+      decoded.push(...res)
+    }
+    return decoded
   }
 
   getEventNames (): string[] {

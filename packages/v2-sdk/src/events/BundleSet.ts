@@ -12,6 +12,8 @@ export interface BundleSet extends EventBase {
 }
 
 export class BundleSetEventFetcher extends Event {
+  eventName = 'BundleSet'
+
   getFilter () {
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(this.address, this.provider)
     const filter = spokeMessageBridge.filters.BundleSet()
@@ -32,6 +34,7 @@ export class BundleSetEventFetcher extends Event {
     const fromChainId = decoded.args.fromChainId.toNumber()
 
     return {
+      _eventName: this.eventName,
       bundleId,
       bundleRoot,
       fromChainId,

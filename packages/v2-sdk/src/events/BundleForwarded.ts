@@ -13,6 +13,8 @@ export interface BundleForwarded extends EventBase {
 }
 
 export class BundleForwardedEventFetcher extends Event {
+  eventName = 'BundleForwarded'
+
   getFilter () {
     const hubMessageBridge = HubMessageBridge__factory.connect(this.address, this.provider)
     const filter = hubMessageBridge.filters.BundleForwarded()
@@ -34,6 +36,7 @@ export class BundleForwardedEventFetcher extends Event {
     const toChainId = decoded.args.toChainId.toNumber()
 
     return {
+      _eventName: this.eventName,
       bundleId,
       bundleRoot,
       fromChainId,

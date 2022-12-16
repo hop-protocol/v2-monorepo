@@ -8,6 +8,7 @@ export class Event {
   chainId: number
   batchBlocks: number
   address: string
+  eventName: string
 
   constructor (provider: any, chainId: number, batchBlocks: number, address: string) {
     if (!provider) {
@@ -27,8 +28,12 @@ export class Event {
     if (!endBlock) {
       endBlock = await this.provider.getBlockNumber()
     }
-    let events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
-    events = events.map(this.toTypedEvent)
+    const events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
+    return this.populateEvents(events)
+  }
+
+  async populateEvents (events: any[]) {
+    events = events.map(x => this.toTypedEvent(x))
     return Promise.all(events.map((event: any) => this.addContextToEvent(event, this.chainId)))
   }
 

@@ -14,6 +14,8 @@ export interface MessageSent extends EventBase {
 }
 
 export class MessageSentEventFetcher extends Event {
+  eventName = 'MessageSent'
+
   getFilter () {
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(this.address, this.provider)
     const filter = spokeMessageBridge.filters.MessageSent()
@@ -36,6 +38,7 @@ export class MessageSentEventFetcher extends Event {
     const data = decoded.args.data
 
     return {
+      _eventName: this.eventName,
       messageId,
       from,
       toChainId,

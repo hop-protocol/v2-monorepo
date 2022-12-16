@@ -9,6 +9,7 @@ export type EventContext = {
 }
 
 export type EventBase = {
+  _eventName: string
   _event?: any
   context?: EventContext
 }

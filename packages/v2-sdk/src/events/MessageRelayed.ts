@@ -13,6 +13,8 @@ export interface MessageRelayed extends EventBase {
 }
 
 export class MessageRelayedEventFetcher extends Event {
+  eventName = 'MessageRelayed'
+
   getFilter () {
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(this.address, this.provider)
     const filter = spokeMessageBridge.filters.MessageRelayed()
@@ -34,6 +36,7 @@ export class MessageRelayedEventFetcher extends Event {
     const to = decoded.args.to
 
     return {
+      _eventName: this.eventName,
       messageId,
       fromChainId,
       from,

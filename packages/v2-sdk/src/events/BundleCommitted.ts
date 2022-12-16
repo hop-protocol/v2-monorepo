@@ -14,6 +14,8 @@ export interface BundleCommitted extends EventBase {
 }
 
 export class BundleCommittedEventFetcher extends Event {
+  eventName = 'BundleCommitted'
+
   getFilter () {
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(this.address, this.provider)
     const filter = spokeMessageBridge.filters.BundleCommitted()
@@ -36,6 +38,7 @@ export class BundleCommittedEventFetcher extends Event {
     const commitTime = decoded.args.commitTime.toNumber()
 
     return {
+      _eventName: this.eventName,
       bundleId,
       bundleRoot,
       bundleFees,

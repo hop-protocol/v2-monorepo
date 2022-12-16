@@ -21,7 +21,7 @@ export function GetEvents (props: Props) {
   const eventNames = useMemo(() => {
     return sdk?.getEventNames() ?? []
   }, [sdk])
-  const [selectedEventName, setSelectedEventName] = useState(eventNames[0] || '')
+  const [selectedEventNames, setSelectedEventNames] = useState<string[]>([eventNames[0]])
 
   async function getEvents() {
     const provider = sdk.providers[sdk.getChainSlug(Number(chainId))]
@@ -44,7 +44,7 @@ export function GetEvents (props: Props) {
       }
     }
     const args = [
-      selectedEventName,
+      selectedEventNames,
       Number(chainId),
       _startBlock,
       _endBlock
@@ -76,9 +76,9 @@ export function GetEvents (props: Props) {
       <form onSubmit={handleSubmit}>
         <Box mb={2}>
           <Box mb={1}>
-            <label>Event name</label>
+            <label>Event names <small><em>(multiple selection allowed)</em></small></label>
           </Box>
-          <select onChange={event => setSelectedEventName(event.target.value)}>
+          <select multiple value={selectedEventNames} onChange={event => setSelectedEventNames(Object.values(event.target.selectedOptions).map(x => x.value))} style={{ width: '100%', height: '200px' }}>
             {eventNames.map((eventName: string) => {
               return (
                 <option key={eventName} value={eventName}>{eventName}</option>

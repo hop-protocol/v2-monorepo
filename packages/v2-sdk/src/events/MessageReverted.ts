@@ -13,6 +13,8 @@ export interface MessageReverted extends EventBase {
 }
 
 export class MessageRevertedEventFetcher extends Event {
+  eventName = 'MessageReverted'
+
   getFilter () {
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(this.address, this.provider)
     const filter = spokeMessageBridge.filters.MessageReverted()
@@ -34,6 +36,7 @@ export class MessageRevertedEventFetcher extends Event {
     const to = decoded.args.to
 
     return {
+      _eventName: this.eventName,
       messageId,
       fromChainId,
       from,

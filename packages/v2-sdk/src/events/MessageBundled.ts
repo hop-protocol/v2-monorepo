@@ -12,6 +12,8 @@ export interface MessageBundled extends EventBase {
 }
 
 export class MessageBundledEventFetcher extends Event {
+  eventName = 'MessageBundled'
+
   getFilter () {
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(this.address, this.provider)
     const filter = spokeMessageBridge.filters.MessageBundled()
@@ -32,6 +34,7 @@ export class MessageBundledEventFetcher extends Event {
     const messageId = decoded.args.messageId.toString()
 
     return {
+      _eventName: this.eventName,
       bundleId,
       treeIndex,
       messageId,

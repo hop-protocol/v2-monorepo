@@ -65,6 +65,24 @@ describe('sdk setup', () => {
       }
     }
   }, 60 * 1000)
+  it('getEvents', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v001
+    })
+    const chain = 'optimism'
+    const chainId = 420
+    const endBlock = 3218900
+    const startBlock = endBlock - 10
+    let eventNames = ['BundleCommitted']
+    let events = await hop.getEvents(eventNames, chainId, startBlock, endBlock)
+    // console.log(events)
+    expect(events.length).toBe(1)
+
+    eventNames = ['BundleCommitted', 'MessageSent']
+    events = await hop.getEvents(eventNames, chainId, startBlock, endBlock)
+    console.log(events)
+    expect(events.length).toBe(2)
+  }, 60 * 1000)
   it('getBundleCommittedEvents', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v001

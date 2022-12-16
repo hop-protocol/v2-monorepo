@@ -16,6 +16,8 @@ export interface BundleReceived extends EventBase {
 }
 
 export class BundleReceivedEventFetcher extends Event {
+  eventName = 'BundleReceived'
+
   getFilter () {
     const hubMessageBridge = HubMessageBridge__factory.connect(this.address, this.provider)
     const filter = hubMessageBridge.filters.BundleReceived()
@@ -40,6 +42,7 @@ export class BundleReceivedEventFetcher extends Event {
     const relayer = decoded.args.relayer.toString()
 
     return {
+      _eventName: this.eventName,
       bundleId,
       bundleRoot,
       bundleFees,

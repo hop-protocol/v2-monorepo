@@ -67,7 +67,24 @@ function App () {
   const [onboardWallet, setOnboardWallet] = useState<any>()
   const [wallet, setWallet] = useState<any>()
   const sdk = useMemo(() => {
-    const _sdk = new Hop('goerli')
+    /*
+    const contractAddresses = {
+      ethereum: {
+        startBlock: 8077320,
+        hubCoreMessenger: '0x9827315F7D2B1AAd0aa4705c06dafEE6cAEBF920',
+        ethFeeDistributor: '0x8fF09Ff3C87085Fe4607F2eE7514579FE50944C5'
+      },
+      optimism: {
+        startBlock: 3218800,
+        spokeCoreMessenger: '0x4b844c25ef430e71d42eea89d87ffe929f8db927',
+        connector: '0x342EA1227fC0e085704D30cd17a16cA98B58D08B'
+      }
+    }
+    */
+
+    const _sdk = new Hop('goerli', {
+     // contractAddresses
+    })
     ;(window as any).sdk = _sdk
     return _sdk
   }, [])
@@ -215,7 +232,7 @@ function App () {
           )}
         </Box>
       )}
-      <Box display="flex" flexWrap="wrap">
+      <Box mb={6} display="flex" flexWrap="wrap">
         <Box m={2}>
           <Card>
             <Box p={4} minWidth="400px">
@@ -248,8 +265,8 @@ function App () {
           <Alert severity="success">{success}</Alert>
         </Box>
       )}
-      <Box>
-        <a href="https://github.com/hop-protocol/v2-monorepo" target="_blank" rel="noopener noreferrer">Github</a>
+      <Box mb={4}>
+        <a href="https://github.com/hop-protocol/v2-monorepo" target="_blank" rel="noopener noreferrer" style={{ color: '#c34be4' }}>Github</a>
       </Box>
     </Box>
   )

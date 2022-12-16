@@ -10,6 +10,8 @@ export interface FeesSentToHub extends EventBase {
 }
 
 export class FeesSentToHubEventFetcher extends Event {
+  eventName = 'FeesSentToHub'
+
   getFilter () {
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(this.address, this.provider)
     const filter = spokeMessageBridge.filters.FeesSentToHub()
@@ -28,6 +30,7 @@ export class FeesSentToHubEventFetcher extends Event {
     const amount = decoded.args.amount
 
     return {
+      _eventName: this.eventName,
       amount,
       _event: ethersEvent
     }
