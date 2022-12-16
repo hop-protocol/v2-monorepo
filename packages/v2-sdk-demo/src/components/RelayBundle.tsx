@@ -4,6 +4,7 @@ import Box from '@mui/material/Box'
 import LoadingButton from '@mui/lab/LoadingButton'
 import TextField from '@mui/material/TextField'
 import Checkbox from '@mui/material/Checkbox'
+import Alert from '@mui/material/Alert'
 import Typography from '@mui/material/Typography'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
@@ -22,6 +23,7 @@ export function RelayBundle (props: Props) {
   const [populateTxDataOnly, setPopulateTxDataOnly] = useState(true)
   const [txHash, setTxHash] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   async function getSendTxData() {
     const args = [
@@ -36,6 +38,7 @@ export function RelayBundle (props: Props) {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     try {
+      setError('')
       setTxData('')
       setTxHash('')
       setLoading(true)
@@ -62,7 +65,7 @@ export function RelayBundle (props: Props) {
       }
     } catch (err: any) {
       console.error(err)
-      alert(err.message)
+      setError(err.message)
     }
     setLoading(false)
   }
@@ -119,21 +122,26 @@ main().catch(console.error)
               <LoadingButton loading={loading} fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</LoadingButton>
             </Box>
           </form>
-          <Box>
-            {!!txData && (
+          {!!error && (
+            <Box mb={4} width="100%" style={{ wordBreak: 'break-word' }}>
+              <Alert severity="error">{error}</Alert>
+            </Box>
+          )}
+          {!!txHash && (
+            <Box mb={4}>
+              <Alert severity="success">Tx hash: {txHash}</Alert>
+            </Box>
+          )}
+          {!!txData && (
+            <Box>
               <pre style={{
                 maxWidth: '500px',
                 overflow: 'auto'
               }}>
                 {txData}
               </pre>
-            )}
-            {!!txHash && (
-              <Box>
-                tx hash: {txHash}
-              </Box>
-            )}
-          </Box>
+            </Box>
+          )}
         </Box>
         <Box width="100%">
           <Box mb={2}>

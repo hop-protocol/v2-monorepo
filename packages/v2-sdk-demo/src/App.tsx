@@ -3,7 +3,6 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import { useInterval } from 'react-use'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Alert from '@mui/material/Alert'
 import Typography from '@mui/material/Typography'
 import './App.css'
 import { providers } from 'ethers'
@@ -261,16 +260,6 @@ function App () {
           </Box>
         </Box>
       </Box>
-      {!!error && (
-        <Box mb={4} style={{ maxWidth: '400px', wordBreak: 'break-word' }}>
-          <Alert severity="error">{error}</Alert>
-        </Box>
-      )}
-      {!!success && (
-        <Box mb={4}>
-          <Alert severity="success">{success}</Alert>
-        </Box>
-      )}
       <Box mb={4}>
         <a href="https://github.com/hop-protocol/v2-monorepo" target="_blank" rel="noopener noreferrer" style={{ color: '#c34be4' }}>Github</a>
       </Box>

@@ -4,6 +4,7 @@ import Box from '@mui/material/Box'
 import LoadingButton from '@mui/lab/LoadingButton'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import Alert from '@mui/material/Alert'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
 
@@ -23,6 +24,7 @@ export function GetEvents (props: Props) {
     return sdk?.getEventNames() ?? []
   }, [sdk])
   const [selectedEventNames, setSelectedEventNames] = useState<string[]>([eventNames[0]])
+  const [error, setError] = useState('')
 
   async function getEvents() {
     const provider = sdk.providers[sdk.getChainSlug(Number(chainId))]
@@ -58,13 +60,14 @@ export function GetEvents (props: Props) {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     try {
+      setError('')
       setEvents('')
       setLoading(true)
       const _events = await getEvents()
       setEvents(JSON.stringify(_events, null, 2))
     } catch (err: any) {
       console.error(err)
-      alert(err.message)
+      setError(err.message)
     }
     setLoading(false)
   }
@@ -130,14 +133,19 @@ main().catch(console.error)
               </Box>
             </form>
           </Box>
-          <Box>
-            {!!events && (
+          {!!error && (
+            <Box mb={4} width="100%" style={{ wordBreak: 'break-word' }}>
+              <Alert severity="error">{error}</Alert>
+            </Box>
+          )}
+          {!!events && (
+            <Box>
               <pre style={{
                 maxWidth: '500px',
                 overflow: 'auto'
               }}>{events}</pre>
-            )}
-          </Box>
+            </Box>
+          )}
         </Box>
         <Box width="100%">
           <Box mb={2}>
