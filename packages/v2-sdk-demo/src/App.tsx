@@ -13,6 +13,7 @@ import injectedModule from '@web3-onboard/injected-wallets'
 import { SendMessage } from './components/SendMessage'
 import { RelayBundle } from './components/RelayBundle'
 import { GetEvents } from './components/GetEvents'
+import { GetContractAddresses } from './components/GetContractAddresses'
 import { Hop } from '@hop-protocol/v2-sdk'
 import Card from '@mui/material/Card'
 
@@ -66,24 +67,7 @@ function App () {
   const [onboardWallet, setOnboardWallet] = useState<any>()
   const [wallet, setWallet] = useState<any>()
   const sdk = useMemo(() => {
-    /*
-    const contractAddresses = {
-      ethereum: {
-        startBlock: 8077320,
-        hubCoreMessenger: '0x9827315F7D2B1AAd0aa4705c06dafEE6cAEBF920',
-        ethFeeDistributor: '0x8fF09Ff3C87085Fe4607F2eE7514579FE50944C5'
-      },
-      optimism: {
-        startBlock: 3218800,
-        spokeCoreMessenger: '0x4b844c25ef430e71d42eea89d87ffe929f8db927',
-        connector: '0x342EA1227fC0e085704D30cd17a16cA98B58D08B'
-      }
-    }
-    */
-
-    const _sdk = new Hop('goerli', {
-     // contractAddresses
-    })
+    const _sdk = new Hop('goerli')
     ;(window as any).sdk = _sdk
     return _sdk
   }, [])
@@ -262,6 +246,15 @@ function App () {
             <Card>
               <Box p={4} minWidth="400px">
                 <GetEvents sdk={sdk} />
+              </Box>
+            </Card>
+          </Box>
+        </Box>
+        <Box mb={8}>
+          <Box maxWidth="1400px" m="0 auto">
+            <Card>
+              <Box p={4} minWidth="400px">
+                <GetContractAddresses sdk={sdk} />
               </Box>
             </Card>
           </Box>

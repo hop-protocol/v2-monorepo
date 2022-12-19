@@ -90,7 +90,7 @@ export function GetEvents (props: Props) {
   }, [endBlock])
 
   async function getEvents() {
-    const provider = sdk.providers[sdk.getChainSlug(Number(chainId))]
+    const provider = sdk.getRpcProvider(Number(chainId))
     const latestBlock = await provider.getBlockNumber()
     let _startBlock = Number(startBlock)
     let _endBlock = Number(endBlock)

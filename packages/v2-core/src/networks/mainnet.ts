@@ -1,9 +1,9 @@
 import { Networks } from './types'
 
 export const networks: Networks = {
-  ethereum: {
+  1: {
     name: 'Ethereum',
-    networkId: 1,
+    chainId: 1,
     publicRpcUrl: 'https://mainnet.infura.io/v3/84842078b09946638c03157f83405213', // from ethers
     fallbackPublicRpcUrls: [
       'https://rpc.ankr.com/eth'
@@ -11,9 +11,9 @@ export const networks: Networks = {
     explorerUrls: ['https://etherscan.io'],
     waitConfirmations: 64
   },
-  arbitrum: {
+  42161: {
     name: 'Arbitrum',
-    networkId: 42161,
+    chainId: 42161,
     publicRpcUrl: 'https://arb1.arbitrum.io/rpc',
     fallbackPublicRpcUrls: [
       'https://arbitrum-mainnet.infura.io/v3/84842078b09946638c03157f83405213', // from ethers
@@ -23,9 +23,9 @@ export const networks: Networks = {
     nativeBridgeUrl: 'https://bridge.arbitrum.io/',
     waitConfirmations: 20
   },
-  optimism: {
+  10: {
     name: 'Optimism',
-    networkId: 10,
+    chainId: 10,
     publicRpcUrl: 'https://optimism-mainnet.infura.io/v3/84842078b09946638c03157f83405213', // from ethers
     fallbackPublicRpcUrls: [
       'https://mainnet.optimism.io',
@@ -35,9 +35,9 @@ export const networks: Networks = {
     nativeBridgeUrl: 'https://gateway.optimism.io/welcome',
     waitConfirmations: 1
   },
-  gnosis: {
+  100: {
     name: 'Gnosis Chain',
-    networkId: 100,
+    chainId: 100,
     publicRpcUrl: 'https://rpc.gnosischain.com/',
     fallbackPublicRpcUrls: [
       'https://rpc.ankr.com/gnosis'
@@ -46,9 +46,9 @@ export const networks: Networks = {
     nativeBridgeUrl: 'https://omni.xdaichain.com/',
     waitConfirmations: 12
   },
-  polygon: {
+  137: {
     name: 'Polygon',
-    networkId: 137,
+    chainId: 137,
     publicRpcUrl: 'https://polygon-rpc.com',
     fallbackPublicRpcUrls: [
       'https://rpc.ankr.com/polygon'

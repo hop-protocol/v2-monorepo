@@ -6,12 +6,12 @@ require('dotenv').config()
 const privateKey = process.env.PRIVATE_KEY
 
 const contractAddresses_v001 = {
-  ethereum: {
+  5: {
     startBlock: 8077320,
     hubCoreMessenger: '0x9827315F7D2B1AAd0aa4705c06dafEE6cAEBF920',
     ethFeeDistributor: '0x8fF09Ff3C87085Fe4607F2eE7514579FE50944C5'
   },
-  optimism: {
+  420: {
     startBlock: 3218800,
     spokeCoreMessenger: '0x4b844c25ef430e71d42eea89d87ffe929f8db927',
     connector: '0x342EA1227fC0e085704D30cd17a16cA98B58D08B'
@@ -19,12 +19,12 @@ const contractAddresses_v001 = {
 }
 
 const contractAddresses_v002 = {
-  ethereum: {
+  5: {
     startBlock: 8095954,
     hubCoreMessenger: '0xE3F4c0B210E7008ff5DE92ead0c5F6A5311C4FDC',
     ethFeeDistributor: '0xf6eED903Ac2A34E115547874761908DD3C5fe4bf'
   },
-  optimism: {
+  420: {
     startBlock: 3218800,
     spokeCoreMessenger: '0xeA35E10f763ef2FD5634dF9Ce9ad00434813bddB',
     connector: '0x6be2E6Ce67dDBCda1BcdDE7D2bdCC50d34A7eD24'
@@ -53,7 +53,7 @@ describe('sdk setup', () => {
     if (shouldSend) {
       for (let i = 0; i < times; i++) {
         const signer = new Wallet(privateKey)
-        const provider = hop.providers.optimism
+        const provider = hop.getRpcProvider(fromChainId)
         const fee = await hop.getMessageFee(fromChainId, toChainId)
         const tx = await signer.connect(provider).sendTransaction({
           to: txData.to,
@@ -69,7 +69,6 @@ describe('sdk setup', () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v001
     })
-    const chain = 'optimism'
     const chainId = 420
     const endBlock = 3218900
     const startBlock = endBlock - 10
@@ -87,7 +86,6 @@ describe('sdk setup', () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v001
     })
-    const chain = 'optimism'
     const chainId = 420
     const endBlock = 3218900
     const startBlock = endBlock - 100
@@ -144,7 +142,6 @@ describe('sdk setup', () => {
       contractAddresses: contractAddresses_v001
     })
     const chainId = 420
-    const chain = 'optimism'
     const endBlock = 3218900
     const startBlock = endBlock - 100
     const events = await hop.getFeesSentToHubEvents(chainId, startBlock, endBlock)
@@ -157,7 +154,6 @@ describe('sdk setup', () => {
       contractAddresses: contractAddresses_v001
     })
     const chainId = 420
-    const chain = 'optimism'
     const endBlock = 3216770
     const startBlock = endBlock - 100
     const events = await hop.getMessageBundledEvents(chainId, startBlock, endBlock)
@@ -173,7 +169,6 @@ describe('sdk setup', () => {
       contractAddresses: contractAddresses_v001
     })
     const chainId = 420
-    const chain = 'optimism'
     const endBlock = 3216770
     const startBlock = endBlock - 100
     const events = await hop.getMessageRelayedEvents(chainId, startBlock, endBlock)
@@ -185,7 +180,6 @@ describe('sdk setup', () => {
       contractAddresses: contractAddresses_v001
     })
     const chainId = 420
-    const chain = 'optimism'
     const endBlock = 3216770
     const startBlock = endBlock - 100
     const events = await hop.getMessageRevertedEvents(chainId, startBlock, endBlock)
@@ -197,7 +191,6 @@ describe('sdk setup', () => {
       contractAddresses: contractAddresses_v001
     })
     const chainId = 420
-    const chain = 'optimism'
     const endBlock = 3216770
     const startBlock = endBlock - 100
     const events = await hop.getMessageSentEvents(chainId, startBlock, endBlock)
@@ -230,7 +223,6 @@ describe('sdk setup', () => {
     const endBlock = 3218900
     const startBlock = endBlock - 100
     const chainId = 420
-    const chain = 'optimism'
     const toChain = 'ethereum'
     const toChainId = 5
     const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(chainId, startBlock, endBlock)
@@ -244,9 +236,9 @@ describe('sdk setup', () => {
     })
     const endBlock = 3218900
     const startBlock = endBlock - 100
-    const chain = 'optimism'
     const fromChainId = 420
     const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(fromChainId, startBlock, endBlock)
+    expect(bundleCommittedEvent).toBeTruthy()
     const amount = await hop.getRelayReward(fromChainId, bundleCommittedEvent)
     console.log(amount)
     expect(typeof amount).toBe('number')
@@ -257,7 +249,6 @@ describe('sdk setup', () => {
     })
     const endBlock = 3218900
     const startBlock = endBlock - 100
-    const chain = 'optimism'
     const fromChainId = 420
     const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(fromChainId, startBlock, endBlock)
     const shouldAttempt = await hop.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent)
@@ -268,8 +259,8 @@ describe('sdk setup', () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v001
     })
-    const chain = 'optimism'
     const fromChainId = 420
+    const toChainId = 5
     const endBlock = 3218900
     const startBlock = endBlock - 100
     const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(fromChainId, startBlock, endBlock)
@@ -280,7 +271,7 @@ describe('sdk setup', () => {
     const shouldSend = false
     if (shouldSend) {
       const signer = new Wallet(privateKey)
-      const provider = hop.providers.ethereum
+      const provider = hop.getRpcProvider(toChainId)
       const tx = await signer.connect(provider).sendTransaction({
         to: txData.to,
         data: txData.data,
@@ -320,4 +311,11 @@ describe('sdk setup', () => {
     console.log(maxBundleMessageCount)
     expect(maxBundleMessageCount).toBe(8)
   }, 60 * 1000)
+  it('getContractAddresses', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v001
+    })
+    const addresses = hop.getContractAddresses()
+    expect(addresses['5'].hubCoreMessenger).toBe('0x9827315F7D2B1AAd0aa4705c06dafEE6cAEBF920')
+  })
 })

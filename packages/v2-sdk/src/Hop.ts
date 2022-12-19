@@ -1,5 +1,5 @@
 import pkg from '../package.json'
-import { BigNumber, providers } from 'ethers'
+import { BigNumber } from 'ethers'
 import { BundleCommitted, BundleCommittedEventFetcher } from './events/BundleCommitted'
 import { BundleForwarded, BundleForwardedEventFetcher } from './events/BundleForwarded'
 import { BundleReceived, BundleReceivedEventFetcher } from './events/BundleReceived'
@@ -29,7 +29,6 @@ type Options = {
 
 export class Hop {
   eventFetcher: EventFetcher
-  providers: Record<string, providers.Provider>
   network: string
   batchBlocks?: number
   contractAddresses: Record<string, any> = {
@@ -37,16 +36,18 @@ export class Hop {
     goerli: goerliAddresses
   }
 
+  l1ChainId : number
+
   constructor (network: string = 'goerli', options?: Options) {
     if (!['mainnet', 'goerli'].includes(network)) {
       throw new Error(`Invalid network: ${network}`)
     }
     this.network = network
-    this.providers = {
-      ethereum: getProvider(network, 'ethereum'),
-      optimism: getProvider(network, 'optimism'),
-      arbitrum: getProvider(network, 'arbitrum'),
-      polygon: getProvider(network, 'polygon')
+
+    if (this.network === 'mainnet') {
+      this.l1ChainId = 1
+    } else if (this.network === 'goerli') {
+      this.l1ChainId = 5
     }
 
     if (options?.batchBlocks) {
@@ -62,19 +63,23 @@ export class Hop {
     return pkg.version
   }
 
-  getSpokeMessageBridgeContractAddress (chain: string): string {
-    if (!chain) {
-      throw new Error('chain is required')
+  getRpcProvider (chainId: number) {
+    return getProvider(this.network, chainId)
+  }
+
+  getSpokeMessageBridgeContractAddress (chainId: number): string {
+    if (!chainId) {
+      throw new Error('chainId is required')
     }
-    const address = this.contractAddresses[this.network]?.[chain]?.spokeCoreMessenger
+    const address = this.contractAddresses[this.network]?.[chainId]?.spokeCoreMessenger
     return address
   }
 
-  getHubMessageBridgeContractAddress (chain: string): string {
-    if (!chain) {
-      throw new Error('chain is required')
+  getHubMessageBridgeContractAddress (chainId: number): string {
+    if (!chainId) {
+      throw new Error('chainId is required')
     }
-    const address = this.contractAddresses[this.network]?.[chain]?.hubCoreMessenger
+    const address = this.contractAddresses[this.network]?.[chainId]?.hubCoreMessenger
     return address
   }
 
@@ -85,12 +90,11 @@ export class Hop {
     if (!startBlock) {
       throw new Error('startBlock is required')
     }
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
+    const provider = this.getRpcProvider(chainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
-    const address = this.getSpokeMessageBridgeContractAddress(chain)
+    const address = this.getSpokeMessageBridgeContractAddress(chainId)
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
@@ -105,12 +109,11 @@ export class Hop {
     if (!startBlock) {
       throw new Error('startBlock is required')
     }
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
+    const provider = this.getRpcProvider(chainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
-    const address = this.getHubMessageBridgeContractAddress(chain)
+    const address = this.getHubMessageBridgeContractAddress(chainId)
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
@@ -125,12 +128,11 @@ export class Hop {
     if (!startBlock) {
       throw new Error('startBlock is required')
     }
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
+    const provider = this.getRpcProvider(chainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
-    const address = this.getHubMessageBridgeContractAddress(chain)
+    const address = this.getHubMessageBridgeContractAddress(chainId)
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
@@ -145,12 +147,11 @@ export class Hop {
     if (!startBlock) {
       throw new Error('startBlock is required')
     }
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
+    const provider = this.getRpcProvider(chainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
-    const address = this.getHubMessageBridgeContractAddress(chain)
+    const address = this.getHubMessageBridgeContractAddress(chainId)
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
@@ -165,12 +166,11 @@ export class Hop {
     if (!startBlock) {
       throw new Error('startBlock is required')
     }
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
+    const provider = this.getRpcProvider(chainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
-    const address = this.getSpokeMessageBridgeContractAddress(chain)
+    const address = this.getSpokeMessageBridgeContractAddress(chainId)
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
@@ -185,12 +185,11 @@ export class Hop {
     if (!startBlock) {
       throw new Error('startBlock is required')
     }
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
+    const provider = this.getRpcProvider(chainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
-    const address = this.getSpokeMessageBridgeContractAddress(chain)
+    const address = this.getSpokeMessageBridgeContractAddress(chainId)
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
@@ -205,12 +204,11 @@ export class Hop {
     if (!startBlock) {
       throw new Error('startBlock is required')
     }
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
+    const provider = this.getRpcProvider(chainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
-    const address = this.getSpokeMessageBridgeContractAddress(chain)
+    const address = this.getSpokeMessageBridgeContractAddress(chainId)
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
@@ -225,12 +223,11 @@ export class Hop {
     if (!startBlock) {
       throw new Error('startBlock is required')
     }
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
+    const provider = this.getRpcProvider(chainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
-    const address = this.getSpokeMessageBridgeContractAddress(chain)
+    const address = this.getSpokeMessageBridgeContractAddress(chainId)
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
@@ -245,12 +242,11 @@ export class Hop {
     if (!startBlock) {
       throw new Error('startBlock is required')
     }
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
+    const provider = this.getRpcProvider(chainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
-    const address = this.getSpokeMessageBridgeContractAddress(chain)
+    const address = this.getSpokeMessageBridgeContractAddress(chainId)
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
@@ -265,8 +261,7 @@ export class Hop {
     if (!startBlock) {
       throw new Error('startBlock is required')
     }
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
+    const provider = this.getRpcProvider(chainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
@@ -282,55 +277,55 @@ export class Hop {
     const map : any = {}
     for (const eventName of eventNames) {
       if (eventName === 'BundleCommitted') {
-        const address = this.getSpokeMessageBridgeContractAddress(chain)
+        const address = this.getSpokeMessageBridgeContractAddress(chainId)
         const _eventFetcher = new BundleCommittedEventFetcher(provider, chainId, this.batchBlocks, address)
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
         map[filter.topics[0] as string] = _eventFetcher
       } else if (eventName === 'BundleForwared') {
-        const address = this.getHubMessageBridgeContractAddress(chain)
+        const address = this.getHubMessageBridgeContractAddress(chainId)
         const _eventFetcher = new BundleForwardedEventFetcher(provider, chainId, this.batchBlocks, address)
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
         map[filter.topics[0] as string] = _eventFetcher
       } else if (eventName === 'BundleReceived') {
-        const address = this.getHubMessageBridgeContractAddress(chain)
+        const address = this.getHubMessageBridgeContractAddress(chainId)
         const _eventFetcher = new BundleReceivedEventFetcher(provider, chainId, this.batchBlocks, address)
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
         map[filter.topics[0] as string] = _eventFetcher
       } else if (eventName === 'BundleSet') {
-        const address = this.getHubMessageBridgeContractAddress(chain)
+        const address = this.getHubMessageBridgeContractAddress(chainId)
         const _eventFetcher = new BundleSetEventFetcher(provider, chainId, this.batchBlocks, address)
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
         map[filter.topics[0] as string] = _eventFetcher
       } else if (eventName === 'FeesSentToHub') {
-        const address = this.getSpokeMessageBridgeContractAddress(chain)
+        const address = this.getSpokeMessageBridgeContractAddress(chainId)
         const _eventFetcher = new FeesSentToHubEventFetcher(provider, chainId, this.batchBlocks, address)
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
         map[filter.topics[0] as string] = _eventFetcher
       } else if (eventName === 'MessageBundled') {
-        const address = this.getSpokeMessageBridgeContractAddress(chain)
+        const address = this.getSpokeMessageBridgeContractAddress(chainId)
         const _eventFetcher = new MessageBundledEventFetcher(provider, chainId, this.batchBlocks, address)
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
         map[filter.topics[0] as string] = _eventFetcher
       } else if (eventName === 'MessageRelayed') {
-        const address = this.getSpokeMessageBridgeContractAddress(chain)
+        const address = this.getSpokeMessageBridgeContractAddress(chainId)
         const _eventFetcher = new MessageRelayedEventFetcher(provider, chainId, this.batchBlocks, address)
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
         map[filter.topics[0] as string] = _eventFetcher
       } else if (eventName === 'MessageReverted') {
-        const address = this.getSpokeMessageBridgeContractAddress(chain)
+        const address = this.getSpokeMessageBridgeContractAddress(chainId)
         const _eventFetcher = new MessageRevertedEventFetcher(provider, chainId, this.batchBlocks, address)
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
         map[filter.topics[0] as string] = _eventFetcher
       } else if (eventName === 'MessageSent') {
-        const address = this.getSpokeMessageBridgeContractAddress(chain)
+        const address = this.getSpokeMessageBridgeContractAddress(chainId)
         const _eventFetcher = new MessageSentEventFetcher(provider, chainId, this.batchBlocks, address)
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
@@ -371,13 +366,15 @@ export class Hop {
   }
 
   async getSpokeExitTime (fromChainId: number, toChainId: number) {
-    const toChainSlug = this.getChainSlug(toChainId)
-    const provider = this.providers[toChainSlug]
+    const provider = this.getRpcProvider(toChainId)
     if (!provider) {
       throw new Error(`Invalid chain: ${toChainId}`)
     }
 
-    const address = this.getHubMessageBridgeContractAddress(toChainSlug)
+    const address = this.getHubMessageBridgeContractAddress(toChainId)
+    if (!address) {
+      throw new Error(`Invalid chain: ${toChainId}`)
+    }
     const hubMessageBridge = HubMessageBridge__factory.connect(address, provider)
     const exitTime = await hubMessageBridge.getSpokeExitTime(fromChainId)
     const exitTimeSeconds = exitTime.toNumber()
@@ -387,10 +384,9 @@ export class Hop {
   // relayReward = (block.timestamp - relayWindowStart) * feesCollected / relayWindow
   // reference: https://github.com/hop-protocol/contracts-v2/blob/master/contracts/bridge/FeeDistributor/FeeDistributor.sol#L83-L106
   async getRelayReward (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<number> {
-    const fromChainSlug = this.getChainSlug(fromChainId)
-    const provider = this.providers[fromChainSlug]
+    const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
-      throw new Error(`Invalid chain: ${fromChainSlug}`)
+      throw new Error(`Invalid chain: ${fromChainId}`)
     }
     const { commitTime, bundleFees, toChainId } = bundleCommittedEvent
     const feesCollected = Number(formatEther(bundleFees))
@@ -403,10 +399,9 @@ export class Hop {
   }
 
   async getEstimatedTxCostForForwardMessage (chainId: number, bundleCommittedEvent: BundleCommitted): Promise<number> {
-    const chain = this.getChainSlug(chainId)
-    const provider = this.providers[chain]
+    const provider = this.getRpcProvider(chainId)
     if (!provider) {
-      throw new Error(`Invalid chain: ${chain}`)
+      throw new Error(`Invalid chain: ${chainId}`)
     }
     const estimatedGas = BigNumber.from(1_000_000) // TODO
     const gasPrice = await provider.getGasPrice()
@@ -438,7 +433,9 @@ export class Hop {
       throw new Error('expected transaction hash')
     }
 
-    const exitRelayer = new OptimismRelayer(this.network, this.providers.ethereum, this.providers.optimism)
+    const l1Provider = this.getRpcProvider(this.l1ChainId)
+    const l2Provider = this.getRpcProvider(fromChainId)
+    const exitRelayer = new OptimismRelayer(this.network, l1Provider, l2Provider)
     const txData = await exitRelayer.getExitPopulatedTx(transactionHash)
 
     return {
@@ -457,15 +454,14 @@ export class Hop {
     if (!toCalldata) {
       toCalldata = '0x'
     }
-    const fromChainSlug = this.getChainSlug(fromChainId)
-    const provider = this.providers[fromChainSlug]
+    const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Invalid chain: ${fromChainId}`)
     }
 
-    const address = this.getSpokeMessageBridgeContractAddress(fromChainSlug)
+    const address = this.getSpokeMessageBridgeContractAddress(fromChainId)
     if (!address) {
-      throw new Error(`Invalid address: ${fromChainSlug}`)
+      throw new Error(`Invalid address: ${fromChainId}`)
     }
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
     const txData = await spokeMessageBridge.populateTransaction.sendMessage(toChainId, toAddress, toCalldata)
@@ -482,7 +478,7 @@ export class Hop {
     const transactionIndex = event.transactionIndex
     const logIndex = event.logIndex
     const blockNumber = event.blockNumber
-    const { timestamp: blockTimestamp } = await this.getBlock(chainSlug, blockNumber)
+    const { timestamp: blockTimestamp } = await this.getBlock(chainId, blockNumber)
 
     return {
       chainSlug,
@@ -495,12 +491,13 @@ export class Hop {
     }
   }
 
-  async getBlock (chainSlug: string, blockNumber: number): Promise<any> {
-    const cacheKey = `${chainSlug}-${blockNumber}`
+  async getBlock (chainId: number, blockNumber: number): Promise<any> {
+    const cacheKey = `${chainId}-${blockNumber}`
     if (cache[cacheKey]) {
       return cache[cacheKey]
     }
-    const block = await this.providers[chainSlug].getBlock(blockNumber)
+    const provider = this.getRpcProvider(chainId)
+    const block = await provider.getBlock(blockNumber)
     cache[cacheKey] = block
     return block
   }
@@ -522,9 +519,8 @@ export class Hop {
     if (fromChainId === toChainId) {
       throw new Error('fromChainId and toChainId must be different')
     }
-    const chain = this.getChainSlug(fromChainId)
-    const provider = this.providers[chain]
-    const address = this.getSpokeMessageBridgeContractAddress(chain)
+    const provider = this.getRpcProvider(fromChainId)
+    const address = this.getSpokeMessageBridgeContractAddress(fromChainId)
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
     const routeData = await spokeMessageBridge.routeData(toChainId)
 
@@ -552,5 +548,9 @@ export class Hop {
 
   isValidTxHash (txHash: string): boolean {
     return txHash.slice(0, 2) === '0x' && txHash.length === 66
+  }
+
+  getContractAddresses () {
+    return this.contractAddresses[this.network]
   }
 }

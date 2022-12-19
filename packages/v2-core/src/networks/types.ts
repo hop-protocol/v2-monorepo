@@ -1,6 +1,6 @@
 export type Network = {
   name: string
-  networkId: number
+  chainId: number
   publicRpcUrl: string
   fallbackPublicRpcUrls: string[]
   explorerUrls: string[]
@@ -8,10 +8,4 @@ export type Network = {
   waitConfirmations: number
 }
 
-export type Networks = {
-  ethereum: Network
-  arbitrum?: Network
-  optimism?: Network
-  gnosis?: Network
-  polygon?: Network
-}
+export type Networks = Record<string, Network>

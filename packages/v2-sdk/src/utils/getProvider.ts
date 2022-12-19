@@ -1,11 +1,19 @@
 import { goerliNetworks, mainnetNetworks } from '@hop-protocol/v2-core/networks'
 import { providers } from 'ethers'
 
-export function getProvider (network: string, chain: string) {
+export function getProvider (network: string, chainId: number) {
+  let rpcUrl : string
   if (network === 'goerli') {
-    return new providers.JsonRpcProvider((goerliNetworks as any)[chain].publicRpcUrl)
+    rpcUrl = (goerliNetworks as any)[chainId]?.publicRpcUrl
   } else if (network === 'mainnet') {
-    return new providers.JsonRpcProvider((mainnetNetworks as any)[chain].publicRpcUrl)
+    rpcUrl = (mainnetNetworks as any)[chainId]?.publicRpcUrl
+  } else {
+    throw new Error(`Invalid network: ${network}`)
   }
-  throw new Error(`Invalid network: ${network}`)
+
+  if (!rpcUrl) {
+    throw new Error(`Invalid chainId: ${chainId}`)
+  }
+
+  return new providers.JsonRpcProvider(rpcUrl)
 }

@@ -14,8 +14,8 @@ export class Worker {
     this.hop = new Hop('goerli')
     this.indexer = new Indexer({
       startBlocks: {
-        5: goerliAddresses.ethereum.startBlock,
-        420: goerliAddresses.optimism.startBlock
+        5: goerliAddresses['5'].startBlock,
+        420: goerliAddresses['420'].startBlock
       }
     })
   }
@@ -54,7 +54,7 @@ export class Worker {
             shouldAttempt = false
           }
 
-          console.log('shouldAttempt:', shouldAttempt, bundleId, !!bundleForwardedEvent)
+          console.log('shouldAttempt:', shouldAttempt, bundleId, !!bundleSetEvent)
           if (shouldAttempt) {
             const txData = await this.hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedEvent as any)
             console.log('txData', txData)
@@ -72,7 +72,7 @@ export class Worker {
               lastAttemptedAtMs: Date.now()
             })
 
-            const provider = toChainId === 5 ? this.hop.providers.ethereum : this.hop.providers.optimism
+            const provider = this.hop.getRpcProvider(toChainId)
             const tx = await signer?.connect(provider).sendTransaction({
               to: txData.to,
               data: txData.data

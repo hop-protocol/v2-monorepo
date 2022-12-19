@@ -120,7 +120,7 @@ async function main() {
   'console.log(txData)'
   ) : (
   `
-  const provider = new ethers.providers.Web3Provider(window.ethereum, 'any')
+  const provider = new ethers.providers.Web3Provider(window.ethereum)
   const signer = provider.getSigner()
   const tx = await signer.sendTransaction(txData)
   console.log(tx)

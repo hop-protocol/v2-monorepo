@@ -98,7 +98,7 @@ export class Indexer {
         const syncState = await _db.getSyncState(chainId)
         console.log('syncState', eventName, syncState)
 
-        const provider = this.hop.providers[chainId === 5 ? 'ethereum' : 'optimism']
+        const provider = this.hop.getRpcProvider(chainId)
         let startBlock = this.startBlocks[chainId]
         let endBlock = await provider.getBlockNumber()
         if (syncState?.toBlock) {
