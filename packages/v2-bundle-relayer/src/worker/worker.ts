@@ -24,74 +24,78 @@ export class Worker {
     try {
       this.indexer.start()
       await this.indexer.waitForSyncIndex(1)
-      await this.poll()
+      await this.startPoll()
     } catch (err: any) {
       console.error('worker poll error', err)
     }
   }
 
-  async poll () {
+  async startPoll () {
     while (true) {
       try {
-        console.log('poll start')
-        const now = Math.floor(Date.now() / 1000)
-        // TODO: only return if bundle is not set
-        const items = await db.bundleCommittedEventsDb.getFromRange({
-          lt: now,
-          gt: now - (604800 * 2)
-        })
-        console.log('items', items.length)
-
-        for (const bundleCommittedEvent of items) {
-          const { bundleId, toChainId } = bundleCommittedEvent
-          const { chainId: fromChainId } = bundleCommittedEvent.context
-          console.log('checking shouldAttemp for bundle', bundleId)
-          let shouldAttempt = await this.hop.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent as any)
-
-          const bundleSetEvent = await db.bundleSetEventsDb.getEvent(bundleId)
-          if (bundleSetEvent) {
-            console.log('found bundleSetEvent for bundle')
-            shouldAttempt = false
-          }
-
-          console.log('shouldAttempt:', shouldAttempt, bundleId, !!bundleSetEvent)
-          if (shouldAttempt) {
-            const txData = await this.hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedEvent as any)
-            console.log('txData', txData)
-
-            const txState = await db.txStateDb.getTxState(bundleId)
-            const delayMs = 10 * 60 * 1000 // 10min
-            const recentlyAttempted = txState && (txState.lastAttemptedAtMs + delayMs > Date.now())
-            const isOk = !txState || !recentlyAttempted
-            if (!isOk) {
-              throw new Error(`not ok, recently attempted: ${recentlyAttempted}`)
-            }
-
-            await db.txStateDb.putTxState(bundleId, {
-              id: bundleId,
-              lastAttemptedAtMs: Date.now()
-            })
-
-            const provider = this.hop.getRpcProvider(toChainId)
-            const tx = await signer?.connect(provider).sendTransaction({
-              to: txData.to,
-              data: txData.data
-            })
-
-            console.log('sent tx', tx?.hash)
-
-            await db.txStateDb.updateTxState(bundleId, {
-              id: bundleId,
-              transactionHash: tx?.hash
-            })
-            console.log('updated txState', tx?.hash)
-          }
-        }
+        await this.poll()
       } catch (err: any) {
         console.error(err)
       }
 
       await wait(this.pollIntervalMs)
+    }
+  }
+
+  async poll () {
+    console.log('poll start')
+    const now = Math.floor(Date.now() / 1000)
+    // TODO: only return if bundle is not set
+    const items = await db.bundleCommittedEventsDb.getFromRange({
+      lt: now,
+      gt: now - (604800 * 2)
+    })
+    console.log('items', items.length)
+
+    for (const bundleCommittedEvent of items) {
+      const { bundleId, toChainId } = bundleCommittedEvent
+      const { chainId: fromChainId } = bundleCommittedEvent.context
+      console.log('checking shouldAttemp for bundle', bundleId)
+      let shouldAttempt = await this.hop.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent as any)
+
+      const bundleSetEvent = await db.bundleSetEventsDb.getEvent(bundleId)
+      if (bundleSetEvent) {
+        console.log('found bundleSetEvent for bundle')
+        shouldAttempt = false
+      }
+
+      console.log('shouldAttempt:', shouldAttempt, bundleId, !!bundleSetEvent)
+      if (shouldAttempt) {
+        const txData = await this.hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedEvent as any)
+        console.log('txData', txData)
+
+        const txState = await db.txStateDb.getTxState(bundleId)
+        const delayMs = 10 * 60 * 1000 // 10min
+        const recentlyAttempted = txState && (txState.lastAttemptedAtMs + delayMs > Date.now())
+        const isOk = !txState || !recentlyAttempted
+        if (!isOk) {
+          throw new Error(`not ok, recently attempted: ${recentlyAttempted}`)
+        }
+
+        await db.txStateDb.putTxState(bundleId, {
+          id: bundleId,
+          lastAttemptedAtMs: Date.now()
+        })
+
+        const provider = this.hop.getRpcProvider(toChainId)
+        const tx = await signer?.connect(provider).sendTransaction({
+          to: txData.to,
+          data: txData.data
+        })
+
+        console.log('sent tx', tx?.hash)
+
+        await db.txStateDb.updateTxState(bundleId, {
+          id: bundleId,
+          transactionHash: tx?.hash
+        })
+        console.log('updated txState', tx?.hash)
+      }
     }
   }
 }

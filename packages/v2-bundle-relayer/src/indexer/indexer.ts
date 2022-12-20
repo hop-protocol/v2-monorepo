@@ -24,10 +24,11 @@ export class Indexer {
   paused: boolean = false
   syncIndex: number = 0
   db = db
+  eventsToSync: Record<string, EventsBaseDb<any>>
 
   constructor (options?: Options) {
     this.hop = new Hop('goerli', {
-      batchBlocks: 10_000
+      batchBlocks: 2_000
     })
     if (options?.startBlocks) {
       this.startBlocks = options.startBlocks
@@ -37,6 +38,18 @@ export class Indexer {
     }
     if (options?.dbPath) {
       this.db.setDbPath(options.dbPath)
+    }
+
+    this.eventsToSync = {
+      BundleCommitted: this.db.bundleCommittedEventsDb,
+      BundleForwarded: this.db.bundleForwardedEventsDb, // hub
+      BundleReceived: this.db.bundleReceivedEventsDb, // hub
+      BundleSet: this.db.bundleSetEventsDb, // hub
+      FeesSentToHub: this.db.feesSentToHubEventsDb,
+      MessageBundled: this.db.messageBundledEventsDb,
+      MessageRelayed: this.db.messageRelayedEventsDb,
+      MessageReverted: this.db.messageRevertedEventsDb,
+      MessageSent: this.db.messageSentEventsDb
     }
   }
 
@@ -66,58 +79,51 @@ export class Indexer {
   async poll () {
     console.log('poll start')
 
-    const eventsToSync: Record<string, EventsBaseDb<any>> = {
-      BundleCommitted: this.db.bundleCommittedEventsDb,
-      BundleForwarded: this.db.bundleForwardedEventsDb, // hub
-      BundleReceived: this.db.bundleReceivedEventsDb, // hub
-      BundleSet: this.db.bundleSetEventsDb, // hub
-      FeesSentToHub: this.db.feesSentToHubEventsDb,
-      MessageBundled: this.db.messageBundledEventsDb,
-      MessageRelayed: this.db.messageRelayedEventsDb,
-      MessageReverted: this.db.messageRevertedEventsDb,
-      MessageSent: this.db.messageSentEventsDb
-    }
-
-    for (const eventName in eventsToSync) {
-      const _db = eventsToSync[eventName]
+    for (const eventName in this.eventsToSync) {
+      const _db = this.eventsToSync[eventName]
       for (const _chainId in this.chainIds) {
         const chainId = Number(_chainId)
-        const isL1 = this.getIsL1(chainId)
-        const hubEvents = ['BundleForwarded', 'BundleReceived', 'BundleSet']
-        if (hubEvents.includes(eventName)) {
-          if (!isL1) {
-            continue
-          }
-        } else {
-          if (isL1) {
-            continue
-          }
-        }
 
-        // await _db.resetSyncState(chainId)
-        const syncState = await _db.getSyncState(chainId)
-        console.log('syncState', eventName, syncState)
-
-        const provider = this.hop.getRpcProvider(chainId)
-        let startBlock = this.startBlocks[chainId]
-        let endBlock = await provider.getBlockNumber()
-        if (syncState?.toBlock) {
-          startBlock = syncState.toBlock + 1
-          endBlock = await provider.getBlockNumber()
-        }
-
-        console.log('get', eventName, chainId, startBlock, endBlock)
-        const events = await this.hop.getEvents(eventName, chainId, startBlock, endBlock)
-        console.log('events', eventName, events.length)
-        for (const event of events) {
-          const key = _db.getKeyStringFromEvent(event)!
-          await _db.updateEvent(key, event)
-        }
-        await _db.putSyncState(chainId, { fromBlock: startBlock, toBlock: endBlock })
+        await this.syncChainEvents(chainId, eventName, _db)
       }
     }
     this.syncIndex++
     console.log('poll done')
+  }
+
+  async syncChainEvents (chainId: number, eventName: string, _db: EventsBaseDb<any>) {
+    const isL1 = this.getIsL1(chainId)
+    const hubEvents = ['BundleForwarded', 'BundleReceived', 'BundleSet']
+    if (hubEvents.includes(eventName)) {
+      if (!isL1) {
+        return
+      }
+    } else {
+      if (isL1) {
+        return
+      }
+    }
+
+    // await _db.resetSyncState(chainId)
+    const syncState = await _db.getSyncState(chainId)
+    console.log('syncState', eventName, syncState)
+
+    const provider = this.hop.getRpcProvider(chainId)
+    let startBlock = this.startBlocks[chainId]
+    let endBlock = await provider.getBlockNumber()
+    if (syncState?.toBlock) {
+      startBlock = syncState.toBlock + 1
+      endBlock = await provider.getBlockNumber()
+    }
+
+    console.log('get', eventName, chainId, startBlock, endBlock)
+    const events = await this.hop.getEvents(eventName, chainId, startBlock, endBlock)
+    console.log('events', eventName, events.length)
+    for (const event of events) {
+      const key = _db.getKeyStringFromEvent(event)!
+      await _db.updateEvent(key, event)
+    }
+    await _db.putSyncState(chainId, { fromBlock: startBlock, toBlock: endBlock })
   }
 
   async waitForSyncIndex (syncIndex: number): Promise<boolean> {
