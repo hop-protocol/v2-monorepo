@@ -9,6 +9,7 @@ import { EventContext } from './events/types'
 import { EventFetcher } from './eventFetcher'
 import { FeesSentToHub, FeesSentToHubEventFetcher } from './events/FeesSentToHub'
 import { HubMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/HubMessageBridge__factory'
+import { MerkleTree } from './utils/MerkleTree'
 import { MessageBundled, MessageBundledEventFetcher } from './events/MessageBundled'
 import { MessageRelayed, MessageRelayedEventFetcher } from './events/MessageRelayed'
 import { MessageReverted, MessageRevertedEventFetcher } from './events/MessageReverted'
@@ -22,9 +23,16 @@ import { goerliAddresses } from '@hop-protocol/v2-core/addresses'
 
 const cache : Record<string, any> = {}
 
-type Options = {
+export type Options = {
   batchBlocks?: number,
   contractAddresses?: Record<string, any>
+}
+
+export type BundleProof = {
+  bundleId: string
+  treeIndex: number
+  siblings: string[]
+  totalLeaves: number
 }
 
 export class Hop {
@@ -571,5 +579,151 @@ export class Hop {
     }
 
     return BigNumber.from(entity.root).gt(0) && entity.fromChainId.toNumber() === fromChainId
+  }
+
+  async getMessageSentEventFromTransactionHash (fromChainId: number, transactionHash: string) {
+    const provider = this.getRpcProvider(fromChainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${fromChainId}`)
+    }
+    const receipt = await provider.getTransactionReceipt(transactionHash)
+    const address = this.getSpokeMessageBridgeContractAddress(fromChainId)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${fromChainId}`)
+    }
+    const eventFetcher = new MessageSentEventFetcher(provider, fromChainId, this.batchBlocks, address)
+    const filter = eventFetcher.getFilter()
+    for (const log of receipt.logs) {
+      if (log.topics[0] === filter.topics[0]) {
+        const decoded = eventFetcher.toTypedEvent(log)
+        return decoded
+      }
+    }
+    return null
+  }
+
+  async getMessageBundledEventFromTransactionHash (fromChainId: number, transactionHash: string) {
+    const provider = this.getRpcProvider(fromChainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${fromChainId}`)
+    }
+    const receipt = await provider.getTransactionReceipt(transactionHash)
+    const address = this.getSpokeMessageBridgeContractAddress(fromChainId)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${fromChainId}`)
+    }
+    const eventFetcher = new MessageBundledEventFetcher(provider, fromChainId, this.batchBlocks, address)
+    const filter = eventFetcher.getFilter()
+    for (const log of receipt.logs) {
+      if (log.topics[0] === filter.topics[0]) {
+        const decoded = eventFetcher.toTypedEvent(log)
+        return decoded
+      }
+    }
+    return null
+  }
+
+  async getMessageIdFromTransactionHash (fromChainId: number, transactionHash: string) {
+    const event = await this.getMessageSentEventFromTransactionHash(fromChainId, transactionHash)
+    if (!event) {
+      throw new Error('event not found for transaction hash')
+    }
+
+    return event.messageId
+  }
+
+  async getMessageBundleIdFromTransactionHash (fromChainId: number, transactionHash: string): Promise<string> {
+    const event = await this.getMessageBundledEventFromTransactionHash(fromChainId, transactionHash)
+    if (!event) {
+      throw new Error('event not found for transaction hash')
+    }
+
+    return event.bundleId
+  }
+
+  async getMessageTreeIndexFromTransactionHash (fromChainId: number, transactionHash: string): Promise<number> {
+    const event = await this.getMessageBundledEventFromTransactionHash(fromChainId, transactionHash)
+    if (!event) {
+      throw new Error('event not found for transaction hash')
+    }
+
+    return event.treeIndex
+  }
+
+  async getMessageBundledEventsForBundleId (fromChainId: number, bundleId: string): Promise<any[]> {
+    const provider = this.getRpcProvider(fromChainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${fromChainId}`)
+    }
+    const address = this.getSpokeMessageBridgeContractAddress(fromChainId)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${fromChainId}`)
+    }
+    const eventFetcher = new MessageBundledEventFetcher(provider, fromChainId, this.batchBlocks, address)
+    const filter = eventFetcher.getBundleIdFilter(bundleId)
+    const endBlock = await provider.getBlockNumber()
+    const startBlock = endBlock - 100_000
+    const events = eventFetcher._getEvents(filter, startBlock, endBlock)
+    return events
+  }
+
+  async getMessageIdsForBundleId (fromChainId: number, bundleId: string): Promise<string[]> {
+    const messageEvents = await this.getMessageBundledEventsForBundleId(fromChainId, bundleId)
+    const messageIds = messageEvents.map((item: any) => item.messageId)
+    return messageIds
+  }
+
+  getMerkleProofForMessageId (messageIds: string[], messageId: string) {
+    const tree = MerkleTree.from(messageIds)
+    const proof = tree.getHexProof(messageId)
+    return proof
+  }
+
+  async getBundleProof (fromChainId: number, transactionHash: string): Promise<BundleProof> {
+    const provider = this.getRpcProvider(fromChainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${fromChainId}`)
+    }
+
+    // TODO: handle case for when multiple message events in single transaction
+    const treeIndex = await this.getMessageTreeIndexFromTransactionHash(fromChainId, transactionHash)
+    const bundleId = await this.getMessageBundleIdFromTransactionHash(fromChainId, transactionHash)
+    const messageId = await this.getMessageIdFromTransactionHash(fromChainId, transactionHash)
+    const messageIds = await this.getMessageIdsForBundleId(fromChainId, bundleId)
+    const siblings = this.getMerkleProofForMessageId(messageIds, messageId)
+    const totalLeaves = messageIds.length
+
+    return {
+      bundleId,
+      treeIndex,
+      siblings,
+      totalLeaves
+    }
+  }
+
+  async getRelayMessagePopulatedTx (fromChainId: number, toChainId: number, fromAddress: string, toAddress: string, toCalldata: string, bundleProof: BundleProof) {
+    const provider = this.getRpcProvider(toChainId)
+    if (!provider) {
+      throw new Error(`Invalid chain: ${toChainId}`)
+    }
+
+    const address = this.getHubMessageBridgeContractAddress(toChainId)
+    if (!address) {
+      throw new Error(`Invalid chain: ${toChainId}`)
+    }
+
+    const hubMessageBridge = HubMessageBridge__factory.connect(address, provider)
+    const txData = await hubMessageBridge.populateTransaction.relayMessage(
+      fromChainId,
+      fromAddress,
+      toAddress,
+      toCalldata,
+      bundleProof
+    )
+
+    return {
+      ...txData,
+      chainId: toChainId
+    }
   }
 }

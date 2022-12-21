@@ -338,4 +338,140 @@ describe('sdk setup', () => {
     const isSet = await hop.getIsBundleSet(fromChainId, toChainId, bundleId)
     expect(isSet).toBe(true)
   })
+  it('getMessageSentEventFromTransactionHash', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
+    const fromChainId = 420
+    const event = await hop.getMessageSentEventFromTransactionHash(fromChainId, transactionHash)
+    console.log(event)
+    expect(event).toBeTruthy()
+  })
+  it('getMessageBundledEventFromTransactionHash', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
+    const fromChainId = 420
+    const event = await hop.getMessageBundledEventFromTransactionHash(fromChainId, transactionHash)
+    console.log(event)
+    expect(event).toBeTruthy()
+  })
+  it('getMessageBundleIdFromTransactionHash', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
+    const fromChainId = 420
+    const bundleId = await hop.getMessageBundleIdFromTransactionHash(fromChainId, transactionHash)
+    console.log(bundleId)
+    expect(bundleId).toBe('0x5e26c4282d410e7e0c892561566ce0a6522f4762de1fc59d9bfba068890d9f7a')
+  })
+  it('getMessageTreeIndexFromTransactionHash', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
+    const fromChainId = 420
+    const treeIndex = await hop.getMessageTreeIndexFromTransactionHash(fromChainId, transactionHash)
+    console.log(treeIndex)
+    expect(treeIndex).toBe(7)
+  })
+  it('getMessageIdFromTransactionHash', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
+    const fromChainId = 420
+    const messageId = await hop.getMessageIdFromTransactionHash(fromChainId, transactionHash)
+    console.log(messageId)
+    expect(messageId).toBe('0xf0d21b61d0b49b40caf94be6bef72760e5a7b154d59f7ce7b06036718f55fecf')
+  })
+  it('getMessageBundledEventsForBundleId', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const fromChainId = 420
+    const bundleId = '0x5e26c4282d410e7e0c892561566ce0a6522f4762de1fc59d9bfba068890d9f7a'
+    const events = await hop.getMessageBundledEventsForBundleId(fromChainId, bundleId)
+    console.log(events)
+    expect(events.length).toBe(8)
+  }, 5 * 60 * 1000)
+  it('getMessageIdsForBundleId', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const fromChainId = 420
+    const bundleId = '0x5e26c4282d410e7e0c892561566ce0a6522f4762de1fc59d9bfba068890d9f7a'
+    const messageIds = await hop.getMessageIdsForBundleId(fromChainId, bundleId)
+    console.log(messageIds)
+    expect(messageIds.length).toBe(8)
+  }, 5 * 60 * 1000)
+  it('getMerkleProofForMessageId', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const messageIds = [
+      '0x949e97cfdf880e647b5d52cf43efac927ef93a6db53fa5594f8c66b03055929e',
+      '0xe66de037c45650911138e7337a4246c45c662e2b9dd3c12ff2a5d054a62534bc',
+      '0x68fa511b02dcda258728d758f34b274841c0462fb26cb55af3096f6be2c5f3e2',
+      '0xf067644936a2986c6527109e187e6686b0ce6ec998da45ad169e3a646570dfd7',
+      '0xb8219286d809fb60e8f14551543b468af59001c9ec7a766d16a0ab39cfe7d5ee',
+      '0x29744fe90f14f9ffad620b97a353661c6709fc7212d793df7435c218677b46b4',
+      '0x03a110400ca2f3b59f856b6d839f3be1bcfc06f9b0ff3177f9fd8fb3138df3cd',
+      '0xf0d21b61d0b49b40caf94be6bef72760e5a7b154d59f7ce7b06036718f55fecf'
+    ]
+    const messageId = '0xf0d21b61d0b49b40caf94be6bef72760e5a7b154d59f7ce7b06036718f55fecf'
+    const proof = hop.getMerkleProofForMessageId(messageIds, messageId)
+    console.log(proof)
+    expect(proof.length).toBe(3)
+  }, 5 * 60 * 1000)
+  it('getBundleProof', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
+    const fromChainId = 420
+    const bundleProof = await hop.getBundleProof(fromChainId, transactionHash)
+    console.log(bundleProof)
+    expect(bundleProof).toBeTruthy()
+  }, 5 * 60 * 1000)
+  it('getRelayMessagePopulatedTx', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
+    const fromChainId = 420
+    const toChainId = 5
+
+    const fromAddress = '0x75f222420c75da8a59091a23368f97de43f54d9b'
+    const toAddress = '0x0000000000000000000000000000000000000000'
+    const toCalldata = '0x'
+
+    const bundleProof = {
+      bundleId: '0x5e26c4282d410e7e0c892561566ce0a6522f4762de1fc59d9bfba068890d9f7a',
+      treeIndex: 7,
+      siblings: [
+        '0x03a110400ca2f3b59f856b6d839f3be1bcfc06f9b0ff3177f9fd8fb3138df3cd',
+        '0x0ac703d67cf8f7a0fe1df5a2ed9ee5320eb5084e624b0b2d36ebad8e0cfc48fe',
+        '0xdee34a02f502e70448801278444d804d419198bba994225d451bacf192a0ac74'
+      ],
+      totalLeaves: 8
+    }
+    const txData = await hop.getRelayMessagePopulatedTx(fromChainId, toChainId, fromAddress, toAddress, toCalldata, bundleProof)
+    console.log(txData)
+    expect(txData).toBeTruthy()
+    const shouldSend = false
+    if (shouldSend) {
+      const signer = new Wallet(privateKey)
+      const provider = hop.getRpcProvider(toChainId)
+      const tx = await signer.connect(provider).sendTransaction({
+        to: txData.to,
+        data: txData.data
+      })
+      console.log(tx)
+      expect(tx.hash).toBeTruthy()
+    }
+  }, 5 * 60 * 1000)
 })
