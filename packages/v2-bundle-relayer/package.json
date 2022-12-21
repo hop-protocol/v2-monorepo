@@ -34,7 +34,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@hop-protocol/v2-sdk": "0.0.0-beta.6",
+    "@hop-protocol/v2-sdk": "0.0.0-beta.7",
     "@hop-protocol/v2-core": "0.0.0-beta.2",
     "@ethersproject/hdnode": "5.0.9",
     "@slack/web-api": "6.7.2",
