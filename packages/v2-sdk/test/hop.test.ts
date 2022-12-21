@@ -318,4 +318,24 @@ describe('sdk setup', () => {
     const addresses = hop.getContractAddresses()
     expect(addresses['5'].hubCoreMessenger).toBe('0x9827315F7D2B1AAd0aa4705c06dafEE6cAEBF920')
   })
+  it('isBundleSet - false', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const bundleId = '0x5e26c4282d410e7e0c892561566ce0a6522f4762de1fc59d9bfba068890d9123'
+    const fromChainId = 420
+    const toChainId = 5
+    const isSet = await hop.getIsBundleSet(fromChainId, toChainId, bundleId)
+    expect(isSet).toBe(false)
+  })
+  it('isBundleSet - true', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const bundleId = '0x5e26c4282d410e7e0c892561566ce0a6522f4762de1fc59d9bfba068890d9f75'
+    const fromChainId = 420
+    const toChainId = 5
+    const isSet = await hop.getIsBundleSet(fromChainId, toChainId, bundleId)
+    expect(isSet).toBe(true)
+  })
 })

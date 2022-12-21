@@ -145,8 +145,10 @@ export class EventFetcher {
 
   private async parallelFetch (promiseFns: any[]) {
     const events: any[] = []
+    let i = 1
     await promiseQueue(promiseFns, async (fn: any) => {
       const batchedEvents = await fn()
+      console.log(`got batch ${i++}/${promiseFns.length}`)
       events.push(...batchedEvents)
     }, { concurrency: 20 })
     return events

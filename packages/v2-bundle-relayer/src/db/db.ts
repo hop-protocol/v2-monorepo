@@ -8,11 +8,12 @@ import { MessageBundledEventsDb } from './eventsDb/MessageBundledEventsDb'
 import { MessageRelayedEventsDb } from './eventsDb/MessageRelayedEventsDb'
 import { MessageRevertedEventsDb } from './eventsDb/MessageRevertedEventsDb'
 import { MessageSentEventsDb } from './eventsDb/MessageSentEventsDb'
+import { RelayableBundlesDb } from './relayableBundlesDb/RelayableBundlesDb'
 import { TxStateDb } from './txStateDb/TxStateDb'
 import { dbPath as _configDbPath } from '../config'
 
 let configDbPath = _configDbPath
-const instances: Record<string, EventsBaseDb<any> | TxStateDb> = {}
+const instances: Record<string, EventsBaseDb<any> | TxStateDb | RelayableBundlesDb> = {}
 
 function getDb (DbClass: any) {
   const dbName = DbClass.name
@@ -61,5 +62,12 @@ export const db = {
   },
   get txStateDb (): TxStateDb {
     return getDb(TxStateDb)
+  },
+  get relayableBundlesDb (): RelayableBundlesDb {
+    const _db = getDb(RelayableBundlesDb)
+    if (!_db.otherDbs) {
+      _db.otherDbs = db
+    }
+    return _db
   }
 }

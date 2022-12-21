@@ -272,7 +272,8 @@ export class Hop {
 
     const filters :any[] = []
     const eventFetcher = new EventFetcher({
-      provider
+      provider,
+      batchBlocks: this.batchBlocks
     })
     const map : any = {}
     for (const eventName of eventNames) {
@@ -552,5 +553,23 @@ export class Hop {
 
   getContractAddresses () {
     return this.contractAddresses[this.network]
+  }
+
+  async getIsBundleSet (fromChainId: number, toChainId: number, bundleId: string) {
+    const provider = this.getRpcProvider(toChainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${toChainId}`)
+    }
+    const address = this.getHubMessageBridgeContractAddress(toChainId)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${toChainId}`)
+    }
+    const hubMessageBridge = HubMessageBridge__factory.connect(address, provider)
+    const entity = await hubMessageBridge.bundles(bundleId)
+    if (!entity) {
+      return false
+    }
+
+    return BigNumber.from(entity.root).gt(0) && entity.fromChainId.toNumber() === fromChainId
   }
 }

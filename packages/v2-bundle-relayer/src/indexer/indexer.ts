@@ -14,7 +14,7 @@ type Options = {
 
 export class Indexer {
   hop: Hop
-  pollIntervalMs: number = 1 * 60 * 1000
+  pollIntervalMs: number = 10 * 1000
   startBlocks: StartBlocks = {}
   chainIds: any = {
     5: true, // goerli
@@ -28,7 +28,7 @@ export class Indexer {
 
   constructor (options?: Options) {
     this.hop = new Hop('goerli', {
-      batchBlocks: 2_000
+      batchBlocks: 10_000
     })
     if (options?.startBlocks) {
       this.startBlocks = options.startBlocks
@@ -79,28 +79,61 @@ export class Indexer {
   async poll () {
     console.log('poll start')
 
+    const events: any[] = []
     for (const eventName in this.eventsToSync) {
       const _db = this.eventsToSync[eventName]
       for (const _chainId in this.chainIds) {
         const chainId = Number(_chainId)
+        // for debugging
+        if (eventName === 'BundleCommitted') {
+          // await _db.resetSyncState(chainId)
+        }
 
-        await this.syncChainEvents(chainId, eventName, _db)
+        // for debugging
+        if (eventName === 'BundleSet') {
+          // await _db.resetSyncState(chainId)
+        }
+        const _events = await this.syncChainEvents(chainId, eventName, _db)
+        events.push(..._events)
       }
     }
+
+    const relayableBundles: any = {}
+
+    for (const event of events) {
+      if (event.eventName === 'BundleCommitted') {
+        relayableBundles[event.bundleId] = true
+      }
+    }
+
+    for (const event of events) {
+      if (event.eventName === 'BundleSet') {
+        relayableBundles[event.bundleId] = false
+      }
+    }
+
+    for (const bundleId in relayableBundles) {
+      if (relayableBundles[bundleId]) {
+        await db.relayableBundlesDb.putItem(bundleId)
+      } else {
+        await db.relayableBundlesDb.deleteItem(bundleId)
+      }
+    }
+
     this.syncIndex++
     console.log('poll done')
   }
 
-  async syncChainEvents (chainId: number, eventName: string, _db: EventsBaseDb<any>) {
+  async syncChainEvents (chainId: number, eventName: string, _db: EventsBaseDb<any>): Promise<any[]> {
     const isL1 = this.getIsL1(chainId)
     const hubEvents = ['BundleForwarded', 'BundleReceived', 'BundleSet']
     if (hubEvents.includes(eventName)) {
       if (!isL1) {
-        return
+        return []
       }
     } else {
       if (isL1) {
-        return
+        return []
       }
     }
 
@@ -124,6 +157,7 @@ export class Indexer {
       await _db.updateEvent(key, event)
     }
     await _db.putSyncState(chainId, { fromBlock: startBlock, toBlock: endBlock })
+    return events
   }
 
   async waitForSyncIndex (syncIndex: number): Promise<boolean> {

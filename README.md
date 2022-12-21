@@ -21,7 +21,7 @@ Install dependencies & link packages
 
 Run sdk app in development
 
-    cd packages/sdk
+    cd packages/v2-sdk
     npm run dev
 
 ## Contributing

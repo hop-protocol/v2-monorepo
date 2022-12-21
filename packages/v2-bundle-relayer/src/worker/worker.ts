@@ -5,9 +5,11 @@ import { db } from '../db'
 import { goerliAddresses } from '@hop-protocol/v2-core/addresses'
 import { signer } from '../signer'
 
+class RelayError extends Error {}
+
 export class Worker {
   hop: Hop
-  pollIntervalMs: number = 1 * 60 * 1000
+  pollIntervalMs: number = 10 * 1000
   indexer: Indexer
 
   constructor () {
@@ -35,7 +37,11 @@ export class Worker {
       try {
         await this.poll()
       } catch (err: any) {
-        console.error(err)
+        if (err instanceof RelayError) {
+          console.warn(err.message)
+        } else {
+          console.error(err)
+        }
       }
 
       await wait(this.pollIntervalMs)
@@ -44,37 +50,21 @@ export class Worker {
 
   async poll () {
     console.log('poll start')
-    const now = Math.floor(Date.now() / 1000)
-    // TODO: only return if bundle is not set
-    const items = await db.bundleCommittedEventsDb.getFromRange({
-      lt: now,
-      gt: now - (604800 * 2)
-    })
+    const items = await db.relayableBundlesDb.getItems()
     console.log('items', items.length)
 
     for (const bundleCommittedEvent of items) {
       const { bundleId, toChainId } = bundleCommittedEvent
       const { chainId: fromChainId } = bundleCommittedEvent.context
       console.log('checking shouldAttemp for bundle', bundleId)
-      let shouldAttempt = await this.hop.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent as any)
+      const shouldAttempt = true // await this.hop.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent as any)
 
-      const bundleSetEvent = await db.bundleSetEventsDb.getEvent(bundleId)
-      if (bundleSetEvent) {
-        console.log('found bundleSetEvent for bundle')
-        shouldAttempt = false
-      }
-
-      console.log('shouldAttempt:', shouldAttempt, bundleId, !!bundleSetEvent)
+      console.log('shouldAttempt:', shouldAttempt, bundleId)
       if (shouldAttempt) {
-        const txData = await this.hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedEvent as any)
-        console.log('txData', txData)
-
-        const txState = await db.txStateDb.getTxState(bundleId)
-        const delayMs = 10 * 60 * 1000 // 10min
-        const recentlyAttempted = txState && (txState.lastAttemptedAtMs + delayMs > Date.now())
-        const isOk = !txState || !recentlyAttempted
-        if (!isOk) {
-          throw new Error(`not ok, recently attempted: ${recentlyAttempted}`)
+        const bundleSet = await this.hop.getIsBundleSet(fromChainId, toChainId, bundleId)
+        if (bundleSet) {
+          await db.relayableBundlesDb.deleteItem(bundleId)
+          throw new RelayError('bundle already set')
         }
 
         await db.txStateDb.putTxState(bundleId, {
@@ -82,11 +72,30 @@ export class Worker {
           lastAttemptedAtMs: Date.now()
         })
 
+        let txData: any
+        try {
+          console.log('getting getBundleExitPopulatedTx')
+          txData = await this.hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedEvent)
+          console.log('txData', txData)
+        } catch (err: any) {
+          if (/unable to find state root batch for tx with hash/.test(err.message)) {
+            throw new RelayError('skipping, not ready yet to be relayed')
+          }
+        }
+
         const provider = this.hop.getRpcProvider(toChainId)
+        if (!signer) {
+          throw new Error('no signer connected')
+        }
+
         const tx = await signer?.connect(provider).sendTransaction({
           to: txData.to,
           data: txData.data
         })
+
+        if (!tx?.hash) {
+          throw new Error('did not send tx')
+        }
 
         console.log('sent tx', tx?.hash)
 
