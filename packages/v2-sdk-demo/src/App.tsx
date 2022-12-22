@@ -13,6 +13,7 @@ import injectedModule from '@web3-onboard/injected-wallets'
 import { SendMessage } from './components/SendMessage'
 import { RelayMessage } from './components/RelayMessage'
 import { RelayBundle } from './components/RelayBundle'
+import { GetBundleProof } from './components/GetBundleProof'
 import { GetEvents } from './components/GetEvents'
 import { GetContractAddresses } from './components/GetContractAddresses'
 import { Hop } from '@hop-protocol/v2-sdk'
@@ -177,6 +178,7 @@ function App () {
 
   const components = [
     <SendMessage signer={wallet} sdk={sdk} onboard={onboard} />,
+    <GetBundleProof sdk={sdk} />,
     <RelayMessage signer={wallet} sdk={sdk} onboard={onboard} />,
     <RelayBundle signer={wallet} sdk={sdk} onboard={onboard} />,
     <GetEvents sdk={sdk} />,

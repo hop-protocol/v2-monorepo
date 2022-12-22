@@ -155,7 +155,7 @@ export function RelayMessage (props: Props) {
           _signer = ethersProvider.getSigner()
         }
 
-        const success = await onboard.setChain({ chainId: Number(fromChainId) })
+        const success = await onboard.setChain({ chainId: Number(toChainId) })
         if (success) {
           const tx = await _signer.sendTransaction(txData)
           setTxHash(tx.hash)
