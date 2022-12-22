@@ -145,7 +145,12 @@ async function main() {
   const endBlock = ${endBlock || 'undefined'}
 
   const hop = new Hop('goerli')
-  const events = await hop.getEvents(eventNames, chainId, startBlock, endBlock)
+  const events = await hop.getEvents(
+    eventNames,
+    chainId,
+    startBlock,
+    endBlock
+  )
   console.log(events)
 }
 
@@ -154,8 +159,11 @@ main().catch(console.error)
 
   return (
     <Box>
-      <Box mb={4}>
+      <Box mb={1}>
         <Typography variant="h5">Get Events</Typography>
+      </Box>
+      <Box mb={4}>
+        <Typography variant="subtitle1">Get decoded events for hub and spoke contracts</Typography>
       </Box>
       <Box width="100%" display="flex" justifyContent="space-between">
         <Box minWidth="400px" mr={4}>
@@ -203,6 +211,9 @@ main().catch(console.error)
           )}
           {!!events && (
             <Box>
+              <Box mb={2}>
+                <Typography variant="body1">Output</Typography>
+              </Box>
               <pre style={{
                 maxWidth: '500px',
                 overflow: 'auto'

@@ -11,6 +11,7 @@ import { useQueryParams } from './hooks/useQueryParams'
 import Onboard from '@web3-onboard/core'
 import injectedModule from '@web3-onboard/injected-wallets'
 import { SendMessage } from './components/SendMessage'
+import { RelayMessage } from './components/RelayMessage'
 import { RelayBundle } from './components/RelayBundle'
 import { GetEvents } from './components/GetEvents'
 import { GetContractAddresses } from './components/GetContractAddresses'
@@ -174,6 +175,14 @@ function App () {
 
   const showAccountInfo = false
 
+  const components = [
+    <SendMessage signer={wallet} sdk={sdk} onboard={onboard} />,
+    <RelayMessage signer={wallet} sdk={sdk} onboard={onboard} />,
+    <RelayBundle signer={wallet} sdk={sdk} onboard={onboard} />,
+    <GetEvents sdk={sdk} />,
+    <GetContractAddresses sdk={sdk} />
+  ]
+
   return (
     <Box p={4} m="0 auto" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
       <Box width="100%" mb={4} display="flex" justifyContent="space-between">
@@ -223,42 +232,19 @@ function App () {
         </Box>
       )}
       <Box width="100%" mb={6} display="flex" flexDirection="column">
-        <Box mb={8}>
-          <Box maxWidth="1400px" m="0 auto">
-            <Card>
-              <Box p={4} minWidth="400px">
-                <SendMessage signer={wallet} sdk={sdk} onboard={onboard} />
+        {components.map((component: any, i: number) => {
+          return (
+            <Box mb={8} key={i}>
+              <Box maxWidth="1400px" m="0 auto">
+                <Card>
+                  <Box p={4} minWidth="400px">
+                    {component}
+                  </Box>
+                </Card>
               </Box>
-            </Card>
-          </Box>
-        </Box>
-        <Box mb={8}>
-          <Box maxWidth="1400px" m="0 auto">
-            <Card>
-              <Box p={4} minWidth="400px">
-                <RelayBundle signer={wallet} sdk={sdk} onboard={onboard} />
-              </Box>
-            </Card>
-          </Box>
-        </Box>
-        <Box mb={8}>
-          <Box maxWidth="1400px" m="0 auto">
-            <Card>
-              <Box p={4} minWidth="400px">
-                <GetEvents sdk={sdk} />
-              </Box>
-            </Card>
-          </Box>
-        </Box>
-        <Box mb={8}>
-          <Box maxWidth="1400px" m="0 auto">
-            <Card>
-              <Box p={4} minWidth="400px">
-                <GetContractAddresses sdk={sdk} />
-              </Box>
-            </Card>
-          </Box>
-        </Box>
+            </Box>
+          )
+        })}
       </Box>
       <Box mb={4}>
         <a href="https://github.com/hop-protocol/v2-monorepo" target="_blank" rel="noopener noreferrer" style={{ color: '#c34be4' }}>Github</a>

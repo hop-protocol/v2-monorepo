@@ -11,6 +11,7 @@ export function Syntax (props: { code: string }) {
         language="javascript"
         style={theme}
         showLineNumbers={true}
+        wrapLongLines={true}
       >
         {code}
       </SyntaxHighlighter>

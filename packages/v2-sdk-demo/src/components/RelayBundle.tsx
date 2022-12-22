@@ -115,12 +115,17 @@ async function main() {
   const bundleCommittedTxHash = "${bundleCommittedTxHash}"
 
   const hop = new Hop('goerli')
-  const txData = await hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedTxHash)
+  const txData = await hop.getBundleExitPopulatedTx(
+    fromChainId,
+    bundleCommittedTxHash
+  )
   ${populateTxDataOnly ? (
   'console.log(txData)'
   ) : (
   `
-  const provider = new ethers.providers.Web3Provider(window.ethereum)
+  const provider = new ethers.providers.Web3Provider(
+    window.ethereum
+  )
   const signer = provider.getSigner()
   const tx = await signer.sendTransaction(txData)
   console.log(tx)
@@ -133,8 +138,11 @@ main().catch(console.error)
 
   return (
     <Box>
-      <Box mb={4}>
+      <Box mb={1}>
         <Typography variant="h5">Relay Bundle</Typography>
+      </Box>
+      <Box mb={4}>
+        <Typography variant="subtitle1">Exit bundle at the destination</Typography>
       </Box>
       <Box width="100%" display="flex" justifyContent="space-between">
         <Box minWidth="400px" mr={4}>
@@ -173,6 +181,9 @@ main().catch(console.error)
           )}
           {!!txData && (
             <Box>
+              <Box mb={2}>
+                <Typography variant="body1">Output</Typography>
+              </Box>
               <pre style={{
                 maxWidth: '500px',
                 overflow: 'auto'

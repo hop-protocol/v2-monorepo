@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Signer, providers } from 'ethers'
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
@@ -16,11 +16,11 @@ type Props = {
   onboard: any
 }
 
-export function SendMessage (props: Props) {
+export function RelayMessage (props: Props) {
   const { signer, sdk, onboard } = props
   const [fromChainId, setFromChainId] = useState(() => {
     try {
-      const cached = localStorage.getItem('sendMessage:fromChainId')
+      const cached = localStorage.getItem('relayMessage:fromChainId')
       if (cached) {
         return cached
       }
@@ -29,16 +29,25 @@ export function SendMessage (props: Props) {
   })
   const [toChainId, setToChainId] = useState(() => {
     try {
-      const cached = localStorage.getItem('sendMessage:toChainId')
+      const cached = localStorage.getItem('relayMessage:toChainId')
       if (cached) {
         return cached
       }
     } catch (err: any) {}
     return '5'
   })
+  const [fromAddress, setFromAddress] = useState(() => {
+    try {
+      const cached = localStorage.getItem('relayMessage:fromAddress')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return ''
+  })
   const [toAddress, setToAddress] = useState(() => {
     try {
-      const cached = localStorage.getItem('sendMessage:toAddress')
+      const cached = localStorage.getItem('relayMessage:toAddress')
       if (cached) {
         return cached
       }
@@ -47,7 +56,7 @@ export function SendMessage (props: Props) {
   })
   const [toCalldata, setToCalldata] = useState(() => {
     try {
-      const cached = localStorage.getItem('sendMessage:toCalldata')
+      const cached = localStorage.getItem('relayMessage:toCalldata')
       if (cached) {
         return cached
       }
@@ -55,6 +64,15 @@ export function SendMessage (props: Props) {
     return ''
   })
   const [txData, setTxData] = useState('')
+  const [bundleProof, setBundleProof] = useState(() => {
+    try {
+      const cached = localStorage.getItem('relayMessage:bundleProof')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return ''
+  })
   const [populateTxDataOnly, setPopulateTxDataOnly] = useState(true)
   const [txHash, setTxHash] = useState('')
   const [loading, setLoading] = useState(false)
@@ -62,7 +80,7 @@ export function SendMessage (props: Props) {
 
   useEffect(() => {
     try {
-      localStorage.setItem('sendMessage:fromChainId', fromChainId)
+      localStorage.setItem('relayMessage:fromChainId', fromChainId)
     } catch (err: any) {
       console.error(err)
     }
@@ -70,7 +88,7 @@ export function SendMessage (props: Props) {
 
   useEffect(() => {
     try {
-      localStorage.setItem('sendMessage:toChainId', toChainId)
+      localStorage.setItem('relayMessage:toChainId', toChainId)
     } catch (err: any) {
       console.error(err)
     }
@@ -78,7 +96,15 @@ export function SendMessage (props: Props) {
 
   useEffect(() => {
     try {
-      localStorage.setItem('sendMessage:toAddress', toAddress)
+      localStorage.setItem('relayMessage:fromAddress', fromAddress)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [fromAddress])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('relayMessage:toAddress', toAddress)
     } catch (err: any) {
       console.error(err)
     }
@@ -86,18 +112,26 @@ export function SendMessage (props: Props) {
 
   useEffect(() => {
     try {
-      localStorage.setItem('sendMessage:toCalldata', toCalldata)
+      localStorage.setItem('relayMessage:toCalldata', toCalldata)
     } catch (err: any) {
       console.error(err)
     }
   }, [toCalldata])
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('relayMessage:bundleProof', bundleProof)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [bundleProof])
+
   async function getSendTxData() {
     const args = [
-      Number(fromChainId), Number(toChainId), toAddress, toCalldata
+      Number(fromChainId), Number(toChainId), fromAddress, toAddress, toCalldata, JSON.parse(bundleProof.trim())
     ] as const
     console.log('args', args)
-    const txData = await sdk.getSendMessagePopulatedTx(...args)
+    const txData = await sdk.getRelayMessagePopulatedTx(...args)
     return txData
   }
 
@@ -110,7 +144,6 @@ export function SendMessage (props: Props) {
       setLoading(true)
       const txData = await getSendTxData()
       setTxData(JSON.stringify(txData, null, 2))
-      const fee = await sdk.getMessageFee(Number(fromChainId), Number(toChainId))
       if (!populateTxDataOnly) {
         let _signer = signer
         if (!_signer) {
@@ -124,10 +157,7 @@ export function SendMessage (props: Props) {
 
         const success = await onboard.setChain({ chainId: Number(fromChainId) })
         if (success) {
-          const tx = await _signer.sendTransaction({
-            ...txData,
-            value: fee
-          })
+          const tx = await _signer.sendTransaction(txData)
           setTxHash(tx.hash)
         }
       }
@@ -137,6 +167,14 @@ export function SendMessage (props: Props) {
     }
     setLoading(false)
   }
+
+  const _bundleProof = useMemo(() => {
+    try {
+      return JSON.stringify(JSON.parse(bundleProof.trim()), null, 2)
+    } catch (err: any) {
+      return '{}'
+    }
+  }, [bundleProof])
 
   const code = `
 ${populateTxDataOnly ? `
@@ -149,29 +187,29 @@ import { ethers } from 'ethers'
 async function main() {
   const fromChainId = ${fromChainId || 'undefined'}
   const toChainId = ${toChainId || 'undefined'}
+  const fromAddress = "${fromAddress}"
   const toAddress = "${toAddress}"
   const toCalldata = "${toCalldata}"
+  const bundleProof = ${_bundleProof}
 
   const hop = new Hop('goerli')
-  const txData = await hop.getSendMessagePopulatedTx(
+  const txData = await hop.getRelayMessagePopulatedTx(
     fromChainId,
     toChainId,
+    fromAddress,
     toAddress,
-    toCalldata
+    toCalldata,
+    bundleProof
   )
   ${populateTxDataOnly ? (
   'console.log(txData)'
   ) : (
   `
-  const fee = await hop.getMessageFee(fromChainId, toChainId)
   const provider = new ethers.providers.Web3Provider(
     window.ethereum
   )
   const signer = provider.getSigner()
-  const tx = await signer.sendTransaction({
-    ...txData,
-    value: fee
-  })
+  const tx = await signer.sendTransaction(txData)
   console.log(tx)
   `.trim()
   )}
@@ -183,10 +221,10 @@ main().catch(console.error)
   return (
     <Box>
       <Box mb={1}>
-        <Typography variant="h5">Send Message</Typography>
+        <Typography variant="h5">Relay Message</Typography>
       </Box>
       <Box mb={4}>
-        <Typography variant="subtitle1">Send message to a destination chain</Typography>
+        <Typography variant="subtitle1">Relay and execute message at the destination</Typography>
       </Box>
       <Box width="100%" display="flex" justifyContent="space-between">
         <Box minWidth="400px" mr={4}>
@@ -206,6 +244,12 @@ main().catch(console.error)
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
+                  <label>From <small><em>(address)</em></small></label>
+                </Box>
+                <TextField fullWidth placeholder="0x" value={fromAddress} onChange={event => setFromAddress(event.target.value)} />
+              </Box>
+              <Box mb={2}>
+                <Box mb={1}>
                   <label>To <small><em>(address)</em></small></label>
                 </Box>
                 <TextField fullWidth placeholder="0x" value={toAddress} onChange={event => setToAddress(event.target.value)} />
@@ -215,6 +259,19 @@ main().catch(console.error)
                   <label>Data <small><em>(hex string)</em></small></label>
                 </Box>
                 <Textarea minRows={5} placeholder="0x" value={toCalldata} onChange={event => setToCalldata(event.target.value)} style={{ width: '100%' }} />
+              </Box>
+              <Box mb={2}>
+                <Box mb={1}>
+                  <label>Bundle Proof <small><em>(JSON)</em></small></label>
+                </Box>
+                <Textarea minRows={5} placeholder={`
+{
+  "bundleId": "",
+  "treeIndex": 0,
+  "siblings": [],
+  "totalLeaves": 0
+}
+                `.trim()} value={bundleProof} onChange={event => setBundleProof(event.target.value)} style={{ width: '100%' }} />
               </Box>
               <Box mb={2}>
                 <Box>

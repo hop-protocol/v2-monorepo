@@ -28,16 +28,19 @@ main().catch(console.error)
 
   return (
     <Box>
-      <Box mb={4}>
+      <Box mb={1}>
         <Typography variant="h5">Get Contract Addresses</Typography>
+      </Box>
+      <Box mb={4}>
+        <Typography variant="subtitle1">Get hub and spoke contract addresses used</Typography>
       </Box>
       <Box width="100%" display="flex" justifyContent="space-between">
         <Box minWidth="400px" mr={4}>
-          <Box mb={4}>
-            <Typography variant="body1">Output</Typography>
-          </Box>
           {!!contractAddresses && (
             <Box>
+              <Box mb={2}>
+                <Typography variant="body1">Output</Typography>
+              </Box>
               <pre style={{
                 maxWidth: '500px',
                 overflow: 'auto'
