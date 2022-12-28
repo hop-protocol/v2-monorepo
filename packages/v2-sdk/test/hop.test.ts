@@ -427,13 +427,23 @@ describe('sdk setup', () => {
     console.log(proof)
     expect(proof.length).toBe(3)
   }, 5 * 60 * 1000)
-  it('getBundleProof', async () => {
+  it('getBundleProofFromTransactionHash', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
     })
     const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
     const fromChainId = 420
-    const bundleProof = await hop.getBundleProof(fromChainId, transactionHash)
+    const bundleProof = await hop.getBundleProofFromTransactionHash(fromChainId, transactionHash)
+    console.log(bundleProof)
+    expect(bundleProof).toBeTruthy()
+  }, 5 * 60 * 1000)
+  it('getBundleProofFromMessageId', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const messageId = '0xf0d21b61d0b49b40caf94be6bef72760e5a7b154d59f7ce7b06036718f55fecf'
+    const fromChainId = 420
+    const bundleProof = await hop.getBundleProofFromMessageId(fromChainId, messageId)
     console.log(bundleProof)
     expect(bundleProof).toBeTruthy()
   }, 5 * 60 * 1000)

@@ -79,37 +79,43 @@ export class EventFetcher {
     const endBlock = options.endBlock
     const filtersByAddress :Record<string, Partial<Filter>> = {}
 
-    for (const filter of filters) {
-      if (filter.address) {
-        const address = getAddress(filter.address)
-        if (!filtersByAddress[address]) {
-          filtersByAddress[address] = {}
-        }
-        const obj = filtersByAddress[address]
-        if (!obj.address) {
-          obj.address = address
-        }
-        const topics: (string | string[])[] = obj.topics ?? []
-        if (filter.topics) {
-          for (let i = 0; i < filter.topics.length; i++) {
-            const topic : any = filter.topics[i]
-            if (!topics[i]) {
-              topics[i] = []
-            }
-            if (!topics[i].includes(topic)) {
-              (topics[i] as string[]).push(topic)
+    if (filters.length === 1) {
+      const filter = filters[0]
+      const address = getAddress(filter.address)
+      filter.address = address
+      filtersByAddress[address] = filter
+    } else if (filters.length > 1) {
+      for (const filter of filters) {
+        if (filter.address) {
+          const address = getAddress(filter.address)
+          if (!filtersByAddress[address]) {
+            filtersByAddress[address] = {}
+          }
+          const obj = filtersByAddress[address]
+          if (!obj.address) {
+            obj.address = address
+          }
+          const topics: (string | string[])[] = obj.topics ?? []
+          if (filter.topics) {
+            for (let i = 0; i < filter.topics.length; i++) {
+              const topic : any = filter.topics[i]
+              if (!topics[i]) {
+                topics[i] = []
+              }
+              if (!topics[i].includes(topic)) {
+                (topics[i] as string[]).push(topic)
+              }
             }
           }
+          obj.topics = topics
+          filtersByAddress[address] = obj
         }
-        obj.topics = topics
-        filtersByAddress[address] = obj
       }
     }
 
     const aggregatedFilters: Filter[] = []
     for (const address in filtersByAddress) {
       const filter = filtersByAddress[address]
-      filter.topics = filter.topics?.sort()
       aggregatedFilters.push({ ...filter, fromBlock: startBlock, toBlock: endBlock })
     }
 

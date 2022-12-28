@@ -26,6 +26,12 @@ export class MessageBundledEventFetcher extends Event {
     return filter
   }
 
+  getMessageIdFilter (messageId: string) {
+    const spokeMessageBridge = SpokeMessageBridge__factory.connect(this.address, this.provider)
+    const filter = spokeMessageBridge.filters.MessageBundled(null, null, messageId)
+    return filter
+  }
+
   async getEvents (startBlock: number, endBlock: number): Promise<MessageBundled[]> {
     const filter = this.getFilter()
     return this._getEvents(filter, startBlock, endBlock)

@@ -610,6 +610,25 @@ export class Hop {
     return this.getMessageSentEventFromTransactionReceipt(fromChainId, receipt)
   }
 
+  async getMessageBundledEventFromMessageId (fromChainId: number, messageId: string) {
+    const provider = this.getRpcProvider(fromChainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${fromChainId}`)
+    }
+
+    const address = this.getSpokeMessageBridgeContractAddress(fromChainId)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${fromChainId}`)
+    }
+
+    const eventFetcher = new MessageBundledEventFetcher(provider, fromChainId, 1_000_000_000, address)
+    const filter = eventFetcher.getMessageIdFilter(messageId)
+    const endBlock = await provider.getBlockNumber()
+    const startBlock = 0 // endBlock - 100_000
+    const events = await eventFetcher._getEvents(filter, startBlock, endBlock)
+    return events?.[0] ?? null
+  }
+
   async getMessageBundledEventFromTransactionHash (fromChainId: number, transactionHash: string) {
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
@@ -640,6 +659,15 @@ export class Hop {
     return event.messageId
   }
 
+  async getMessageBundleIdFromMessageId (fromChainId: number, messageId: string): Promise<string> {
+    const event = await this.getMessageBundledEventFromMessageId(fromChainId, messageId)
+    if (!event) {
+      throw new Error('event not found for messageId')
+    }
+
+    return event.bundleId
+  }
+
   async getMessageBundleIdFromTransactionHash (fromChainId: number, transactionHash: string): Promise<string> {
     const event = await this.getMessageBundledEventFromTransactionHash(fromChainId, transactionHash)
     if (!event) {
@@ -647,6 +675,15 @@ export class Hop {
     }
 
     return event.bundleId
+  }
+
+  async getMessageTreeIndexFromMessageId (fromChainId: number, messageId: string): Promise<number> {
+    const event = await this.getMessageBundledEventFromMessageId(fromChainId, messageId)
+    if (!event) {
+      throw new Error('event not found for messageId')
+    }
+
+    return event.treeIndex
   }
 
   async getMessageTreeIndexFromTransactionHash (fromChainId: number, transactionHash: string): Promise<number> {
@@ -667,10 +704,10 @@ export class Hop {
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${fromChainId}`)
     }
-    const eventFetcher = new MessageBundledEventFetcher(provider, fromChainId, this.batchBlocks, address)
+    const eventFetcher = new MessageBundledEventFetcher(provider, fromChainId, 1_000_000_000, address)
     const filter = eventFetcher.getBundleIdFilter(bundleId)
     const endBlock = await provider.getBlockNumber()
-    const startBlock = endBlock - 100_000
+    const startBlock = 0 // endBlock - 100_000
     const events = eventFetcher._getEvents(filter, startBlock, endBlock)
     return events
   }
@@ -687,15 +724,33 @@ export class Hop {
     return proof
   }
 
-  async getBundleProof (fromChainId: number, transactionHash: string): Promise<BundleProof> {
+  async getBundleProofFromMessageId (fromChainId: number, messageId: string): Promise<BundleProof> {
+    const provider = this.getRpcProvider(fromChainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${fromChainId}`)
+    }
+
+    const { treeIndex, bundleId } = await this.getMessageBundledEventFromMessageId(fromChainId, messageId)
+    const messageIds = await this.getMessageIdsForBundleId(fromChainId, bundleId)
+    const siblings = this.getMerkleProofForMessageId(messageIds, messageId)
+    const totalLeaves = messageIds.length
+
+    return {
+      bundleId,
+      treeIndex,
+      siblings,
+      totalLeaves
+    }
+  }
+
+  async getBundleProofFromTransactionHash (fromChainId: number, transactionHash: string): Promise<BundleProof> {
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
     }
 
     // TODO: handle case for when multiple message events in single transaction
-    const treeIndex = await this.getMessageTreeIndexFromTransactionHash(fromChainId, transactionHash)
-    const bundleId = await this.getMessageBundleIdFromTransactionHash(fromChainId, transactionHash)
+    const { treeIndex, bundleId } = await this.getMessageBundledEventFromTransactionHash(fromChainId, transactionHash)
     const messageId = await this.getMessageIdFromTransactionHash(fromChainId, transactionHash)
     const messageIds = await this.getMessageIdsForBundleId(fromChainId, bundleId)
     const siblings = this.getMerkleProofForMessageId(messageIds, messageId)
