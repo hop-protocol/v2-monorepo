@@ -581,12 +581,11 @@ export class Hop {
     return BigNumber.from(entity.root).gt(0) && entity.fromChainId.toNumber() === fromChainId
   }
 
-  async getMessageSentEventFromTransactionHash (fromChainId: number, transactionHash: string) {
+  async getMessageSentEventFromTransactionReceipt (fromChainId: number, receipt: any) {
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
     }
-    const receipt = await provider.getTransactionReceipt(transactionHash)
     const address = this.getSpokeMessageBridgeContractAddress(fromChainId)
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${fromChainId}`)
@@ -600,6 +599,15 @@ export class Hop {
       }
     }
     return null
+  }
+
+  async getMessageSentEventFromTransactionHash (fromChainId: number, transactionHash: string) {
+    const provider = this.getRpcProvider(fromChainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${fromChainId}`)
+    }
+    const receipt = await provider.getTransactionReceipt(transactionHash)
+    return this.getMessageSentEventFromTransactionReceipt(fromChainId, receipt)
   }
 
   async getMessageBundledEventFromTransactionHash (fromChainId: number, transactionHash: string) {

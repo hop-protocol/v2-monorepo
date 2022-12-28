@@ -57,6 +57,7 @@ export function SendMessage (props: Props) {
   const [txData, setTxData] = useState('')
   const [populateTxDataOnly, setPopulateTxDataOnly] = useState(true)
   const [txHash, setTxHash] = useState('')
+  const [messageId, setMessageId] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -107,6 +108,7 @@ export function SendMessage (props: Props) {
       setError('')
       setTxData('')
       setTxHash('')
+      setMessageId('')
       setLoading(true)
       const txData = await getSendTxData()
       setTxData(JSON.stringify(txData, null, 2))
@@ -129,6 +131,10 @@ export function SendMessage (props: Props) {
             value: fee
           })
           setTxHash(tx.hash)
+
+          const receipt = await tx.wait()
+          const { messageId } = await sdk.getMessageSentEventFromTransactionReceipt(Number(fromChainId), receipt)
+          setMessageId(messageId)
         }
       }
     } catch (err: any) {
@@ -235,6 +241,11 @@ main().catch(console.error)
           {!!txHash && (
             <Box mb={4}>
               <Alert severity="success">Tx hash: {txHash}</Alert>
+            </Box>
+          )}
+          {!!messageId && (
+            <Box mb={4}>
+              <Alert severity="info">Message ID: {messageId}</Alert>
             </Box>
           )}
           {!!txData && (
