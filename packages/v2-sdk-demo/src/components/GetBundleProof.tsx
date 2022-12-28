@@ -32,9 +32,9 @@ export function GetBundleProof (props: Props) {
     } catch (err: any) {}
     return '5'
   })
-  const [txHash, setTxHash] = useState(() => {
+  const [messageId, setMessageId] = useState(() => {
     try {
-      const cached = localStorage.getItem('getBundleProof:txHash')
+      const cached = localStorage.getItem('getBundleProof:messageId')
       if (cached) {
         return cached
       }
@@ -63,19 +63,19 @@ export function GetBundleProof (props: Props) {
 
   useEffect(() => {
     try {
-      localStorage.setItem('getBundleProof:txHash', txHash)
+      localStorage.setItem('getBundleProof:messageId', messageId)
     } catch (err: any) {
       console.error(err)
     }
-  }, [txHash])
+  }, [messageId])
 
   async function getBundleProof() {
     const args = [
       Number(fromChainId),
-      txHash
+      messageId
     ] as const
     console.log('args', args)
-    const proof = await sdk.getBundleProof(...args)
+    const proof = await sdk.getBundleProofFromMessageId(...args)
     return proof
   }
 
@@ -100,12 +100,12 @@ import { Hop } from '@hop-protocol/v2-sdk'
 async function main() {
   const fromChainId = ${fromChainId || 'undefined'}
   const toChainId = ${toChainId || 'undefined'}
-  const transactionHash = "${txHash}"
+  const messageId = "${messageId}"
 
   const hop = new Hop('goerli')
-  const bundleProof = await hop.getBundleProof(
+  const bundleProof = await hop.getBundleProofFromMessageId(
     fromChainId,
-    transactionHash
+    messageId
   )
   console.log(bundleProof)
 }
@@ -141,9 +141,9 @@ main().catch(console.error)
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
-                  <label>Transaction Hash <small><em>(hex)</em></small></label>
+                  <label>Message ID <small><em>(hex)</em></small></label>
                 </Box>
-                <TextField fullWidth placeholder="0x" value={txHash} onChange={event => setTxHash(event.target.value)} />
+                <TextField fullWidth placeholder="0x" value={messageId} onChange={event => setMessageId(event.target.value)} />
               </Box>
               <Box mb={2} display="flex" justifyContent="center">
                 <LoadingButton loading={loading} fullWidth type="submit" variant="contained" size="large">Get Bundle Proof</LoadingButton>
