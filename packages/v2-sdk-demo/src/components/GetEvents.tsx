@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography'
 import Alert from '@mui/material/Alert'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
+import { ChainSelect } from './ChainSelect'
 
 type Props = {
   sdk: Hop
@@ -185,7 +186,8 @@ main().catch(console.error)
                 <Box mb={1}>
                   <label>Chain ID <small><em>(number)</em></small></label>
                 </Box>
-                <TextField fullWidth placeholder="420" value={chainId} onChange={event => setChainId(event.target.value)} />
+                {/*<TextField fullWidth placeholder="420" value={chainId} onChange={event => setChainId(event.target.value)} />*/}
+                <ChainSelect value={chainId} chains={['420', '5']} onChange={value => setChainId(value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
