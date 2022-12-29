@@ -7,7 +7,7 @@ export type RangeLookup = {
 
 export class TimestampDb extends BaseDb {
   constructor (dbPath: string, dbName: string) {
-    super(dbPath, `syncState:${dbName}`)
+    super(dbPath, `timestamp:${dbName}`)
   }
 
   async putTimestampKey (timestampKey: string, id: string): Promise<boolean> {

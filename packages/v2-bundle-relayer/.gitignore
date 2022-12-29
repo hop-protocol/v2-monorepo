@@ -7,3 +7,4 @@ src/scripts
 *.dump
 *.log
 .build-info.json
+test-db
