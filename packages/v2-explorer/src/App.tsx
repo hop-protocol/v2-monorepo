@@ -7,64 +7,19 @@ import './App.css'
 // import { useQueryParams } from './hooks/useQueryParams'
 import { Table } from './components/Table'
 import Card from '@mui/material/Card'
+import { apiUrl } from './config'
+import { BundleCommittedEvents } from './components/events/BundleCommittedEvents'
+import { BundleForwardedEvents } from './components/events/BundleForwardedEvents'
+import { BundleReceivedEvents } from './components/events/BundleReceivedEvents'
+import { BundleSetEvents } from './components/events/BundleSetEvents'
+import { MessageBundledEvents } from './components/events/MessageBundledEvents'
+import { MessageRelayedEvents } from './components/events/MessageRelayedEvents'
+import { MessageRevertedEvents } from './components/events/MessageRevertedEvents'
+import { MessageSentEvents } from './components/events/MessageSentEvents'
 
 function App () {
   // const { queryParams, updateQueryParams } = useQueryParams()
-  const [events, setEvents] = useState([])
-  const [lastKey, setLastKey] = useState('')
-  const limit = 10
 
-  const updateEvents = async (_lastKey: string = '') => {
-    try {
-      const url = `http://localhost:8000/v1/events?limit=${limit}&lastKey=${_lastKey}`
-      const res = await fetch(url)
-      const json = await res.json()
-      if (json.error) {
-        throw new Error(json.error)
-      }
-      if (!json.events) {
-        throw new Error('no events')
-      }
-      setEvents(json.events)
-      setLastKey(json.lastKey ?? '')
-    } catch (err: any) {
-      console.error(err.message)
-    }
-  }
-
-  const updateEventsCb = useCallback(updateEvents, [])
-
-  useEffect(() => {
-    updateEventsCb().catch(console.error)
-  }, [updateEventsCb])
-
-  useInterval(updateEvents, 10 * 1000)
-
-  const data = events.map((event: any) => {
-    return [
-      {
-        label: 'Timestamp',
-        value: event.context.blockTimestamp
-      },
-      {
-        label: 'Message ID',
-        value: event.messageId
-      },
-      {
-        label: 'From Chain ID',
-        value: event.context.chainId
-      },
-      {
-        label: 'To Chain ID',
-        value: event.toChainId
-      }
-    ]
-  })
-
-  function nextPage(event: any) {
-    event.preventDefault()
-    updateEventsCb(lastKey)
-  }
 
   return (
     <Box p={4} m="0 auto" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
@@ -89,8 +44,70 @@ function App () {
           <Box maxWidth="1400px" m="0 auto">
             <Card>
               <Box p={4} minWidth="400px">
-                <Table title="SendMessage Events" rows={data} />
-                {events.length === limit && <Button onClick={nextPage}>Next Page</Button>}
+                <BundleCommittedEvents />
+              </Box>
+            </Card>
+          </Box>
+        </Box>
+        <Box mb={8}>
+          <Box maxWidth="1400px" m="0 auto">
+            <Card>
+              <Box p={4} minWidth="400px">
+                <BundleForwardedEvents />
+              </Box>
+            </Card>
+          </Box>
+        </Box>
+        <Box mb={8}>
+          <Box maxWidth="1400px" m="0 auto">
+            <Card>
+              <Box p={4} minWidth="400px">
+                <BundleReceivedEvents />
+              </Box>
+            </Card>
+          </Box>
+        </Box>
+        <Box mb={8}>
+          <Box maxWidth="1400px" m="0 auto">
+            <Card>
+              <Box p={4} minWidth="400px">
+                <BundleSetEvents />
+              </Box>
+            </Card>
+          </Box>
+        </Box>
+        <Box mb={8}>
+          <Box maxWidth="1400px" m="0 auto">
+            <Card>
+              <Box p={4} minWidth="400px">
+                <MessageBundledEvents />
+              </Box>
+            </Card>
+          </Box>
+        </Box>
+        <Box mb={8}>
+          <Box maxWidth="1400px" m="0 auto">
+            <Card>
+              <Box p={4} minWidth="400px">
+                <MessageRelayedEvents />
+              </Box>
+            </Card>
+          </Box>
+        </Box>
+        <Box mb={8}>
+          <Box maxWidth="1400px" m="0 auto">
+            <Card>
+              <Box p={4} minWidth="400px">
+                <MessageRevertedEvents />
+              </Box>
+            </Card>
+          </Box>
+        </Box>
+        <Box mb={8}>
+          <Box maxWidth="1400px" m="0 auto">
+            <Card>
+              <Box p={4} minWidth="400px">
+                <MessageSentEvents />
               </Box>
             </Card>
           </Box>
