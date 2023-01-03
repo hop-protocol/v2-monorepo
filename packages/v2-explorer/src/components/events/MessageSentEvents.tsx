@@ -18,13 +18,13 @@ export function MessageSentEvents () {
       value: 'Message ID',
     },
     {
-      key: 'fromChainId',
-      value: 'From Chain ID',
-    },
-    {
       key: 'toChainId',
       value: 'To Chain ID',
-    }
+    },
+    {
+      key: 'eventChainId',
+      value: 'Event Chain ID',
+    },
   ]
 
   const rows = events.map((event: any) => {
@@ -38,13 +38,13 @@ export function MessageSentEvents () {
         value: event.messageIdTruncated
       },
       {
-        key: 'fromChainId',
-        value: event.context.chainId
-      },
-      {
         key: 'toChainID',
         value: event.toChainId
-      }
+      },
+      {
+        key: 'eventChainId',
+        value: event.context.chainId
+      },
     ]
   })
 

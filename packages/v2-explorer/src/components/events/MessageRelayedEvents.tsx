@@ -29,6 +29,10 @@ export function MessageRelayedEvents () {
       key: 'to',
       value: 'To',
     },
+    {
+      key: 'eventChainId',
+      value: 'Event Chain ID',
+    },
   ]
 
   const rows = events.map((event: any) => {
@@ -52,6 +56,10 @@ export function MessageRelayedEvents () {
       {
         key: 'to',
         value: event.to
+      },
+      {
+        key: 'eventChainId',
+        value: event.context.chainId
       },
     ]
   })

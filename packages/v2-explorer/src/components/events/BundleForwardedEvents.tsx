@@ -28,7 +28,11 @@ export function BundleForwardedEvents () {
     {
       key: 'toChainId',
       value: 'To Chain ID',
-    }
+    },
+    {
+      key: 'eventChainId',
+      value: 'Event Chain ID',
+    },
   ]
 
   const rows = events.map((event: any) => {
@@ -46,13 +50,13 @@ export function BundleForwardedEvents () {
         value: event.bundleRootTruncated
       },
       {
-        key: 'fromChainId',
-        value: event.context.chainId
-      },
-      {
         key: 'toChainId',
         value: event.toChainId
-      }
+      },
+      {
+        key: 'eventChainId',
+        value: event.context.chainId
+      },
     ]
   })
 

@@ -32,7 +32,11 @@ export function BundleCommittedEvents () {
     {
       key: 'commitTime',
       value: 'Commit Time'
-    }
+    },
+    {
+      key: 'eventChainId',
+      value: 'Event Chain ID',
+    },
   ]
 
   const rows = events.map((event: any) => {
@@ -60,7 +64,11 @@ export function BundleCommittedEvents () {
       {
         key: 'commitTime',
         value: event.commitTime
-      }
+      },
+      {
+        key: 'eventChainId',
+        value: event.context.chainId
+      },
     ]
   })
 

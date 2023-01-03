@@ -24,7 +24,11 @@ export function BundleSetEvents () {
     {
       key: 'fromChainId',
       value: 'From Chain ID',
-    }
+    },
+    {
+      key: 'eventChainId',
+      value: 'Event Chain ID',
+    },
   ]
 
   const rows = events.map((event: any) => {
@@ -44,6 +48,10 @@ export function BundleSetEvents () {
       {
         key: 'fromChainID',
         value: event.fromChainId
+      },
+      {
+        key: 'eventChainId',
+        value: event.context.chainId
       }
     ]
   })

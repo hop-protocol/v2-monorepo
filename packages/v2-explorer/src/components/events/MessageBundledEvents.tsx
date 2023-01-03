@@ -26,8 +26,8 @@ export function MessageBundledEvents () {
       value: 'Message ID',
     },
     {
-      key: 'fromChainId',
-      value: 'fromChainId',
+      key: 'eventChainId',
+      value: 'Event Chain ID',
     },
   ]
 
@@ -50,7 +50,7 @@ export function MessageBundledEvents () {
         value: event.messageIdTruncated
       },
       {
-        key: 'fromChainId',
+        key: 'eventChainId',
         value: event.context.chainId
       },
     ]

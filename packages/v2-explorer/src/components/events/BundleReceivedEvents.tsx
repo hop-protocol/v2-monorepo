@@ -26,10 +26,6 @@ export function BundleReceivedEvents () {
       value: 'Bundle Fees',
     },
     {
-      key: 'fromChainId',
-      value: 'From Chain ID',
-    },
-    {
       key: 'toChainId',
       value: 'To Chain ID',
     },
@@ -40,7 +36,11 @@ export function BundleReceivedEvents () {
     {
       key: 'relayer',
       value: 'Relayer',
-    }
+    },
+    {
+      key: 'eventChainId',
+      value: 'Event Chain ID',
+    },
   ]
 
   const rows = events.map((event: any) => {
@@ -62,10 +62,6 @@ export function BundleReceivedEvents () {
         value: event.bundleFeesDisplay
       },
       {
-        key: 'fromChainId',
-        value: event.context.chainId
-      },
-      {
         key: 'toChainId',
         value: event.toChainId
       },
@@ -76,6 +72,10 @@ export function BundleReceivedEvents () {
       {
         key: 'Relayer',
         value: event.relayerTruncated
+      },
+      {
+        key: 'eventChainId',
+        value: event.context.chainId
       }
     ]
   })
