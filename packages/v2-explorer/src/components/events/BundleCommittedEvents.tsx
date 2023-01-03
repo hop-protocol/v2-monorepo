@@ -8,30 +8,57 @@ export function BundleCommittedEvents () {
   const eventName = 'BundleCommitted'
   const { events, nextPage, showNextButton } = useEvents(eventName)
 
-  const data = events.map((event: any) => {
+  const headers = [
+    {
+      key: 'timestamp',
+      value: 'Timestamp'
+    },
+    {
+      key: 'bundleId',
+      value: 'Bundle ID'
+    },
+    {
+      key: 'bundleRoot',
+      value: 'Bundle Root'
+    },
+    {
+      key: 'bundleFees',
+      value: 'Bundle Fees'
+    },
+    {
+      key: 'toChainId',
+      value: 'To Chain ID'
+    },
+    {
+      key: 'commitTime',
+      value: 'Commit Time'
+    }
+  ]
+
+  const rows = events.map((event: any) => {
     return [
       {
-        label: 'Timestamp',
-        value: event.context.blockTimestamp
+        key: 'timestamp',
+        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`
       },
       {
-        label: 'Bundle ID',
-        value: event.bundleId
+        key: 'bundleId',
+        value: event.bundleIdTruncated
       },
       {
-        label: 'Bundle Root',
-        value: event.bundleRoot
+        key: 'bundleRoot',
+        value: event.bundleRootTruncated
       },
       {
-        label: 'Bundle Fees',
-        value: event.bundleFees
+        key: 'bundleFees',
+        value: event.bundleFeesDisplay
       },
       {
-        label: 'To Chain ID',
+        key: 'toChainId',
         value: event.toChainId
       },
       {
-        label: 'Commit Time',
+        key: 'commitTime',
         value: event.commitTime
       }
     ]
@@ -39,7 +66,7 @@ export function BundleCommittedEvents () {
 
   return (
     <Box>
-      <Table title={`${eventName} Events`} rows={data} />
+      <Table title={`${eventName} Events`} headers={headers} rows={rows} />
       {showNextButton && <Button onClick={nextPage}>Next Page</Button>}
     </Box>
   )

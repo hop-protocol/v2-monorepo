@@ -20,6 +20,15 @@ import { MessageSentEvents } from './components/events/MessageSentEvents'
 function App () {
   // const { queryParams, updateQueryParams } = useQueryParams()
 
+  const tables = [
+    <BundleCommittedEvents />,
+    <BundleForwardedEvents />,
+    <BundleReceivedEvents />,
+    <BundleSetEvents />,
+    <MessageRelayedEvents />,
+    <MessageRevertedEvents />,
+    <MessageSentEvents />
+  ]
 
   return (
     <Box p={4} m="0 auto" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
@@ -42,74 +51,13 @@ function App () {
       <Box width="100%" mb={6} display="flex" flexDirection="column">
         <Box mb={8}>
           <Box maxWidth="1400px" m="0 auto">
-            <Card>
-              <Box p={4} minWidth="400px">
-                <BundleCommittedEvents />
-              </Box>
-            </Card>
-          </Box>
-        </Box>
-        <Box mb={8}>
-          <Box maxWidth="1400px" m="0 auto">
-            <Card>
-              <Box p={4} minWidth="400px">
-                <BundleForwardedEvents />
-              </Box>
-            </Card>
-          </Box>
-        </Box>
-        <Box mb={8}>
-          <Box maxWidth="1400px" m="0 auto">
-            <Card>
-              <Box p={4} minWidth="400px">
-                <BundleReceivedEvents />
-              </Box>
-            </Card>
-          </Box>
-        </Box>
-        <Box mb={8}>
-          <Box maxWidth="1400px" m="0 auto">
-            <Card>
-              <Box p={4} minWidth="400px">
-                <BundleSetEvents />
-              </Box>
-            </Card>
-          </Box>
-        </Box>
-        <Box mb={8}>
-          <Box maxWidth="1400px" m="0 auto">
-            <Card>
-              <Box p={4} minWidth="400px">
-                <MessageBundledEvents />
-              </Box>
-            </Card>
-          </Box>
-        </Box>
-        <Box mb={8}>
-          <Box maxWidth="1400px" m="0 auto">
-            <Card>
-              <Box p={4} minWidth="400px">
-                <MessageRelayedEvents />
-              </Box>
-            </Card>
-          </Box>
-        </Box>
-        <Box mb={8}>
-          <Box maxWidth="1400px" m="0 auto">
-            <Card>
-              <Box p={4} minWidth="400px">
-                <MessageRevertedEvents />
-              </Box>
-            </Card>
-          </Box>
-        </Box>
-        <Box mb={8}>
-          <Box maxWidth="1400px" m="0 auto">
-            <Card>
-              <Box p={4} minWidth="400px">
-                <MessageSentEvents />
-              </Box>
-            </Card>
+            {tables.map((table, i) => {
+              return (
+                <Box key={i} mb={4}>
+                  {table}
+                </Box>
+              )
+            })}
           </Box>
         </Box>
       </Box>

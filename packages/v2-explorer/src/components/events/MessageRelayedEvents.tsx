@@ -8,26 +8,49 @@ export function MessageRelayedEvents () {
   const eventName = 'MessageRelayed'
   const { events, nextPage, showNextButton } = useEvents(eventName)
 
-  const data = events.map((event: any) => {
+  const headers = [
+    {
+      key: 'timestamp',
+      value: 'Timestamp',
+    },
+    {
+      key: 'messageId',
+      value: 'Message ID',
+    },
+    {
+      key: 'fromChainId',
+      value: 'From Chain ID',
+    },
+    {
+      key: 'from',
+      value: 'From',
+    },
+    {
+      key: 'to',
+      value: 'To',
+    },
+  ]
+
+  const rows = events.map((event: any) => {
     return [
       {
-        label: 'Timestamp',
-        value: event.context.blockTimestamp
+        key: 'timestamp',
+        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`
       },
       {
-        label: 'Message ID',
-        value: event.messageId
+        key: 'messageId',
+        value: event.messageIdTruncated
       },
       {
-        label: 'From Chain ID',
+        key: 'fromChainId',
         value: event.fromChainId
       },
       {
-        label: 'From',
+        key: 'from',
         value: event.from
       },
       {
-        label: 'From',
+        key: 'to',
         value: event.to
       },
     ]
@@ -35,7 +58,7 @@ export function MessageRelayedEvents () {
 
   return (
     <Box>
-      <Table title={`${eventName} Events`} rows={data} />
+      <Table title={`${eventName} Events`} headers={headers} rows={rows} />
       {showNextButton && <Button onClick={nextPage}>Next Page</Button>}
     </Box>
   )

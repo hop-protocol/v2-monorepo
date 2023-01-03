@@ -1,19 +1,31 @@
 import React, { useState, useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import _Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
+
+export type Header = {
+  key: string
+  value: string
+}
 
 export type Row = {
-  label: string
+  key: string
   value: string
 }
 
 type Props = {
   title: string
+  headers: Header[]
   rows: Row[][]
 }
 
 export function Table (props: Props) {
-  const { title, rows } = props
+  const { title, headers, rows } = props
 
   return (
     <Box>
@@ -21,22 +33,31 @@ export function Table (props: Props) {
         <Typography variant="h5">{title}</Typography>
       </Box>
       <Box width="100%" display="flex" justifyContent="space-between">
-        <Box minWidth="400px" mr={4}>
-          <table>
-            <tbody>
+        <Box width="100%" minWidth="400px" mr={4}>
+          <_Table width="100%">
+            <TableHead>
+              <TableRow>
+                {headers.map((header: Header, i: number) => {
+                  return (
+                    <TableCell key={i}>{header.value}</TableCell>
+                  )
+                })}
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {rows.map((row: Row[], i: number) => {
                 return (
-                  <tr key={i}>
+                  <TableRow key={i}>
                     {row.map((col: Row, j: number) => {
                       return (
-                        <td key={j}>{col.value}</td>
+                        <TableCell key={j}>{col.value}</TableCell>
                       )
                     })}
-                  </tr>
+                  </TableRow>
                 )
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </_Table>
         </Box>
       </Box>
     </Box>

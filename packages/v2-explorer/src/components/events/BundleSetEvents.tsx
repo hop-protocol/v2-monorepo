@@ -8,30 +8,49 @@ export function BundleSetEvents () {
   const eventName = 'BundleSet'
   const { events, nextPage, showNextButton } = useEvents(eventName)
 
-  const data = events.map((event: any) => {
+  const headers = [
+    {
+      key: 'timestamp',
+      value: 'Timestamp',
+    },
+    {
+      key: 'bundleId',
+      value: 'Bundle ID',
+    },
+    {
+      key: 'bundleRoot',
+      value: 'Bundle Root',
+    },
+    {
+      key: 'fromChainId',
+      value: 'From Chain ID',
+    }
+  ]
+
+  const rows = events.map((event: any) => {
     return [
       {
-        label: 'Timestamp',
-        value: event.context.blockTimestamp
+        key: 'timestamp',
+        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`
       },
       {
-        label: 'Bundle ID',
-        value: event.bundleId
+        key: 'bundleId',
+        value: event.bundleIdTruncated
       },
       {
-        label: 'Bundle Root',
-        value: event.bundleRoot
+        key: 'bundleRoot',
+        value: event.bundleRootTruncated
       },
       {
-        label: 'To Chain ID',
-        value: event.toChainId
+        key: 'fromChainID',
+        value: event.fromChainId
       }
     ]
   })
 
   return (
     <Box>
-      <Table title={`${eventName} Events`} rows={data} />
+      <Table title={`${eventName} Events`} headers={headers} rows={rows} />
       {showNextButton && <Button onClick={nextPage}>Next Page</Button>}
     </Box>
   )

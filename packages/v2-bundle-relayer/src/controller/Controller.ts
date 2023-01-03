@@ -1,4 +1,8 @@
+import { BigNumber } from 'ethers'
+import { DateTime } from 'luxon'
 import { db } from '../db'
+import { formatUnits } from 'ethers/lib/utils'
+import { truncateString } from '../utils/truncateString'
 
 type EventsResult = {
   lastKey: string
@@ -71,6 +75,49 @@ export class Controller {
   async getEventsForApi (eventName: string, limit: number = 10, _lastKey: string = '~'): Promise<EventsResult> {
     const { items, lastKey } = await this.getEvents(eventName, limit, _lastKey)
 
+    const chainNames: any = {
+      1: 'Ethereum (Mainnet)',
+      10: 'Optimism (Mainnet)',
+      420: 'Optimism (Goerli)',
+      5: 'Ethereum (Goerli)'
+    }
+
+    for (const item of items) {
+      if (item.messageId) {
+        item.messageIdTruncated = truncateString(item.messageId, 4)
+      }
+      if (item.bundleId) {
+        item.bundleIdTruncated = truncateString(item.bundleId, 4)
+      }
+      if (item.bundleRoot) {
+        item.bundleRootTruncated = truncateString(item.bundleRoot, 4)
+      }
+      if (item.relayer) {
+        item.relayerTruncated = truncateString(item.relayer, 4)
+      }
+      if (item.from) {
+        item.fromTruncated = truncateString(item.from, 4)
+      }
+      if (item.to) {
+        item.toTruncated = truncateString(item.to, 4)
+      }
+      if (item.chainId) {
+        item.chainName = chainNames[item.chainId]
+      }
+      if (item.fromChainId) {
+        item.fromChainName = chainNames[item.fromChainId]
+      }
+      if (item.toChainId) {
+        item.toChainName = chainNames[item.toChainId]
+      }
+      if (item.bundleFees) {
+        item.bundleFeesDisplay = formatUnits(item.bundleFees, 18)
+      }
+      if (item.context?.blockTimestamp) {
+        item.context.blockTimestampRelative = DateTime.fromSeconds(item.context.blockTimestamp).toRelative()
+      }
+    }
+
     return {
       items: items.map(this.normalizeEventForApi),
       lastKey
@@ -79,7 +126,7 @@ export class Controller {
 
   normalizeEventForApi (event: any) {
     for (const key in event) {
-      if (typeof event[key] !== 'string') {
+      if (BigNumber.isBigNumber(event[key])) {
         event[key] = event[key].toString()
       }
     }

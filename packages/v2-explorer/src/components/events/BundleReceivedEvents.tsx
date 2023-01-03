@@ -8,46 +8,81 @@ export function BundleReceivedEvents () {
   const eventName = 'BundleReceived'
   const { events, nextPage, showNextButton } = useEvents(eventName)
 
-  const data = events.map((event: any) => {
+  const headers = [
+    {
+      key: 'timestamp',
+      value: 'Timestamp',
+    },
+    {
+      key: 'bundleId',
+      value: 'Bundle ID',
+    },
+    {
+      key: 'bundleRoot',
+      value: 'Bundle Root',
+    },
+    {
+      key: 'bundleFees',
+      value: 'Bundle Fees',
+    },
+    {
+      key: 'fromChainId',
+      value: 'From Chain ID',
+    },
+    {
+      key: 'toChainId',
+      value: 'To Chain ID',
+    },
+    {
+      key: 'relayWindowStart',
+      value: 'Relay Window Start',
+    },
+    {
+      key: 'relayer',
+      value: 'Relayer',
+    }
+  ]
+
+  const rows = events.map((event: any) => {
     return [
       {
-        label: 'Timestamp',
-        value: event.context.blockTimestamp
+        key: 'timestamp',
+        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`
       },
       {
-        label: 'Bundle ID',
-        value: event.bundleId
+        key: 'bundleId',
+        value: event.bundleIdTruncated
       },
       {
-        label: 'Bundle Root',
-        value: event.bundleRoot
+        key: 'bundleRoot',
+        value: event.bundleRootTruncated
       },
       {
-        label: 'Bundle Fees',
-        value: event.bundleFees
+        key: 'bundleFees',
+        value: event.bundleFeesDisplay
       },
       {
-        label: 'From Chain ID',
+        key: 'fromChainId',
         value: event.context.chainId
       },
       {
-        label: 'To Chain ID',
+        key: 'toChainId',
         value: event.toChainId
       },
       {
-        label: 'Relay Window Start',
+        key: 'relayWindowStart',
         value: event.relayWindowStart
       },
       {
-        label: 'Relayer',
-        value: event.relayer
+        key: 'Relayer',
+        value: event.relayerTruncated
       }
     ]
   })
 
   return (
     <Box>
-      <Table title={`${eventName} Events`} rows={data} />
+      <Table title={`${eventName} Events`} headers={headers} rows={rows} />
       {showNextButton && <Button onClick={nextPage}>Next Page</Button>}
     </Box>
   )
