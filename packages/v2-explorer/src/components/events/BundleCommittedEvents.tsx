@@ -6,7 +6,7 @@ import { useEvents } from '../../hooks/useEvents'
 
 export function BundleCommittedEvents () {
   const eventName = 'BundleCommitted'
-  const { events, nextPage, previousPage, showNextButton, showPreviousButton, limit } = useEvents(eventName)
+  const { events, nextPage, previousPage, showNextButton, showPreviousButton, limit, loading } = useEvents(eventName)
 
   const headers = [
     {
@@ -74,7 +74,7 @@ export function BundleCommittedEvents () {
 
   return (
     <Box>
-      <Table title={`${eventName} Events`} headers={headers} rows={rows} showNextButton={showNextButton} showPreviousButton={showPreviousButton} nextPage={nextPage} previousPage={previousPage} limit={limit} />
+      <Table title={`${eventName} Events`} headers={headers} rows={rows} showNextButton={showNextButton} showPreviousButton={showPreviousButton} nextPage={nextPage} previousPage={previousPage} limit={limit} loading={loading} />
     </Box>
   )
 }

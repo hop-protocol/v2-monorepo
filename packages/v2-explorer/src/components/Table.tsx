@@ -12,6 +12,7 @@ import TablePagination from '@mui/material/TablePagination'
 import IconButton from '@mui/material/IconButton'
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight'
+import Skeleton from '@mui/material/Skeleton'
 
 export type Header = {
   key: string
@@ -32,10 +33,11 @@ type Props = {
   nextPage: any
   previousPage: any
   limit: number
+  loading?: boolean
 }
 
 export function Table (props: Props) {
-  const { title, headers, rows, showNextButton, showPreviousButton, nextPage, previousPage, limit } = props
+  const { title, headers, rows, showNextButton, showPreviousButton, nextPage, previousPage, limit, loading = false } = props
   const page = 0
   function handleChangePage() {
   }
@@ -61,6 +63,27 @@ export function Table (props: Props) {
                 </TableRow>
               </TableHead>
               <TableBody>
+                {(!loading && !rows.length) && (
+                  <TableRow>
+                    <TableCell colSpan={headers.length}>
+                      <Typography variant="body2"><em>No events found</em></Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {loading && (
+                  <>
+                    <TableRow>
+                      <TableCell colSpan={headers.length}>
+                        <Skeleton variant="rectangular" width={'100%'} height={20} />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell colSpan={headers.length}>
+                        <Skeleton variant="rectangular" width={'100%'} height={20} />
+                      </TableCell>
+                    </TableRow>
+                  </>
+                )}
                 {rows.map((row: Row[], i: number) => {
                   return (
                     <TableRow key={i}>
@@ -75,7 +98,7 @@ export function Table (props: Props) {
               </TableBody>
               <TableFooter>
                 <TableRow>
-                  <TableCell colSpan={100}>
+                  <TableCell colSpan={headers.length}>
                     <Box width="100%" display="flex" justifyContent="flex-end">
                         <IconButton
                           onClick={previousPage}

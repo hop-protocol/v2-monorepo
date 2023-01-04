@@ -7,6 +7,7 @@ export function useEvents (eventName: string) {
   const [lastKey, setLastKey] = useState('')
   const [firstKey, setFirstKey] = useState('')
   const [lastUrl, setLastUrl] = useState('')
+  const [loading, setLoading] = useState(true)
   const limit = 10
 
   const updateEvents = async (_lastKey: string = '', _firstKey: string = '') => {
@@ -23,10 +24,12 @@ export function useEvents (eventName: string) {
       setEvents(json.events)
       setLastKey(json.lastKey ?? '')
       setFirstKey(json.firstKey ?? '')
+      setLoading(false)
       return url
     } catch (err: any) {
       console.error(err.message)
     }
+    setLoading(false)
     return ''
   }
 
@@ -57,6 +60,7 @@ export function useEvents (eventName: string) {
     previousPage,
     limit,
     showNextButton,
-    showPreviousButton
+    showPreviousButton,
+    loading
   }
 }
