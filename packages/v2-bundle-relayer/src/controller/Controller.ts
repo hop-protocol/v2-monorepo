@@ -168,4 +168,20 @@ export class Controller {
     }
     return event
   }
+
+  async getFilteredEvents (eventName: string, filter: any): Promise<any | null> {
+    const eventsDb = this.events[eventName]
+
+    if (filter.messageId) {
+      if (eventName === 'MessageSent') {
+        const item = await eventsDb.getEvent(filter.messageId)
+        return item
+      }
+    } else if (filter.transactionHash) {
+      const item = await eventsDb.getEventByTransactionHash(filter.transactionHash)
+      return item
+    }
+
+    return null
+  }
 }

@@ -1,16 +1,21 @@
 import { BaseDb } from '../BaseDb'
+import { PropertyIndexDb } from '../propertyIndexDb'
 import { RangeLookup, TimestampDb } from '../timestampDb'
 import { SyncState, SyncStateDb } from '../syncStateDb'
 
 export class EventsBaseDb<T> extends BaseDb {
   syncStateDb: SyncStateDb
   timestampDb: TimestampDb
+  propertyIndexDb: Record<string, PropertyIndexDb>
 
   constructor (dbPath: string, dbName: string) {
     super(dbPath, `events:${dbName}`)
 
     this.syncStateDb = new SyncStateDb(dbPath, dbName)
     this.timestampDb = new TimestampDb(dbPath, dbName)
+    this.propertyIndexDb = {
+      'context.transactionHash': new PropertyIndexDb(dbPath, dbName, 'context.transactionHash')
+    }
   }
 
   async putSyncState (chainId: number, syncState: SyncState): Promise<boolean> {
@@ -57,6 +62,7 @@ export class EventsBaseDb<T> extends BaseDb {
     if (timestampKey) {
       await this.timestampDb.putTimestampKey(timestampKey, key)
     }
+    await this.updatePropertyIndexes(key, data)
     return true
   }
 
@@ -68,6 +74,15 @@ export class EventsBaseDb<T> extends BaseDb {
     const timestampKey = this.getTimestampKeyString(data)
     if (timestampKey) {
       await this.timestampDb.putTimestampKey(timestampKey, key)
+    }
+    await this.updatePropertyIndexes(key, data)
+    return true
+  }
+
+  async updatePropertyIndexes (key: string, data: Partial<T>): Promise<boolean> {
+    const transactionHash = (data as any)?.context?.transactionHash
+    if (transactionHash) {
+      await this.propertyIndexDb['context.transactionHash'].putPropertyIndex(transactionHash, key)
     }
     return true
   }
@@ -99,6 +114,19 @@ export class EventsBaseDb<T> extends BaseDb {
 
   getKeyStringFromEvent (data: Partial<T>): string | null {
     throw new Error('Not implemented')
+  }
+
+  async getEventByPropertyIndex (propertyName: string, key: string): Promise<Partial<T> | null> {
+    const result = await this.propertyIndexDb[propertyName].getPropertyIndex(key)
+    if (result?.id) {
+      return this.getEvent(result.id)
+    }
+
+    return null
+  }
+
+  async getEventByTransactionHash (transactionHash: string): Promise<Partial<T> | null> {
+    return this.getEventByPropertyIndex('context.transactionHash', transactionHash)
   }
 
   normalizeDataForGet (getData: Partial<T>): Partial<T> {
