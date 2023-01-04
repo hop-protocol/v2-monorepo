@@ -39,9 +39,27 @@ describe('Controller', () => {
     expect(result2.lastKey).toBe(result4.lastKey)
   }, 10 * 60 * 1000)
 
-  it.only('should get filtered events', async () => {
+  it('should get filtered events for MessageSent', async () => {
     const controller = new Controller()
     const eventName = 'MessageSent'
+    const messageId = '0x562ba81beb1d09afddfa1330d9628ba1dee69d2f9cba0ffd33e9fb5258ba7b8b'
+    const transactionHash = '0x8fbe45595cd217261bb8335492c8edd3f4ef02f461003914213e64ee50d430a5'
+    const result1 = await controller.getFilteredEvents(eventName, {
+      messageId
+    })
+    expect(result1.messageId).toBe(messageId)
+    expect(result1.context.transactionHash).toBe(transactionHash)
+
+    const result2 = await controller.getFilteredEvents(eventName, {
+      transactionHash
+    })
+    expect(result2.messageId).toBe(messageId)
+    expect(result2.context.transactionHash).toBe(transactionHash)
+  })
+
+  it('should get filtered events for MessageBundled', async () => {
+    const controller = new Controller()
+    const eventName = 'MessageBundled'
     const messageId = '0x562ba81beb1d09afddfa1330d9628ba1dee69d2f9cba0ffd33e9fb5258ba7b8b'
     const transactionHash = '0x8fbe45595cd217261bb8335492c8edd3f4ef02f461003914213e64ee50d430a5'
     const result1 = await controller.getFilteredEvents(eventName, {

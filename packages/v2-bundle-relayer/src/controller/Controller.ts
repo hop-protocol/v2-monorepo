@@ -173,13 +173,17 @@ export class Controller {
     const eventsDb = this.events[eventName]
 
     if (filter.messageId) {
-      if (eventName === 'MessageSent') {
-        const item = await eventsDb.getEvent(filter.messageId)
-        return item
+      if (eventName === 'MessageSent' || eventName === 'MessageRelayed' || eventName === 'MessageReverted') {
+        return eventsDb.getEvent(filter.messageId)
+      } else if (eventName === 'MessageBundled') {
+        return eventsDb.getEventByPropertyIndex('messageId', filter.messageId)
+      }
+    } else if (filter.bundleRoot) {
+      if (eventName === 'BundleCommitted' || eventName === 'BundleForwarded' || eventName === 'BundleReceived' || eventName === 'BundleSet') {
+        return eventsDb.getEventByPropertyIndex('bundleRoot', filter.bundleRoot)
       }
     } else if (filter.transactionHash) {
-      const item = await eventsDb.getEventByTransactionHash(filter.transactionHash)
-      return item
+      return eventsDb.getEventByTransactionHash(filter.transactionHash)
     }
 
     return null

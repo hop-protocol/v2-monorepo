@@ -23,6 +23,8 @@ export type KV = {
 export class BaseDb {
   db: any
   mutex: Mutex = new Mutex()
+  dbPath: string
+  dbName: string
 
   constructor (dbPath: string, dbName: string) {
     if (!dbPath) {
@@ -31,6 +33,8 @@ export class BaseDb {
     if (!fs.existsSync(dbPath)) {
       fs.mkdirSync(dbPath, { recursive: true })
     }
+    this.dbPath = dbPath
+    this.dbName = dbName
     const eventsDb = level(dbPath)
     const subDb = sub(eventsDb, dbName, { valueEncoding: 'json' })
     this.db = subDb

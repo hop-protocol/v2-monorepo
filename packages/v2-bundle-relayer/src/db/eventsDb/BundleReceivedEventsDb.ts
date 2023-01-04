@@ -15,6 +15,8 @@ export interface BundleReceived extends EventBase {
 export class BundleReceivedEventsDb extends EventsBaseDb<BundleReceived> {
   constructor (dbPath: string) {
     super(dbPath, EventType.BundleReceived)
+
+    this.addPropertyIndex('bundleRoot')
   }
 
   getKeyStringFromEvent (data: Partial<BundleReceived>): string | null {

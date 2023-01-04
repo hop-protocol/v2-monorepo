@@ -13,6 +13,8 @@ export interface BundleCommitted extends EventBase {
 export class BundleCommittedEventsDb extends EventsBaseDb<BundleCommitted> {
   constructor (dbPath: string) {
     super(dbPath, EventType.BundleCommitted)
+
+    this.addPropertyIndex('bundleRoot')
   }
 
   getKeyStringFromEvent (data: Partial<BundleCommitted>): string | null {

@@ -2,20 +2,24 @@ import { BaseDb } from '../BaseDb'
 import { PropertyIndexDb } from '../propertyIndexDb'
 import { RangeLookup, TimestampDb } from '../timestampDb'
 import { SyncState, SyncStateDb } from '../syncStateDb'
+import { get } from 'lodash'
 
 export class EventsBaseDb<T> extends BaseDb {
   syncStateDb: SyncStateDb
   timestampDb: TimestampDb
-  propertyIndexDb: Record<string, PropertyIndexDb>
+  propertyIndexDb: Record<string, PropertyIndexDb> = {}
 
   constructor (dbPath: string, dbName: string) {
     super(dbPath, `events:${dbName}`)
 
     this.syncStateDb = new SyncStateDb(dbPath, dbName)
     this.timestampDb = new TimestampDb(dbPath, dbName)
-    this.propertyIndexDb = {
-      'context.transactionHash': new PropertyIndexDb(dbPath, dbName, 'context.transactionHash')
-    }
+
+    this.addPropertyIndex('context.transactionHash')
+  }
+
+  addPropertyIndex (propertyName: string): void {
+    this.propertyIndexDb[propertyName] = new PropertyIndexDb(this.dbPath, this.dbName, propertyName)
   }
 
   async putSyncState (chainId: number, syncState: SyncState): Promise<boolean> {
@@ -80,9 +84,13 @@ export class EventsBaseDb<T> extends BaseDb {
   }
 
   async updatePropertyIndexes (key: string, data: Partial<T>): Promise<boolean> {
-    const transactionHash = (data as any)?.context?.transactionHash
-    if (transactionHash) {
-      await this.propertyIndexDb['context.transactionHash'].putPropertyIndex(transactionHash, key)
+    for (const propertyName in this.propertyIndexDb) {
+      const propertyIndexDb = this.propertyIndexDb[propertyName]
+      const value = get(data, propertyName)
+      console.log('updatePropertyIndex', propertyName, value)
+      if (value) {
+        await propertyIndexDb.putPropertyIndex(value, key)
+      }
     }
     return true
   }
@@ -116,8 +124,8 @@ export class EventsBaseDb<T> extends BaseDb {
     throw new Error('Not implemented')
   }
 
-  async getEventByPropertyIndex (propertyName: string, key: string): Promise<Partial<T> | null> {
-    const result = await this.propertyIndexDb[propertyName].getPropertyIndex(key)
+  async getEventByPropertyIndex (propertyName: string, value: string): Promise<Partial<T> | null> {
+    const result = await this.propertyIndexDb[propertyName].getPropertyIndex(value)
     if (result?.id) {
       return this.getEvent(result.id)
     }

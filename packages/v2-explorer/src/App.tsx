@@ -25,6 +25,7 @@ function App () {
     <BundleForwardedEvents />,
     <BundleReceivedEvents />,
     <BundleSetEvents />,
+    <MessageBundledEvents />,
     <MessageRelayedEvents />,
     <MessageRevertedEvents />,
     <MessageSentEvents />
