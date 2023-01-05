@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import { useInterval } from 'react-use'
 import { apiUrl } from '../config'
 
-export function useEvents (eventName: string) {
+export function useEvents (eventName: string, filter: any = {}) {
   const [events, setEvents] = useState([])
   const [lastKey, setLastKey] = useState('')
   const [firstKey, setFirstKey] = useState('')
@@ -10,9 +10,20 @@ export function useEvents (eventName: string) {
   const [loading, setLoading] = useState(true)
   const limit = 10
 
+  const filterString = useMemo(() => {
+    let str = ''
+    for (const key in filter) {
+      const value = filter[key]
+      if (value) {
+        str += `&filter[${key}]=${value}`
+      }
+    }
+    return str
+  }, [filter])
+
   const updateEvents = async (_lastKey: string = '', _firstKey: string = '') => {
     try {
-      const url = lastUrl || `${apiUrl}/v1/events?limit=${limit}&lastKey=${_lastKey}&firstKey=${_firstKey}&eventName=${eventName}`
+      const url = lastUrl || `${apiUrl}/v1/events?limit=${limit}&lastKey=${_lastKey}&firstKey=${_firstKey}&eventName=${eventName}${filterString}`
       const res = await fetch(url)
       const json = await res.json()
       if (json.error) {
@@ -33,7 +44,7 @@ export function useEvents (eventName: string) {
     return ''
   }
 
-  const updateEventsCb = useCallback(updateEvents, [])
+  const updateEventsCb = useCallback(updateEvents, [filterString])
 
   useEffect(() => {
     updateEventsCb().catch(console.error)

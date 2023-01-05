@@ -49,12 +49,12 @@ function App () {
           </Box>
         </Box>
       </Box>
-      <Box width="100%" mb={6} display="flex" flexDirection="column">
+     <Box width="100%" mb={6} display="flex" flexDirection="column">
         <Box mb={8}>
           <Box maxWidth="1400px" m="0 auto">
             {tables.map((table, i) => {
               return (
-                <Box key={i} mb={4}>
+                <Box key={i} mb={8}>
                   {table}
                 </Box>
               )

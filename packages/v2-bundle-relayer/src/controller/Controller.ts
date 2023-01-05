@@ -10,6 +10,14 @@ type EventsResult = {
   items: any[]
 }
 
+type EventsApiInput = {
+  eventName: string,
+  limit: number,
+  lastKey: string | null,
+  firstKey: string | null,
+  filter: any
+}
+
 export class Controller {
   db: any
   events: any
@@ -107,8 +115,20 @@ export class Controller {
     return this._getEvents(eventsDb, limit, lastKey, firstKey)
   }
 
-  async getEventsForApi (eventName: string, limit: number = 10, _lastKey: string | null = '~', _firstKey: string | null = ''): Promise<EventsResult> {
-    const { items, lastKey, firstKey } = await this.getEvents(eventName, limit, _lastKey, _firstKey)
+  async getEventsForApi (input: EventsApiInput): Promise<EventsResult> {
+    const { eventName, limit = 10, lastKey: _lastKey = '~', firstKey: _firstKey = '', filter } = input
+    let items :any[] = []
+    let firstKey : string | null = null
+    let lastKey : string | null = null
+
+    if (filter && Object.keys(filter).length > 0) {
+      const item = await this.getFilteredEvents(eventName, filter)
+      if (item) {
+        items.push(item)
+      }
+    } else {
+      ({ items, lastKey, firstKey } = await this.getEvents(eventName, limit, _lastKey, _firstKey))
+    }
 
     const chainNames: any = {
       1: 'Ethereum (Mainnet)',
@@ -177,6 +197,10 @@ export class Controller {
         return eventsDb.getEvent(filter.messageId)
       } else if (eventName === 'MessageBundled') {
         return eventsDb.getEventByPropertyIndex('messageId', filter.messageId)
+      }
+    } else if (filter.bundleId) {
+      if (eventName === 'BundleCommitted' || eventName === 'BundleForwarded' || eventName === 'BundleReceived' || eventName === 'BundleSet' || eventName === 'MessageBundled') {
+        return eventsDb.getEvent(filter.bundleId)
       }
     } else if (filter.bundleRoot) {
       if (eventName === 'BundleCommitted' || eventName === 'BundleForwarded' || eventName === 'BundleReceived' || eventName === 'BundleSet') {

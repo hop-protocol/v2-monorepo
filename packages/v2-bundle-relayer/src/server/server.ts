@@ -23,7 +23,7 @@ app.get('/health', (req: any, res: any) => {
 
 app.get('/v1/events', responseCache, async (req: any, res: any) => {
   try {
-    let { eventName, firstKey, lastKey, limit = 10 } = req.query
+    let { eventName, firstKey, lastKey, limit = 10, filter } = req.query
     if (!eventName) {
       throw new Error('missing eventName')
     }
@@ -35,7 +35,13 @@ app.get('/v1/events', responseCache, async (req: any, res: any) => {
       throw new Error('limit must be less than 10')
     }
     const controller = new Controller()
-    const { lastKey: newLastKey, firstKey: newFirstKey, items } = await controller.getEventsForApi(eventName, limit, lastKey, firstKey)
+    const { lastKey: newLastKey, firstKey: newFirstKey, items } = await controller.getEventsForApi({
+      eventName,
+      limit,
+      lastKey,
+      firstKey,
+      filter
+    })
     res.status(200).json({
       events: items,
       lastKey: newLastKey,
