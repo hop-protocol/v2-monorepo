@@ -2,8 +2,8 @@ import { BigNumber } from 'ethers'
 import { DateTime } from 'luxon'
 import { db } from '../db'
 import { formatUnits } from 'ethers/lib/utils'
-import { truncateString } from '../utils/truncateString'
 import { getTransactionHashExplorerUrl } from 'src/utils/getTransactionHashExplorerUrl'
+import { truncateString } from '../utils/truncateString'
 
 type EventsResult = {
   firstKey: string | null

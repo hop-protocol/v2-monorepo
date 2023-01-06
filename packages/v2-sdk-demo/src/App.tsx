@@ -76,18 +76,70 @@ function App () {
 
   async function onboardConnect() {
     const wallets = await onboard.connectWallet()
-    if (wallets[0]) {
-      setOnboardWallet(wallets[0])
+    const _wallet = wallets[0]
+    if (_wallet) {
+      setOnboardWallet(_wallet)
+    } else {
+      setOnboardWallet(null)
+    }
+  }
+
+  useEffect(() => {
+    if (onboardWallet) {
       const ethersProvider = new providers.Web3Provider(
-        wallets[0].provider,
+        onboardWallet.provider,
         'any'
       )
       const signer = ethersProvider.getSigner()
       setWallet(signer)
     } else {
-      setOnboardWallet(null)
+      setWallet(null)
     }
-  }
+  }, [onboardWallet])
+
+  useEffect(() => {
+    let unsubscribe: any
+    try {
+      const walletsSub = onboard.state.select('wallets')
+      ;({ unsubscribe } = walletsSub.subscribe(wallets => {
+        const connectedWallets = wallets.map(({ label }) => label)
+        localStorage.setItem(
+          'connectedWallets',
+          JSON.stringify(connectedWallets)
+        )
+      }))
+    } catch (err: any) {
+      console.error(err)
+    }
+
+    return () => {
+      if (unsubscribe) {
+        // unsubscribe()
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    async function update () {
+      try {
+        const cached = localStorage.getItem('connectedWallets')
+        if (cached) {
+          const previouslyConnectedWallets = JSON.parse(cached)
+
+          if (previouslyConnectedWallets?.length > 0) {
+            // You can also auto connect "silently" and disable all onboard modals to avoid them flashing on page load
+            await onboard.connectWallet({
+              autoSelect: { label: previouslyConnectedWallets[0], disableModals: true }
+            })
+          }
+        }
+      } catch (err: any) {
+        console.error(err)
+      }
+    }
+
+    update().catch(console.error)
+  }, [])
 
   const [provider] = useState(() => {
     try {
