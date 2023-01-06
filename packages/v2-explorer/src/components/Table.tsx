@@ -13,6 +13,7 @@ import IconButton from '@mui/material/IconButton'
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight'
 import Skeleton from '@mui/material/Skeleton'
+import Link from '@mui/material/Link'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 
 export type Header = {
@@ -23,6 +24,7 @@ export type Header = {
 export type Row = {
   key: string
   value: string
+  valueUrl?: string
   clipboardValue?: string
 }
 
@@ -113,7 +115,15 @@ export function Table (props: Props) {
                                   </CopyToClipboard>
                                 </Box>
                               )}
-                              <Box>{col.value}</Box>
+                              <Box>
+                                {col.valueUrl ? (
+                                  <Link href={col.valueUrl} target="_blank" rel="noreferrer">
+                                    <Typography variant="body2">{col.value}</Typography>
+                                  </Link>
+                                ) : (
+                                  <Typography variant="body2">{col.value}</Typography>
+                                )}
+                              </Box>
                             </Box>
                           </TableCell>
                         )

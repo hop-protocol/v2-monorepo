@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import { db } from '../db'
 import { formatUnits } from 'ethers/lib/utils'
 import { truncateString } from '../utils/truncateString'
+import { getTransactionHashExplorerUrl } from 'src/utils/getTransactionHashExplorerUrl'
 
 type EventsResult = {
   firstKey: string | null
@@ -176,6 +177,7 @@ export class Controller {
       }
       if (item.context?.transactionHash) {
         item.context.transactionHashTruncated = truncateString(item.context.transactionHash, 4)
+        item.context.transactionHashExplorerUrl = getTransactionHashExplorerUrl(item.context.transactionHash, item.context.chainId)
       }
       if (item.context?.chainId) {
         item.context.chainName = chainNames[item.context.chainId]

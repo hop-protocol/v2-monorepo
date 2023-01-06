@@ -48,6 +48,7 @@ export function MessageSentEvents () {
       {
         key: 'transactionHash',
         value: event.context.transactionHashTruncated,
+        valueUrl: event.context.transactionHashExplorerUrl,
         clipboardValue: event.context.transactionHash
       },
       {
