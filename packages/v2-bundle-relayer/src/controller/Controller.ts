@@ -11,10 +11,10 @@ type EventsResult = {
 }
 
 type EventsApiInput = {
-  eventName: string,
-  limit: number,
-  lastKey: string | null,
-  firstKey: string | null,
+  eventName: string
+  limit: number
+  lastKey: string | null
+  firstKey: string | null
   filter: any
 }
 
@@ -117,9 +117,9 @@ export class Controller {
 
   async getEventsForApi (input: EventsApiInput): Promise<EventsResult> {
     const { eventName, limit = 10, lastKey: _lastKey = '~', firstKey: _firstKey = '', filter } = input
-    let items :any[] = []
-    let firstKey : string | null = null
-    let lastKey : string | null = null
+    let items: any[] = []
+    let firstKey: string | null = null
+    let lastKey: string | null = null
 
     if (filter && Object.keys(filter).length > 0) {
       const item = await this.getFilteredEvents(eventName, filter)

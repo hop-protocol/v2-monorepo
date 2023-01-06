@@ -58,11 +58,13 @@ export function BundleReceivedEvents () {
       },
       {
         key: 'bundleId',
-        value: event.bundleIdTruncated
+        value: event.bundleIdTruncated,
+        clipboardValue: event.bundleId
       },
       {
         key: 'bundleRoot',
-        value: event.bundleRootTruncated
+        value: event.bundleRootTruncated,
+        clipboardValue: event.bundleRoot
       },
       {
         key: 'bundleFees',
@@ -78,7 +80,8 @@ export function BundleReceivedEvents () {
       },
       {
         key: 'Relayer',
-        value: event.relayerTruncated
+        value: event.relayerTruncated,
+        clipboardValue: event.relayer
       },
       {
         key: 'eventChainId',

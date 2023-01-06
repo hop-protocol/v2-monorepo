@@ -50,7 +50,8 @@ export function MessageRevertedEvents () {
       },
       {
         key: 'messageId',
-        value: event.messageIdTruncated
+        value: event.messageIdTruncated,
+        clipboardValue: event.messageId
       },
       {
         key: 'fromChainId',
@@ -58,11 +59,13 @@ export function MessageRevertedEvents () {
       },
       {
         key: 'from',
-        value: event.from
+        value: event.fromTruncated,
+        clipboardValue: event.from
       },
       {
         key: 'To',
-        value: event.to
+        value: event.toTruncated,
+        clipboardValue: event.to
       },
       {
         key: 'eventChainId',

@@ -13,6 +13,7 @@ import IconButton from '@mui/material/IconButton'
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight'
 import Skeleton from '@mui/material/Skeleton'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
 
 export type Header = {
   key: string
@@ -22,6 +23,7 @@ export type Header = {
 export type Row = {
   key: string
   value: string
+  clipboardValue?: string
 }
 
 type Props = {
@@ -38,10 +40,20 @@ type Props = {
 
 export function Table (props: Props) {
   const { title, headers, rows, showNextButton, showPreviousButton, nextPage, previousPage, limit, loading = false } = props
+  const [copied, setCopied] = useState('')
   const page = 0
+
   function handleChangePage() {
   }
+
   function handleChangeRowsPerPage () {
+  }
+
+  function handleCopy (value: string) {
+    setCopied(value)
+    setTimeout(() => {
+      setCopied('')
+    }, 1000)
   }
 
   return (
@@ -89,7 +101,21 @@ export function Table (props: Props) {
                     <TableRow key={i}>
                       {row.map((col: Row, j: number) => {
                         return (
-                          <TableCell key={j}>{col.value}</TableCell>
+                          <TableCell key={j}>
+                            <Box display="flex" alignItems="center">
+                              {!!col.clipboardValue && (
+                                <Box mr={0.5}>
+                                  <CopyToClipboard text={col.clipboardValue}
+                                    onCopy={event => handleCopy(col.clipboardValue!)}>
+                                    <Typography variant="body2" style={{ cursor: 'pointer' }}>
+                                      {copied === col.clipboardValue ? '✅' : '📋'}
+                                    </Typography>
+                                  </CopyToClipboard>
+                                </Box>
+                              )}
+                              <Box>{col.value}</Box>
+                            </Box>
+                          </TableCell>
                         )
                       })}
                     </TableRow>

@@ -46,15 +46,18 @@ export function MessageBundledEvents () {
       },
       {
         key: 'bundleID',
-        value: event.bundleIdTruncated
+        value: event.bundleIdTruncated,
+        clipboardValue: event.bundleId
       },
       {
         key: 'treeIndex',
-        value: event.treeIndex
+        value: event.treeIndex,
+        clipboardValue: event.treeIndex
       },
       {
         key: 'messageId',
-        value: event.messageIdTruncated
+        value: event.messageIdTruncated,
+        clipboardValue: event.messageId
       },
       {
         key: 'eventChainId',

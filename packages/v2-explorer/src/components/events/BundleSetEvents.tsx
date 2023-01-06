@@ -46,11 +46,13 @@ export function BundleSetEvents () {
       },
       {
         key: 'bundleId',
-        value: event.bundleIdTruncated
+        value: event.bundleIdTruncated,
+        clipboardValue: event.bundleId
       },
       {
         key: 'bundleRoot',
-        value: event.bundleRootTruncated
+        value: event.bundleRootTruncated,
+        clipboardValue: event.bundleRoot
       },
       {
         key: 'fromChainID',

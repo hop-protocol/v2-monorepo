@@ -42,7 +42,8 @@ export function MessageSentEvents () {
       },
       {
         key: 'messageId',
-        value: event.messageIdTruncated
+        value: event.messageIdTruncated,
+        clipboardValue: event.messageId
       },
       {
         key: 'toChainID',
