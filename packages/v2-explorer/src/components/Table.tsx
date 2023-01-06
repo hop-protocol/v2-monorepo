@@ -62,7 +62,7 @@ export function Table (props: Props) {
         <Typography variant="h5">{title}</Typography>
       </Box>
       <Box width="100%" display="flex" justifyContent="space-between">
-        <Box width="100%" minWidth="400px" mr={4}>
+        <Box width="100%" mr={4}>
           <TableContainer>
             <_Table width="100%">
               <TableHead>

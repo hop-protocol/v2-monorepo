@@ -50,7 +50,8 @@ export function MessageRelayedEvents () {
     return [
       {
         key: 'timestamp',
-        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`
+        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`,
+        clipboardValue: event.context.blockTimestamp
       },
       {
         key: 'transactionHash',
@@ -64,7 +65,8 @@ export function MessageRelayedEvents () {
       },
       {
         key: 'fromChainId',
-        value: event.fromChainId
+        value: event.fromChainLabel,
+        clipboardValue: event.fromChainId
       },
       {
         key: 'from',
@@ -78,7 +80,8 @@ export function MessageRelayedEvents () {
       },
       {
         key: 'eventChainId',
-        value: event.context.chainId
+        value: event.context.chainLabel,
+        clipboardValue: event.context.chainId
       },
     ]
   })

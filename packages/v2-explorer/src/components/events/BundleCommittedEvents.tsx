@@ -54,7 +54,8 @@ export function BundleCommittedEvents () {
     return [
       {
         key: 'timestamp',
-        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`
+        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`,
+        clipboardValue: event.context.blockTimestamp
       },
       {
         key: 'transactionHash',
@@ -73,19 +74,23 @@ export function BundleCommittedEvents () {
       },
       {
         key: 'bundleFees',
-        value: event.bundleFeesDisplay
+        value: event.bundleFeesDisplay,
+        clipboardValue: event.bundleFees
       },
       {
         key: 'toChainId',
-        value: event.toChainId
+        value: event.toChainLabel,
+        clipboardValue: event.toChainId
       },
       {
         key: 'commitTime',
-        value: event.commitTime
+        value: event.commitTime,
+        clipboardValue: event.commitTime
       },
       {
         key: 'eventChainId',
-        value: event.context.chainId
+        value: event.context.chainLabel,
+        clipboardValue: event.context.chainId
       },
     ]
   })

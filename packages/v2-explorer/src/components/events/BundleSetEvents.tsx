@@ -46,7 +46,8 @@ export function BundleSetEvents () {
     return [
       {
         key: 'timestamp',
-        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`
+        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`,
+        clipboardValue: event.context.blockTimestamp
       },
       {
         key: 'transactionHash',
@@ -64,12 +65,14 @@ export function BundleSetEvents () {
         clipboardValue: event.bundleRoot
       },
       {
-        key: 'fromChainID',
-        value: event.fromChainId
+        key: 'fromChainId',
+        value: event.fromChainLabel,
+        clipboardValue: event.fromChainId
       },
       {
         key: 'eventChainId',
-        value: event.context.chainId
+        value: event.context.chainLabel,
+        clipboardValue: event.context.chainId
       }
     ]
   })

@@ -158,12 +158,15 @@ export class Controller {
       }
       if (item.chainId) {
         item.chainName = chainNames[item.chainId]
+        item.chainLabel = `${item.chainId} - ${chainNames[item.chainId]}`
       }
       if (item.fromChainId) {
         item.fromChainName = chainNames[item.fromChainId]
+        item.fromChainLabel = `${item.fromChainId} - ${chainNames[item.fromChainId]}`
       }
       if (item.toChainId) {
         item.toChainName = chainNames[item.toChainId]
+        item.toChainLabel = `${item.toChainId} - ${chainNames[item.toChainId]}`
       }
       if (item.bundleFees) {
         item.bundleFeesDisplay = formatUnits(item.bundleFees, 18)
@@ -173,6 +176,10 @@ export class Controller {
       }
       if (item.context?.transactionHash) {
         item.context.transactionHashTruncated = truncateString(item.context.transactionHash, 4)
+      }
+      if (item.context?.chainId) {
+        item.context.chainName = chainNames[item.context.chainId]
+        item.context.chainLabel = `${item.context.chainId} - ${chainNames[item.context.chainId]}`
       }
     }
 

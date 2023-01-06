@@ -46,7 +46,8 @@ export function MessageBundledEvents () {
     return [
       {
         key: 'timestamp',
-        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`
+        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`,
+        clipboardValue: event.context.blockTimestamp
       },
       {
         key: 'transactionHash',
@@ -70,7 +71,8 @@ export function MessageBundledEvents () {
       },
       {
         key: 'eventChainId',
-        value: event.context.chainId
+        value: event.context.chainLabel,
+        clipboardValue: event.context.chainId
       },
     ]
   })

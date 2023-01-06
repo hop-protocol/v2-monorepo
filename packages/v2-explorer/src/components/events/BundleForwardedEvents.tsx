@@ -50,7 +50,8 @@ export function BundleForwardedEvents () {
     return [
       {
         key: 'timestamp',
-        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`
+        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`,
+        clipboardValue: event.context.blockTimestamp
       },
       {
         key: 'transactionHash',
@@ -69,11 +70,13 @@ export function BundleForwardedEvents () {
       },
       {
         key: 'toChainId',
-        value: event.toChainId
+        value: event.toChainLabel,
+        clipboardValue: event.toChainId
       },
       {
         key: 'eventChainId',
-        value: event.context.chainId
+        value: event.context.chainLabel,
+        clipboardValue: event.context.chainId
       },
     ]
   })

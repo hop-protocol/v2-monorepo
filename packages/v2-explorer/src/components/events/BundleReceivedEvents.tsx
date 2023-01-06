@@ -58,7 +58,8 @@ export function BundleReceivedEvents () {
     return [
       {
         key: 'timestamp',
-        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`
+        value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`,
+        clipboardValue: event.context.blockTimestamp
       },
       {
         key: 'transactionHash',
@@ -77,15 +78,18 @@ export function BundleReceivedEvents () {
       },
       {
         key: 'bundleFees',
-        value: event.bundleFeesDisplay
+        value: event.bundleFeesDisplay,
+        clipboardValue: event.bundleFees
       },
       {
         key: 'toChainId',
-        value: event.toChainId
+        value: event.toChainLabel,
+        clipboardValue: event.toChainId
       },
       {
         key: 'relayWindowStart',
-        value: event.relayWindowStart
+        value: event.relayWindowStart,
+        clipboardValue: event.relayWindowStart
       },
       {
         key: 'Relayer',
@@ -94,7 +98,8 @@ export function BundleReceivedEvents () {
       },
       {
         key: 'eventChainId',
-        value: event.context.chainId
+        value: event.context.chainLabel,
+        clipboardValue: event.context.chainId
       }
     ]
   })
