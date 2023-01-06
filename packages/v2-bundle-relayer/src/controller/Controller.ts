@@ -171,6 +171,9 @@ export class Controller {
       if (item.context?.blockTimestamp) {
         item.context.blockTimestampRelative = DateTime.fromSeconds(item.context.blockTimestamp).toRelative()
       }
+      if (item.context?.transactionHash) {
+        item.context.transactionHashTruncated = truncateString(item.context.transactionHash, 4)
+      }
     }
 
     return {

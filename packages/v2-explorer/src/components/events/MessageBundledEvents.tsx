@@ -21,6 +21,10 @@ export function MessageBundledEvents () {
       value: 'Timestamp',
     },
     {
+      key: 'transactionHash',
+      value: 'Transaction Hash'
+    },
+    {
       key: 'bundleId',
       value: 'Bundle ID',
     },
@@ -43,6 +47,11 @@ export function MessageBundledEvents () {
       {
         key: 'timestamp',
         value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`
+      },
+      {
+        key: 'transactionHash',
+        value: event.context.transactionHashTruncated,
+        clipboardValue: event.context.transactionHash
       },
       {
         key: 'bundleID',

@@ -21,6 +21,10 @@ export function MessageSentEvents () {
       value: 'Timestamp',
     },
     {
+      key: 'transactionHash',
+      value: 'Transaction Hash'
+    },
+    {
       key: 'messageId',
       value: 'Message ID',
     },
@@ -39,6 +43,11 @@ export function MessageSentEvents () {
       {
         key: 'timestamp',
         value: `${event.context.blockTimestamp} (${event.context.blockTimestampRelative})`
+      },
+      {
+        key: 'transactionHash',
+        value: event.context.transactionHashTruncated,
+        clipboardValue: event.context.transactionHash
       },
       {
         key: 'messageId',
