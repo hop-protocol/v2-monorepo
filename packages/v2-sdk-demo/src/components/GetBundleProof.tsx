@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
 import { ChainSelect } from './ChainSelect'
+import { useStyles } from './useStyles'
 
 type Props = {
   sdk: Hop
@@ -14,6 +15,7 @@ type Props = {
 
 export function GetBundleProof (props: Props) {
   const { sdk } = props
+  const styles = useStyles()
   const [fromChainId, setFromChainId] = useState(() => {
     try {
       const cached = localStorage.getItem('getBundleProof:fromChainId')
@@ -121,8 +123,8 @@ main().catch(console.error)
       <Box mb={4}>
         <Typography variant="subtitle1">Get bundle proof needed to relay message at destination chain</Typography>
       </Box>
-      <Box width="100%" display="flex" justifyContent="space-between">
-        <Box minWidth="400px" mr={4}>
+      <Box width="100%" display="flex" justifyContent="space-between" className={styles.container}>
+        <Box mr={4} className={styles.formContainer}>
           <Box>
             <form onSubmit={handleSubmit}>
               <Box mb={2}>

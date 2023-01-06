@@ -3,6 +3,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
+import { useStyles } from './useStyles'
 
 type Props = {
   sdk: Hop
@@ -10,6 +11,7 @@ type Props = {
 
 export function GetContractAddresses (props: Props) {
   const { sdk } = props
+  const styles = useStyles()
   const contractAddresses = useMemo(() => {
     return sdk?.getContractAddresses() ?? null
   }, [sdk])
@@ -34,8 +36,8 @@ main().catch(console.error)
       <Box mb={4}>
         <Typography variant="subtitle1">Get hub and spoke contract addresses used</Typography>
       </Box>
-      <Box width="100%" display="flex" justifyContent="space-between">
-        <Box minWidth="400px" mr={4}>
+      <Box width="100%" display="flex" justifyContent="space-between" className={styles.container}>
+        <Box mr={4} className={styles.formContainer}>
           {!!contractAddresses && (
             <Box>
               <Box mb={2}>

@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
 import { ChainSelect } from './ChainSelect'
+import { useStyles } from './useStyles'
 
 type Props = {
   signer: Signer
@@ -18,6 +19,7 @@ type Props = {
 
 export function RelayBundle (props: Props) {
   const { signer, sdk, onboard } = props
+  const styles = useStyles()
   const [fromChainId, setFromChainId] = useState(() => {
     try {
       const cached = localStorage.getItem('relayBundle:fromChainId')
@@ -145,8 +147,8 @@ main().catch(console.error)
       <Box mb={4}>
         <Typography variant="subtitle1">Exit bundle at the destination</Typography>
       </Box>
-      <Box width="100%" display="flex" justifyContent="space-between">
-        <Box minWidth="400px" mr={4}>
+      <Box width="100%" display="flex" justifyContent="space-between" className={styles.container}>
+        <Box mr={4} className={styles.formContainer}>
           <form onSubmit={handleSubmit}>
             <Box mb={2}>
               <Box mb={1}>

@@ -9,6 +9,7 @@
     "@hop-protocol/v2-sdk": "0.0.0-beta.8",
     "@mui/lab": "^5.0.0-alpha.86",
     "@mui/material": "^5.8.4",
+    "@mui/styles": "^5.11.2",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
