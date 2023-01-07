@@ -72,12 +72,12 @@ export function GetBundleProof (props: Props) {
   }, [messageId])
 
   async function getBundleProof() {
-    const args = [
-      Number(fromChainId),
+    const args = {
+      fromChainId: Number(fromChainId),
       messageId
-    ] as const
+    }
     console.log('args', args)
-    const proof = await sdk.getBundleProofFromMessageId(...args)
+    const proof = await sdk.getBundleProofFromMessageId(args)
     return proof
   }
 
@@ -105,10 +105,10 @@ async function main() {
   const messageId = "${messageId}"
 
   const hop = new Hop('goerli')
-  const bundleProof = await hop.getBundleProofFromMessageId(
+  const bundleProof = await hop.getBundleProofFromMessageId({
     fromChainId,
     messageId
-  )
+  })
   console.log(bundleProof)
 }
 

@@ -13,7 +13,7 @@ type Options = {
 }
 
 export class Indexer {
-  hop: Hop
+  sdk: Hop
   pollIntervalMs: number = 10 * 1000
   startBlocks: StartBlocks = {}
   chainIds: any = {
@@ -27,7 +27,7 @@ export class Indexer {
   eventsToSync: Record<string, EventsBaseDb<any>>
 
   constructor (options?: Options) {
-    this.hop = new Hop('goerli', {
+    this.sdk = new Hop('goerli', {
       batchBlocks: 10_000
     })
     if (options?.startBlocks) {
@@ -141,22 +141,22 @@ export class Indexer {
     const syncState = await _db.getSyncState(chainId)
     console.log('syncState', eventName, syncState)
 
-    const provider = this.hop.getRpcProvider(chainId)
-    let startBlock = this.startBlocks[chainId]
-    let endBlock = await provider.getBlockNumber()
+    const provider = this.sdk.getRpcProvider(chainId)
+    let fromBlock = this.startBlocks[chainId]
+    let toBlock = await provider.getBlockNumber()
     if (syncState?.toBlock) {
-      startBlock = syncState.toBlock + 1
-      endBlock = await provider.getBlockNumber()
+      fromBlock = syncState.toBlock + 1
+      toBlock = await provider.getBlockNumber()
     }
 
-    console.log('get', eventName, chainId, startBlock, endBlock)
-    const events = await this.hop.getEvents(eventName, chainId, startBlock, endBlock)
+    console.log('get', eventName, chainId, fromBlock, toBlock)
+    const events = await this.sdk.getEvents({ eventName, chainId, fromBlock, toBlock })
     console.log('events', eventName, events.length)
     for (const event of events) {
       const key = _db.getKeyStringFromEvent(event)!
       await _db.updateEvent(key, event)
     }
-    await _db.putSyncState(chainId, { fromBlock: startBlock, toBlock: endBlock })
+    await _db.putSyncState(chainId, { fromBlock, toBlock })
     return events
   }
 

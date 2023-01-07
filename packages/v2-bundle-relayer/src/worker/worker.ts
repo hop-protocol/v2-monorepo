@@ -8,12 +8,12 @@ import { signer } from '../signer'
 class RelayError extends Error {}
 
 export class Worker {
-  hop: Hop
+  sdk: Hop
   pollIntervalMs: number = 10 * 1000
   indexer: Indexer
 
   constructor () {
-    this.hop = new Hop('goerli')
+    this.sdk = new Hop('goerli')
     this.indexer = new Indexer({
       startBlocks: {
         5: goerliAddresses['5'].startBlock,
@@ -57,11 +57,11 @@ export class Worker {
       const { bundleId, toChainId } = bundleCommittedEvent
       const { chainId: fromChainId } = bundleCommittedEvent.context
       console.log('checking shouldAttemp for bundle', bundleId)
-      const shouldAttempt = true // await this.hop.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent as any)
+      const shouldAttempt = true // await this.sdk.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent as any)
 
       console.log('shouldAttempt:', shouldAttempt, bundleId)
       if (shouldAttempt) {
-        const bundleSet = await this.hop.getIsBundleSet(fromChainId, toChainId, bundleId)
+        const bundleSet = await this.sdk.getIsBundleSet({ fromChainId, toChainId, bundleId })
         if (bundleSet) {
           await db.relayableBundlesDb.deleteItem(bundleId)
           throw new RelayError('bundle already set')
@@ -75,7 +75,7 @@ export class Worker {
         let txData: any
         try {
           console.log('getting getBundleExitPopulatedTx')
-          txData = await this.hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedEvent)
+          txData = await this.sdk.getBundleExitPopulatedTx({ fromChainId, bundleCommittedEvent })
           console.log('txData', txData)
         } catch (err: any) {
           if (/unable to find state root batch for tx with hash/.test(err.message)) {
@@ -83,7 +83,7 @@ export class Worker {
           }
         }
 
-        const provider = this.hop.getRpcProvider(toChainId)
+        const provider = this.sdk.getRpcProvider(toChainId)
         if (!signer) {
           throw new Error('no signer connected')
         }

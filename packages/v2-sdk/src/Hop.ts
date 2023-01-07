@@ -35,6 +35,162 @@ export type BundleProof = {
   totalLeaves: number
 }
 
+export type GetEventsInput = {
+  chainId: number
+  fromBlock: number
+  toBlock?: number
+}
+
+export type GetGeneralEventsInput = {
+  eventName?: string
+  eventNames?: string[]
+  chainId: number
+  fromBlock: number
+  toBlock?: number
+}
+
+export type HasAuctionStartedInput = {
+  fromChainId: number
+  bundleCommittedEvent: BundleCommitted
+}
+
+export type GetSpokeExitTimeInput = {
+  fromChainId: number
+  toChainId: number
+}
+
+export type GetRelayRewardInput = {
+  fromChainId: number,
+  bundleCommittedEvent: BundleCommitted
+}
+
+export type GetEstimatedTxCostForForwardMessageInput = {
+  chainId: number,
+}
+
+export type ShouldAttemptForwardMessageInput = {
+  fromChainId: number,
+  bundleCommittedEvent: BundleCommitted
+}
+
+export type GetBundleExitPopulatedTxInput = {
+  fromChainId: number,
+  bundleCommittedEvent?: BundleCommitted
+  bundleCommittedTransactionHash?: string
+}
+
+export type GetSendMessagePopulatedTxInput = {
+  fromChainId: number,
+  toChainId: number,
+  toAddress: string,
+  toCalldata: string
+}
+
+export type GetEventContextInput = {
+  chainId: number
+  event: any,
+}
+
+export type GetRouteDataInput = {
+  fromChainId: number,
+  toChainId: number
+}
+
+export type GetMessageFeeInput = {
+  fromChainId: number,
+  toChainId: number
+}
+
+export type GetMaxBundleMessageCountInput = {
+  fromChainId: number,
+  toChainId: number
+}
+
+export type GetIsBundleSetInput = {
+  fromChainId: number,
+  toChainId: number,
+  bundleId: string
+}
+
+export type GetMessageSentEventFromTransactionReceiptInput = {
+  fromChainId: number,
+  receipt: any
+}
+
+export type GetMessageSentEventFromTransactionHashInput = {
+  fromChainId: number,
+  transactionHash: string
+}
+
+export type GetMessageBundledEventFromMessageIdInput = {
+  fromChainId: number,
+  messageId: string
+}
+
+export type GetMessageBundledEventFromTransactionHashInput = {
+  fromChainId: number,
+  transactionHash: string
+}
+
+export type GetMessageIdFromTransactionHashInput = {
+  fromChainId: number,
+  transactionHash: string
+}
+
+export type GetMessageBundleIdFromMessageIdInput = {
+  fromChainId: number,
+  messageId: string
+}
+
+export type GetMessageBundleIdFromTransactionHashInput = {
+  fromChainId: number,
+  transactionHash: string
+}
+
+export type GetMessageTreeIndexFromMessageIdInput = {
+  fromChainId: number,
+  messageId: string
+}
+
+export type GetMessageTreeIndexFromTransactionHashInput = {
+  fromChainId: number,
+  transactionHash: string
+}
+
+export type GetMessageBundledEventsForBundleIdInput = {
+  fromChainId: number,
+  bundleId: string
+}
+
+export type GetMessageIdsForBundleIdInput = {
+  fromChainId: number,
+  bundleId: string
+}
+
+export type GetMerkleProofForMessageIdInput = {
+  messageIds: string[],
+  targetMessageId: string
+}
+
+export type GetBundleProofFromMessageIdInput = {
+  fromChainId: number,
+  messageId: string
+}
+
+export type GetBundleProofFromTransactionHashInput = {
+  fromChainId: number,
+  transactionHash: string
+}
+
+export type GetRelayMessagePopulatedTxInput = {
+  fromChainId: number,
+  toChainId: number,
+  fromAddress: string,
+  toAddress: string,
+  toCalldata: string,
+  bundleProof: BundleProof
+}
+
 export class Hop {
   eventFetcher: EventFetcher
   network: string
@@ -91,12 +247,13 @@ export class Hop {
     return address
   }
 
-  async getBundleCommittedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleCommitted[]> {
+  async getBundleCommittedEvents (input: GetEventsInput): Promise<BundleCommitted[]> {
+    const { chainId, fromBlock, toBlock } = input
     if (!chainId) {
       throw new Error('chainId is required')
     }
-    if (!startBlock) {
-      throw new Error('startBlock is required')
+    if (!fromBlock) {
+      throw new Error('fromBlock is required')
     }
     const provider = this.getRpcProvider(chainId)
     if (!provider) {
@@ -107,15 +264,16 @@ export class Hop {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
     const eventFetcher = new BundleCommittedEventFetcher(provider, chainId, this.batchBlocks, address)
-    return eventFetcher.getEvents(startBlock, endBlock)
+    return eventFetcher.getEvents(fromBlock, toBlock)
   }
 
-  async getBundleForwardedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleForwarded[]> {
+  async getBundleForwardedEvents (input: GetEventsInput): Promise<BundleForwarded[]> {
+    const { chainId, fromBlock, toBlock } = input
     if (!chainId) {
       throw new Error('chainId is required')
     }
-    if (!startBlock) {
-      throw new Error('startBlock is required')
+    if (!fromBlock) {
+      throw new Error('fromBlock is required')
     }
     const provider = this.getRpcProvider(chainId)
     if (!provider) {
@@ -126,15 +284,16 @@ export class Hop {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
     const eventFetcher = new BundleForwardedEventFetcher(provider, chainId, this.batchBlocks, address)
-    return eventFetcher.getEvents(startBlock, endBlock)
+    return eventFetcher.getEvents(fromBlock, toBlock)
   }
 
-  async getBundleReceivedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleReceived[]> {
+  async getBundleReceivedEvents (input: GetEventsInput): Promise<BundleReceived[]> {
+    const { chainId, fromBlock, toBlock } = input
     if (!chainId) {
       throw new Error('chainId is required')
     }
-    if (!startBlock) {
-      throw new Error('startBlock is required')
+    if (!fromBlock) {
+      throw new Error('fromBlock is required')
     }
     const provider = this.getRpcProvider(chainId)
     if (!provider) {
@@ -145,15 +304,16 @@ export class Hop {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
     const eventFetcher = new BundleReceivedEventFetcher(provider, chainId, this.batchBlocks, address)
-    return eventFetcher.getEvents(startBlock, endBlock)
+    return eventFetcher.getEvents(fromBlock, toBlock)
   }
 
-  async getBundleSetEvents (chainId: number, startBlock: number, endBlock?: number): Promise<BundleSet[]> {
+  async getBundleSetEvents (input: GetEventsInput): Promise<BundleSet[]> {
+    const { chainId, fromBlock, toBlock } = input
     if (!chainId) {
       throw new Error('chainId is required')
     }
-    if (!startBlock) {
-      throw new Error('startBlock is required')
+    if (!fromBlock) {
+      throw new Error('fromBlock is required')
     }
     const provider = this.getRpcProvider(chainId)
     if (!provider) {
@@ -164,15 +324,16 @@ export class Hop {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
     const eventFetcher = new BundleSetEventFetcher(provider, chainId, this.batchBlocks, address)
-    return eventFetcher.getEvents(startBlock, endBlock)
+    return eventFetcher.getEvents(fromBlock, toBlock)
   }
 
-  async getFeesSentToHubEvents (chainId: number, startBlock: number, endBlock?: number): Promise<FeesSentToHub[]> {
+  async getFeesSentToHubEvents (input: GetEventsInput): Promise<FeesSentToHub[]> {
+    const { chainId, fromBlock, toBlock } = input
     if (!chainId) {
       throw new Error('chainId is required')
     }
-    if (!startBlock) {
-      throw new Error('startBlock is required')
+    if (!fromBlock) {
+      throw new Error('fromBlock is required')
     }
     const provider = this.getRpcProvider(chainId)
     if (!provider) {
@@ -183,15 +344,16 @@ export class Hop {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
     const eventFetcher = new FeesSentToHubEventFetcher(provider, chainId, this.batchBlocks, address)
-    return eventFetcher.getEvents(startBlock, endBlock)
+    return eventFetcher.getEvents(fromBlock, toBlock)
   }
 
-  async getMessageBundledEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageBundled[]> {
+  async getMessageBundledEvents (input: GetEventsInput): Promise<MessageBundled[]> {
+    const { chainId, fromBlock, toBlock } = input
     if (!chainId) {
       throw new Error('chainId is required')
     }
-    if (!startBlock) {
-      throw new Error('startBlock is required')
+    if (!fromBlock) {
+      throw new Error('fromBlock is required')
     }
     const provider = this.getRpcProvider(chainId)
     if (!provider) {
@@ -202,15 +364,16 @@ export class Hop {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
     const eventFetcher = new MessageBundledEventFetcher(provider, chainId, this.batchBlocks, address)
-    return eventFetcher.getEvents(startBlock, endBlock)
+    return eventFetcher.getEvents(fromBlock, toBlock)
   }
 
-  async getMessageRelayedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageRelayed[]> {
+  async getMessageRelayedEvents (input: GetEventsInput): Promise<MessageRelayed[]> {
+    const { chainId, fromBlock, toBlock } = input
     if (!chainId) {
       throw new Error('chainId is required')
     }
-    if (!startBlock) {
-      throw new Error('startBlock is required')
+    if (!fromBlock) {
+      throw new Error('fromBlock is required')
     }
     const provider = this.getRpcProvider(chainId)
     if (!provider) {
@@ -221,15 +384,16 @@ export class Hop {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
     const eventFetcher = new MessageRelayedEventFetcher(provider, chainId, this.batchBlocks, address)
-    return eventFetcher.getEvents(startBlock, endBlock)
+    return eventFetcher.getEvents(fromBlock, toBlock)
   }
 
-  async getMessageRevertedEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageReverted[]> {
+  async getMessageRevertedEvents (input: GetEventsInput): Promise<MessageReverted[]> {
+    const { chainId, fromBlock, toBlock } = input
     if (!chainId) {
       throw new Error('chainId is required')
     }
-    if (!startBlock) {
-      throw new Error('startBlock is required')
+    if (!fromBlock) {
+      throw new Error('fromBlock is required')
     }
     const provider = this.getRpcProvider(chainId)
     if (!provider) {
@@ -240,15 +404,16 @@ export class Hop {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
     const eventFetcher = new MessageRevertedEventFetcher(provider, chainId, this.batchBlocks, address)
-    return eventFetcher.getEvents(startBlock, endBlock)
+    return eventFetcher.getEvents(fromBlock, toBlock)
   }
 
-  async getMessageSentEvents (chainId: number, startBlock: number, endBlock?: number): Promise<MessageSent[]> {
+  async getMessageSentEvents (input: GetEventsInput): Promise<MessageSent[]> {
+    const { chainId, fromBlock, toBlock } = input
     if (!chainId) {
       throw new Error('chainId is required')
     }
-    if (!startBlock) {
-      throw new Error('startBlock is required')
+    if (!fromBlock) {
+      throw new Error('fromBlock is required')
     }
     const provider = this.getRpcProvider(chainId)
     if (!provider) {
@@ -259,23 +424,28 @@ export class Hop {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
     const eventFetcher = new MessageSentEventFetcher(provider, chainId, this.batchBlocks, address)
-    return eventFetcher.getEvents(startBlock, endBlock)
+    return eventFetcher.getEvents(fromBlock, toBlock)
   }
 
-  async getEvents (eventNames: string | string[], chainId: number, startBlock: number, endBlock?: number): Promise<any[]> {
+  async getEvents (input: GetGeneralEventsInput): Promise<any[]> {
+    let { eventName, eventNames, chainId, fromBlock, toBlock } = input
     if (!chainId) {
       throw new Error('chainId is required')
     }
-    if (!startBlock) {
-      throw new Error('startBlock is required')
+    if (!fromBlock) {
+      throw new Error('fromBlock is required')
     }
     const provider = this.getRpcProvider(chainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
 
-    if (!Array.isArray(eventNames)) {
-      eventNames = [eventNames]
+    if (eventName) {
+      eventNames = [eventName]
+    }
+
+    if (!eventNames.length) {
+      throw new Error('expected eventName or eventNames')
     }
 
     const filters :any[] = []
@@ -342,8 +512,8 @@ export class Hop {
       }
     }
     const options = {
-      startBlock,
-      endBlock
+      fromBlock,
+      toBlock
     }
     const events = await eventFetcher.fetchEvents(filters, options)
     const decoded : any[] = []
@@ -368,13 +538,15 @@ export class Hop {
     ]
   }
 
-  async hasAuctionStarted (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<boolean> {
+  async hasAuctionStarted (input: HasAuctionStartedInput): Promise<boolean> {
+    const { fromChainId, bundleCommittedEvent } = input
     const { commitTime, toChainId } = bundleCommittedEvent
-    const exitTime = await this.getSpokeExitTime(fromChainId, toChainId)
+    const exitTime = await this.getSpokeExitTime({ fromChainId, toChainId })
     return commitTime + exitTime < DateTime.utc().toSeconds()
   }
 
-  async getSpokeExitTime (fromChainId: number, toChainId: number) {
+  async getSpokeExitTime (input: GetSpokeExitTimeInput): Promise<number> {
+    const { fromChainId, toChainId } = input
     const provider = this.getRpcProvider(toChainId)
     if (!provider) {
       throw new Error(`Invalid chain: ${toChainId}`)
@@ -392,7 +564,8 @@ export class Hop {
 
   // relayReward = (block.timestamp - relayWindowStart) * feesCollected / relayWindow
   // reference: https://github.com/hop-protocol/contracts-v2/blob/master/contracts/bridge/FeeDistributor/FeeDistributor.sol#L83-L106
-  async getRelayReward (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<number> {
+  async getRelayReward (input: GetRelayRewardInput): Promise<number> {
+    const { fromChainId, bundleCommittedEvent } = input
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Invalid chain: ${fromChainId}`)
@@ -400,14 +573,15 @@ export class Hop {
     const { commitTime, bundleFees, toChainId } = bundleCommittedEvent
     const feesCollected = Number(formatEther(bundleFees))
     const { timestamp: blockTimestamp } = await provider.getBlock('latest')
-    const spokeExitTime = await this.getSpokeExitTime(fromChainId, toChainId)
+    const spokeExitTime = await this.getSpokeExitTime({ fromChainId, toChainId })
     const relayWindowStart = commitTime + spokeExitTime
     const relayWindow = this.getRelayWindowHours() * 60 * 60
     const relayReward = (blockTimestamp - relayWindowStart) * feesCollected / relayWindow
     return relayReward
   }
 
-  async getEstimatedTxCostForForwardMessage (chainId: number, bundleCommittedEvent: BundleCommitted): Promise<number> {
+  async getEstimatedTxCostForForwardMessage (input: GetEstimatedTxCostForForwardMessageInput): Promise<number> {
+    const { chainId } = input
     const provider = this.getRpcProvider(chainId)
     if (!provider) {
       throw new Error(`Invalid chain: ${chainId}`)
@@ -418,34 +592,35 @@ export class Hop {
     return Number(formatUnits(estimatedTxCost, 9))
   }
 
-  async shouldAttemptForwardMessage (fromChainId: number, bundleCommittedEvent: BundleCommitted): Promise<boolean> {
-    const estimatedTxCost = await this.getEstimatedTxCostForForwardMessage(fromChainId, bundleCommittedEvent)
-    const relayReward = await this.getRelayReward(fromChainId, bundleCommittedEvent)
+  async shouldAttemptForwardMessage (input: ShouldAttemptForwardMessageInput): Promise<boolean> {
+    const { fromChainId, bundleCommittedEvent } = input
+    const estimatedTxCost = await this.getEstimatedTxCostForForwardMessage({ chainId: fromChainId })
+    const relayReward = await this.getRelayReward({ fromChainId, bundleCommittedEvent })
     const txOk = relayReward > estimatedTxCost
-    const timeOk = await this.hasAuctionStarted(fromChainId, bundleCommittedEvent)
+    const timeOk = await this.hasAuctionStarted({ fromChainId, bundleCommittedEvent })
     const shouldAttempt = txOk && timeOk
     return shouldAttempt
   }
 
-  async getBundleExitPopulatedTx (fromChainId: number, bundleCommittedEventOrTxHash: BundleCommitted | string): Promise<any> {
-    let transactionHash = ''
-    if (typeof bundleCommittedEventOrTxHash === 'string') {
-      transactionHash = bundleCommittedEventOrTxHash
-      if (!this.isValidTxHash(transactionHash)) {
-        throw new Error(`Invalid transaction hash: ${transactionHash}`)
+  async getBundleExitPopulatedTx (input: GetBundleExitPopulatedTxInput): Promise<any> {
+    let { fromChainId, bundleCommittedEvent, bundleCommittedTransactionHash } = input
+    if (bundleCommittedTransactionHash) {
+      if (!this.isValidTxHash(bundleCommittedTransactionHash)) {
+        throw new Error(`Invalid transaction hash: ${bundleCommittedTransactionHash}`)
       }
-    } else {
-      const { eventLog, context } = bundleCommittedEventOrTxHash
-      transactionHash = eventLog.transactionHash ?? context?.transactionHash
+    } else if (bundleCommittedEvent) {
+      const { eventLog, context } = bundleCommittedEvent
+      bundleCommittedTransactionHash = eventLog.transactionHash ?? context?.transactionHash
     }
-    if (!transactionHash) {
-      throw new Error('expected transaction hash')
+    if (!bundleCommittedTransactionHash) {
+      throw new Error('expected bundle comitted transaction hash')
     }
 
     const l1Provider = this.getRpcProvider(this.l1ChainId)
     const l2Provider = this.getRpcProvider(fromChainId)
+    // TODO: generalize
     const exitRelayer = new OptimismRelayer(this.network, l1Provider, l2Provider)
-    const txData = await exitRelayer.getExitPopulatedTx(transactionHash)
+    const txData = await exitRelayer.getExitPopulatedTx(bundleCommittedTransactionHash)
 
     return {
       ...txData,
@@ -453,7 +628,8 @@ export class Hop {
     }
   }
 
-  async getSendMessagePopulatedTx (fromChainId: number, toChainId: number, toAddress: string, toCalldata: string = '0x'): Promise<any> {
+  async getSendMessagePopulatedTx (input: GetSendMessagePopulatedTxInput): Promise<any> {
+    let { fromChainId, toChainId, toAddress, toCalldata = '0x' } = input
     if (fromChainId === toChainId) {
       throw new Error('fromChainId and toChainId must be different')
     }
@@ -481,7 +657,8 @@ export class Hop {
     }
   }
 
-  async getEventContext (event: any, chainId: number): Promise<EventContext> {
+  async getEventContext (input: GetEventContextInput): Promise<EventContext> {
+    const { chainId, event } = input
     const chainSlug = this.getChainSlug(chainId)
     const transactionHash = event.transactionHash
     const transactionIndex = event.transactionIndex
@@ -524,7 +701,8 @@ export class Hop {
     return 12
   }
 
-  async getRouteData (fromChainId: number, toChainId: number) {
+  async getRouteData (input: GetRouteDataInput) {
+    const { fromChainId, toChainId } = input
     if (fromChainId === toChainId) {
       throw new Error('fromChainId and toChainId must be different')
     }
@@ -539,19 +717,21 @@ export class Hop {
     }
   }
 
-  async getMessageFee (fromChainId: number, toChainId: number) {
+  async getMessageFee (input: GetMessageFeeInput) {
+    const { fromChainId, toChainId } = input
     if (fromChainId === toChainId) {
       throw new Error('fromChainId and toChainId must be different')
     }
-    const routeData = await this.getRouteData(fromChainId, toChainId)
+    const routeData = await this.getRouteData({ fromChainId, toChainId })
     return routeData.messageFee
   }
 
-  async getMaxBundleMessageCount (fromChainId: number, toChainId: number) {
+  async getMaxBundleMessageCount (input: GetMaxBundleMessageCountInput) {
+    const { fromChainId, toChainId } = input
     if (fromChainId === toChainId) {
       throw new Error('fromChainId and toChainId must be different')
     }
-    const routeData = await this.getRouteData(fromChainId, toChainId)
+    const routeData = await this.getRouteData({ fromChainId, toChainId })
     return routeData.maxBundleMessages
   }
 
@@ -563,7 +743,8 @@ export class Hop {
     return this.contractAddresses[this.network]
   }
 
-  async getIsBundleSet (fromChainId: number, toChainId: number, bundleId: string) {
+  async getIsBundleSet (input: GetIsBundleSetInput) {
+    const { fromChainId, toChainId, bundleId } = input
     const provider = this.getRpcProvider(toChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${toChainId}`)
@@ -581,7 +762,8 @@ export class Hop {
     return BigNumber.from(entity.root).gt(0) && entity.fromChainId.toNumber() === fromChainId
   }
 
-  async getMessageSentEventFromTransactionReceipt (fromChainId: number, receipt: any) {
+  async getMessageSentEventFromTransactionReceipt (input: GetMessageSentEventFromTransactionReceiptInput) {
+    const { fromChainId, receipt } = input
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
@@ -601,16 +783,18 @@ export class Hop {
     return null
   }
 
-  async getMessageSentEventFromTransactionHash (fromChainId: number, transactionHash: string) {
+  async getMessageSentEventFromTransactionHash (input: GetMessageSentEventFromTransactionHashInput) {
+    const { fromChainId, transactionHash } = input
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
     }
     const receipt = await provider.getTransactionReceipt(transactionHash)
-    return this.getMessageSentEventFromTransactionReceipt(fromChainId, receipt)
+    return this.getMessageSentEventFromTransactionReceipt({ fromChainId, receipt })
   }
 
-  async getMessageBundledEventFromMessageId (fromChainId: number, messageId: string) {
+  async getMessageBundledEventFromMessageId (input: GetMessageBundledEventFromMessageIdInput) {
+    const { fromChainId, messageId } = input
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
@@ -623,13 +807,14 @@ export class Hop {
 
     const eventFetcher = new MessageBundledEventFetcher(provider, fromChainId, 1_000_000_000, address)
     const filter = eventFetcher.getMessageIdFilter(messageId)
-    const endBlock = await provider.getBlockNumber()
-    const startBlock = 0 // endBlock - 100_000
-    const events = await eventFetcher._getEvents(filter, startBlock, endBlock)
+    const toBlock = await provider.getBlockNumber()
+    const fromBlock = 0 // endBlock - 100_000
+    const events = await eventFetcher._getEvents(filter, fromBlock, toBlock)
     return events?.[0] ?? null
   }
 
-  async getMessageBundledEventFromTransactionHash (fromChainId: number, transactionHash: string) {
+  async getMessageBundledEventFromTransactionHash (input: GetMessageBundledEventFromTransactionHashInput) {
+    const { fromChainId, transactionHash } = input
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
@@ -650,8 +835,9 @@ export class Hop {
     return null
   }
 
-  async getMessageIdFromTransactionHash (fromChainId: number, transactionHash: string) {
-    const event = await this.getMessageSentEventFromTransactionHash(fromChainId, transactionHash)
+  async getMessageIdFromTransactionHash (input: GetMessageIdFromTransactionHashInput) {
+    const { fromChainId, transactionHash } = input
+    const event = await this.getMessageSentEventFromTransactionHash({ fromChainId, transactionHash })
     if (!event) {
       throw new Error('event not found for transaction hash')
     }
@@ -659,8 +845,9 @@ export class Hop {
     return event.messageId
   }
 
-  async getMessageBundleIdFromMessageId (fromChainId: number, messageId: string): Promise<string> {
-    const event = await this.getMessageBundledEventFromMessageId(fromChainId, messageId)
+  async getMessageBundleIdFromMessageId (input: GetMessageBundleIdFromMessageIdInput): Promise<string> {
+    const { fromChainId, messageId } = input
+    const event = await this.getMessageBundledEventFromMessageId({ fromChainId, messageId })
     if (!event) {
       throw new Error('event not found for messageId')
     }
@@ -668,8 +855,9 @@ export class Hop {
     return event.bundleId
   }
 
-  async getMessageBundleIdFromTransactionHash (fromChainId: number, transactionHash: string): Promise<string> {
-    const event = await this.getMessageBundledEventFromTransactionHash(fromChainId, transactionHash)
+  async getMessageBundleIdFromTransactionHash (input: GetMessageBundleIdFromTransactionHashInput): Promise<string> {
+    const { fromChainId, transactionHash } = input
+    const event = await this.getMessageBundledEventFromTransactionHash({ fromChainId, transactionHash })
     if (!event) {
       throw new Error('event not found for transaction hash')
     }
@@ -677,8 +865,9 @@ export class Hop {
     return event.bundleId
   }
 
-  async getMessageTreeIndexFromMessageId (fromChainId: number, messageId: string): Promise<number> {
-    const event = await this.getMessageBundledEventFromMessageId(fromChainId, messageId)
+  async getMessageTreeIndexFromMessageId (input: GetMessageTreeIndexFromMessageIdInput): Promise<number> {
+    const { fromChainId, messageId } = input
+    const event = await this.getMessageBundledEventFromMessageId({ fromChainId, messageId })
     if (!event) {
       throw new Error('event not found for messageId')
     }
@@ -686,8 +875,9 @@ export class Hop {
     return event.treeIndex
   }
 
-  async getMessageTreeIndexFromTransactionHash (fromChainId: number, transactionHash: string): Promise<number> {
-    const event = await this.getMessageBundledEventFromTransactionHash(fromChainId, transactionHash)
+  async getMessageTreeIndexFromTransactionHash (input: GetMessageTreeIndexFromTransactionHashInput): Promise<number> {
+    const { fromChainId, transactionHash } = input
+    const event = await this.getMessageBundledEventFromTransactionHash({ fromChainId, transactionHash })
     if (!event) {
       throw new Error('event not found for transaction hash')
     }
@@ -695,7 +885,8 @@ export class Hop {
     return event.treeIndex
   }
 
-  async getMessageBundledEventsForBundleId (fromChainId: number, bundleId: string): Promise<any[]> {
+  async getMessageBundledEventsForBundleId (input: GetMessageBundledEventsForBundleIdInput): Promise<any[]> {
+    const { fromChainId, bundleId } = input
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
@@ -706,33 +897,36 @@ export class Hop {
     }
     const eventFetcher = new MessageBundledEventFetcher(provider, fromChainId, 1_000_000_000, address)
     const filter = eventFetcher.getBundleIdFilter(bundleId)
-    const endBlock = await provider.getBlockNumber()
-    const startBlock = 0 // endBlock - 100_000
-    const events = eventFetcher._getEvents(filter, startBlock, endBlock)
+    const toBlock = await provider.getBlockNumber()
+    const fromBlock = 0 // endBlock - 100_000
+    const events = eventFetcher._getEvents(filter, fromBlock, toBlock)
     return events
   }
 
-  async getMessageIdsForBundleId (fromChainId: number, bundleId: string): Promise<string[]> {
-    const messageEvents = await this.getMessageBundledEventsForBundleId(fromChainId, bundleId)
+  async getMessageIdsForBundleId (input: GetMessageIdsForBundleIdInput): Promise<string[]> {
+    const { fromChainId, bundleId } = input
+    const messageEvents = await this.getMessageBundledEventsForBundleId({ fromChainId, bundleId })
     const messageIds = messageEvents.map((item: any) => item.messageId)
     return messageIds
   }
 
-  getMerkleProofForMessageId (messageIds: string[], messageId: string) {
+  getMerkleProofForMessageId (input: GetMerkleProofForMessageIdInput) {
+    const { messageIds, targetMessageId } = input
     const tree = MerkleTree.from(messageIds)
-    const proof = tree.getHexProof(messageId)
+    const proof = tree.getHexProof(targetMessageId)
     return proof
   }
 
-  async getBundleProofFromMessageId (fromChainId: number, messageId: string): Promise<BundleProof> {
+  async getBundleProofFromMessageId (input: GetBundleProofFromMessageIdInput): Promise<BundleProof> {
+    const { fromChainId, messageId } = input
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
     }
 
-    const { treeIndex, bundleId } = await this.getMessageBundledEventFromMessageId(fromChainId, messageId)
-    const messageIds = await this.getMessageIdsForBundleId(fromChainId, bundleId)
-    const siblings = this.getMerkleProofForMessageId(messageIds, messageId)
+    const { treeIndex, bundleId } = await this.getMessageBundledEventFromMessageId({ fromChainId, messageId })
+    const messageIds = await this.getMessageIdsForBundleId({ fromChainId, bundleId })
+    const siblings = this.getMerkleProofForMessageId({ messageIds, targetMessageId: messageId })
     const totalLeaves = messageIds.length
 
     return {
@@ -743,17 +937,18 @@ export class Hop {
     }
   }
 
-  async getBundleProofFromTransactionHash (fromChainId: number, transactionHash: string): Promise<BundleProof> {
+  async getBundleProofFromTransactionHash (input: GetBundleProofFromTransactionHashInput): Promise<BundleProof> {
+    const { fromChainId, transactionHash } = input
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
     }
 
     // TODO: handle case for when multiple message events in single transaction
-    const { treeIndex, bundleId } = await this.getMessageBundledEventFromTransactionHash(fromChainId, transactionHash)
-    const messageId = await this.getMessageIdFromTransactionHash(fromChainId, transactionHash)
-    const messageIds = await this.getMessageIdsForBundleId(fromChainId, bundleId)
-    const siblings = this.getMerkleProofForMessageId(messageIds, messageId)
+    const { treeIndex, bundleId } = await this.getMessageBundledEventFromTransactionHash({ fromChainId, transactionHash })
+    const targetMessageId = await this.getMessageIdFromTransactionHash({ fromChainId, transactionHash })
+    const messageIds = await this.getMessageIdsForBundleId({ fromChainId, bundleId })
+    const siblings = this.getMerkleProofForMessageId({ messageIds, targetMessageId })
     const totalLeaves = messageIds.length
 
     return {
@@ -764,7 +959,8 @@ export class Hop {
     }
   }
 
-  async getRelayMessagePopulatedTx (fromChainId: number, toChainId: number, fromAddress: string, toAddress: string, toCalldata: string, bundleProof: BundleProof) {
+  async getRelayMessagePopulatedTx (input: GetRelayMessagePopulatedTxInput) {
+    const { fromChainId, toChainId, fromAddress, toAddress, toCalldata, bundleProof } = input
     const provider = this.getRpcProvider(toChainId)
     if (!provider) {
       throw new Error(`Invalid chain: ${toChainId}`)

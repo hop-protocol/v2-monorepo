@@ -130,11 +130,16 @@ export function RelayMessage (props: Props) {
   }, [bundleProof])
 
   async function getSendTxData() {
-    const args = [
-      Number(fromChainId), Number(toChainId), fromAddress, toAddress, toCalldata, JSON.parse(bundleProof.trim())
-    ] as const
+    const args = {
+      fromChainId: Number(fromChainId),
+      toChainId: Number(toChainId),
+      fromAddress,
+      toAddress,
+      toCalldata,
+      bundleProof: JSON.parse(bundleProof.trim())
+    }
     console.log('args', args)
-    const txData = await sdk.getRelayMessagePopulatedTx(...args)
+    const txData = await sdk.getRelayMessagePopulatedTx(args)
     return txData
   }
 
@@ -196,14 +201,14 @@ async function main() {
   const bundleProof = ${_bundleProof}
 
   const hop = new Hop('goerli')
-  const txData = await hop.getRelayMessagePopulatedTx(
+  const txData = await hop.getRelayMessagePopulatedTx({
     fromChainId,
     toChainId,
     fromAddress,
     toAddress,
     toCalldata,
     bundleProof
-  )
+  })
   ${populateTxDataOnly ? (
   'console.log(txData)'
   ) : (

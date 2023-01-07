@@ -97,11 +97,14 @@ export function SendMessage (props: Props) {
   }, [toCalldata])
 
   async function getSendTxData() {
-    const args = [
-      Number(fromChainId), Number(toChainId), toAddress, toCalldata
-    ] as const
+    const args = {
+      fromChainId: Number(fromChainId),
+      toChainId: Number(toChainId),
+      toAddress,
+      toCalldata
+    }
     console.log('args', args)
-    const txData = await sdk.getSendMessagePopulatedTx(...args)
+    const txData = await sdk.getSendMessagePopulatedTx(args)
     return txData
   }
 
@@ -115,7 +118,7 @@ export function SendMessage (props: Props) {
       setLoading(true)
       const txData = await getSendTxData()
       setTxData(JSON.stringify(txData, null, 2))
-      const fee = await sdk.getMessageFee(Number(fromChainId), Number(toChainId))
+      const fee = await sdk.getMessageFee({ fromChainId: Number(fromChainId), toChainId: Number(toChainId) })
       if (!populateTxDataOnly) {
         let _signer = signer
         if (!_signer) {
@@ -136,7 +139,7 @@ export function SendMessage (props: Props) {
           setTxHash(tx.hash)
 
           const receipt = await tx.wait()
-          const { messageId } = await sdk.getMessageSentEventFromTransactionReceipt(Number(fromChainId), receipt)
+          const { messageId } = await sdk.getMessageSentEventFromTransactionReceipt({ fromChainId: Number(fromChainId), receipt })
           setMessageId(messageId)
         }
       }
@@ -162,12 +165,12 @@ async function main() {
   const toCalldata = "${toCalldata}"
 
   const hop = new Hop('goerli')
-  const txData = await hop.getSendMessagePopulatedTx(
+  const txData = await hop.getSendMessagePopulatedTx({
     fromChainId,
     toChainId,
     toAddress,
     toCalldata
-  )
+  })
   ${populateTxDataOnly ? (
   'console.log(txData)'
   ) : (

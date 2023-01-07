@@ -11,8 +11,8 @@ export type Options = {
 }
 
 export type FetchOptions = {
-  startBlock: number
-  endBlock: number
+  fromBlock: number
+  toBlock: number
 }
 
 export type InputFilter = {
@@ -36,13 +36,13 @@ export class EventFetcher {
   }
 
   async fetchEvents (filters: InputFilter[], options: FetchOptions) {
-    const blockRanges = this.getChunkedBlockRanges(options.startBlock, options.endBlock)
+    const blockRanges = this.getChunkedBlockRanges(options.fromBlock, options.toBlock)
 
     const promiseFns :any[] = []
     for (const [batchStart, batchEnd] of blockRanges) {
       const batchOptions = {
-        startBlock: batchStart,
-        endBlock: batchEnd
+        fromBlock: batchStart,
+        toBlock: batchEnd
       }
 
       const aggregatedFilters = this.aggregateFilters(filters, batchOptions)
@@ -54,29 +54,29 @@ export class EventFetcher {
     return this.normalizeEvents(events)
   }
 
-  getChunkedBlockRanges (startBlock: number, endBlock: number) {
-    startBlock = Math.min(startBlock, endBlock)
-    let batchStart = startBlock
-    let batchEnd = Math.min(batchStart + this.batchBlocks, endBlock)
+  getChunkedBlockRanges (fromBlock: number, toBlock: number) {
+    fromBlock = Math.min(fromBlock, toBlock)
+    let batchStart = fromBlock
+    let batchEnd = Math.min(batchStart + this.batchBlocks, toBlock)
 
     const blockRanges: number[][] = []
-    while (batchEnd <= endBlock) {
+    while (batchEnd <= toBlock) {
       blockRanges.push([batchStart, batchEnd])
 
-      if (batchEnd === endBlock) {
+      if (batchEnd === toBlock) {
         break
       }
 
       batchStart = batchEnd
-      batchEnd = Math.min(batchStart + this.batchBlocks, endBlock)
+      batchEnd = Math.min(batchStart + this.batchBlocks, toBlock)
     }
 
     return blockRanges
   }
 
   aggregateFilters (filters: InputFilter[], options: FetchOptions): Filter[] {
-    const startBlock = options.startBlock
-    const endBlock = options.endBlock
+    const fromBlock = options.fromBlock
+    const toBlock = options.toBlock
     const filtersByAddress :Record<string, Partial<Filter>> = {}
 
     if (filters.length === 1) {
@@ -116,7 +116,7 @@ export class EventFetcher {
     const aggregatedFilters: Filter[] = []
     for (const address in filtersByAddress) {
       const filter = filtersByAddress[address]
-      aggregatedFilters.push({ ...filter, fromBlock: startBlock, toBlock: endBlock })
+      aggregatedFilters.push({ ...filter, fromBlock, toBlock })
     }
 
     return aggregatedFilters

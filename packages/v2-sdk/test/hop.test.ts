@@ -43,8 +43,8 @@ describe('sdk setup', () => {
     const fromChainId = 420
     const toChainId = 5
     const toAddress = '0x0000000000000000000000000000000000000000'
-    const toData = '0x'
-    const txData = await hop.getSendMessagePopulatedTx(fromChainId, toChainId, toAddress, toData)
+    const toCalldata = '0x'
+    const txData = await hop.getSendMessagePopulatedTx({ fromChainId, toChainId, toAddress, toCalldata })
     expect(txData.data.startsWith('0x7056f41f')).toBe(true)
     // expect(txData.to).toBe('0x4b844c25EF430e71D42EEA89d87Ffe929f8db927')
     expect(txData.to).toBe('0xeA35E10f763ef2FD5634dF9Ce9ad00434813bddB')
@@ -54,7 +54,7 @@ describe('sdk setup', () => {
       for (let i = 0; i < times; i++) {
         const signer = new Wallet(privateKey)
         const provider = hop.getRpcProvider(fromChainId)
-        const fee = await hop.getMessageFee(fromChainId, toChainId)
+        const fee = await hop.getMessageFee({ fromChainId, toChainId })
         const tx = await signer.connect(provider).sendTransaction({
           to: txData.to,
           data: txData.data,
@@ -70,15 +70,15 @@ describe('sdk setup', () => {
       contractAddresses: contractAddresses_v001
     })
     const chainId = 420
-    const endBlock = 3218900
-    const startBlock = endBlock - 10
+    const toBlock = 3218900
+    const fromBlock = toBlock - 10
     let eventNames = ['BundleCommitted']
-    let events = await hop.getEvents(eventNames, chainId, startBlock, endBlock)
+    let events = await hop.getEvents({ eventNames, chainId, fromBlock, toBlock })
     // console.log(events)
     expect(events.length).toBe(1)
 
     eventNames = ['BundleCommitted', 'MessageSent']
-    events = await hop.getEvents(eventNames, chainId, startBlock, endBlock)
+    events = await hop.getEvents({ eventNames, chainId, fromBlock, toBlock })
     console.log(events)
     expect(events.length).toBe(2)
   }, 60 * 1000)
@@ -87,9 +87,9 @@ describe('sdk setup', () => {
       contractAddresses: contractAddresses_v001
     })
     const chainId = 420
-    const endBlock = 3218900
-    const startBlock = endBlock - 100
-    const events = await hop.getBundleCommittedEvents(chainId, startBlock, endBlock)
+    const toBlock = 3218900
+    const fromBlock = toBlock - 100
+    const events = await hop.getBundleCommittedEvents({ chainId, fromBlock, toBlock })
     console.log(events)
     expect(events.length).toBe(1)
     expect(events[0].bundleId).toBe('0x941b97adc8856fc13c566e5b9aaa9cd5fd953324452f0aa1fe24ca227a5e2ab6')
@@ -107,9 +107,9 @@ describe('sdk setup', () => {
     })
     const chain = 'ethereum'
     const chainId = 5
-    const endBlock = 3218900
-    const startBlock = endBlock - 100
-    const events = await hop.getBundleForwardedEvents(chainId, startBlock, endBlock)
+    const toBlock = 3218900
+    const fromBlock = toBlock - 100
+    const events = await hop.getBundleForwardedEvents({ chainId, fromBlock, toBlock })
     console.log(events)
     expect(events.length).toBe(0)
   }, 60 * 1000)
@@ -119,9 +119,9 @@ describe('sdk setup', () => {
     })
     const chain = 'ethereum'
     const chainId = 5
-    const endBlock = 3218900
-    const startBlock = endBlock - 100
-    const events = await hop.getBundleReceivedEvents(chainId, startBlock, endBlock)
+    const toBlock = 3218900
+    const fromBlock = toBlock - 100
+    const events = await hop.getBundleReceivedEvents({ chainId, fromBlock, toBlock })
     console.log(events)
     expect(events.length).toBe(0)
   }, 60 * 1000)
@@ -131,9 +131,9 @@ describe('sdk setup', () => {
     })
     const chain = 'ethereum'
     const chainId = 5
-    const endBlock = 3218900
-    const startBlock = endBlock - 100
-    const events = await hop.getBundleSetEvents(chainId, startBlock, endBlock)
+    const toBlock = 3218900
+    const fromBlock = toBlock - 100
+    const events = await hop.getBundleSetEvents({ chainId, fromBlock, toBlock })
     console.log(events)
     expect(events.length).toBe(0)
   }, 60 * 1000)
@@ -142,9 +142,9 @@ describe('sdk setup', () => {
       contractAddresses: contractAddresses_v001
     })
     const chainId = 420
-    const endBlock = 3218900
-    const startBlock = endBlock - 100
-    const events = await hop.getFeesSentToHubEvents(chainId, startBlock, endBlock)
+    const toBlock = 3218900
+    const fromBlock = toBlock - 100
+    const events = await hop.getFeesSentToHubEvents({ chainId, fromBlock, toBlock })
     console.log(events)
     expect(events.length).toBe(1)
     expect(events[0].amount.toString()).toBe('8000000000000')
@@ -154,9 +154,9 @@ describe('sdk setup', () => {
       contractAddresses: contractAddresses_v001
     })
     const chainId = 420
-    const endBlock = 3216770
-    const startBlock = endBlock - 100
-    const events = await hop.getMessageBundledEvents(chainId, startBlock, endBlock)
+    const toBlock = 3216770
+    const fromBlock = toBlock - 100
+    const events = await hop.getMessageBundledEvents({ chainId, fromBlock, toBlock })
     console.log(events)
     expect(events.length).toBe(1)
     expect(events[0].bundleId).toBe('0x941b97adc8856fc13c566e5b9aaa9cd5fd953324452f0aa1fe24ca227a5e2ab6')
@@ -169,9 +169,9 @@ describe('sdk setup', () => {
       contractAddresses: contractAddresses_v001
     })
     const chainId = 420
-    const endBlock = 3216770
-    const startBlock = endBlock - 100
-    const events = await hop.getMessageRelayedEvents(chainId, startBlock, endBlock)
+    const toBlock = 3216770
+    const fromBlock = toBlock - 100
+    const events = await hop.getMessageRelayedEvents({ chainId, fromBlock, toBlock })
     console.log(events)
     expect(events.length).toBe(0)
   }, 60 * 1000)
@@ -180,9 +180,9 @@ describe('sdk setup', () => {
       contractAddresses: contractAddresses_v001
     })
     const chainId = 420
-    const endBlock = 3216770
-    const startBlock = endBlock - 100
-    const events = await hop.getMessageRevertedEvents(chainId, startBlock, endBlock)
+    const toBlock = 3216770
+    const fromBlock = toBlock - 100
+    const events = await hop.getMessageRevertedEvents({ chainId, fromBlock, toBlock })
     console.log(events)
     expect(events.length).toBe(0)
   }, 60 * 1000)
@@ -191,9 +191,9 @@ describe('sdk setup', () => {
       contractAddresses: contractAddresses_v001
     })
     const chainId = 420
-    const endBlock = 3216770
-    const startBlock = endBlock - 100
-    const events = await hop.getMessageSentEvents(chainId, startBlock, endBlock)
+    const toBlock = 3216770
+    const fromBlock = toBlock - 100
+    const events = await hop.getMessageSentEvents({ chainId, fromBlock, toBlock })
     console.log(events)
     expect(events.length).toBe(1)
     expect(events[0].messageId).toBe('0x1dcab020e2c5973e3461028e6d6cce6e8785c18c8d47257836800170d37b9e3e')
@@ -220,13 +220,12 @@ describe('sdk setup', () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v001
     })
-    const endBlock = 3218900
-    const startBlock = endBlock - 100
-    const chainId = 420
-    const toChain = 'ethereum'
+    // const toBlock = 3218900
+    // const fromBlock = toBlock - 100
+    // const chainId = 420
     const toChainId = 5
-    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(chainId, startBlock, endBlock)
-    const estimatedTxCost = await hop.getEstimatedTxCostForForwardMessage(toChainId, bundleCommittedEvent)
+    // const [bundleCommittedEvent] = await hop.getBundleCommittedEvents({ chainId, fromBlock, toBlock })
+    const estimatedTxCost = await hop.getEstimatedTxCostForForwardMessage({ chainId: toChainId })
     console.log(estimatedTxCost)
     expect(estimatedTxCost).toBeGreaterThan(0)
   }, 60 * 1000)
@@ -234,12 +233,12 @@ describe('sdk setup', () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v001
     })
-    const endBlock = 3218900
-    const startBlock = endBlock - 100
+    const toBlock = 3218900
+    const fromBlock = toBlock - 100
     const fromChainId = 420
-    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(fromChainId, startBlock, endBlock)
+    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents({ chainId: fromChainId, fromBlock, toBlock })
     expect(bundleCommittedEvent).toBeTruthy()
-    const amount = await hop.getRelayReward(fromChainId, bundleCommittedEvent)
+    const amount = await hop.getRelayReward({ fromChainId, bundleCommittedEvent })
     console.log(amount)
     expect(typeof amount).toBe('number')
   }, 60 * 1000)
@@ -247,11 +246,11 @@ describe('sdk setup', () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v001
     })
-    const endBlock = 3218900
-    const startBlock = endBlock - 100
+    const toBlock = 3218900
+    const fromBlock = toBlock - 100
     const fromChainId = 420
-    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(fromChainId, startBlock, endBlock)
-    const shouldAttempt = await hop.shouldAttemptForwardMessage(fromChainId, bundleCommittedEvent)
+    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents({ chainId: fromChainId, fromBlock, toBlock })
+    const shouldAttempt = await hop.shouldAttemptForwardMessage({ fromChainId, bundleCommittedEvent })
     console.log(shouldAttempt)
     expect(shouldAttempt).toBe(false)
   }, 60 * 1000)
@@ -261,10 +260,10 @@ describe('sdk setup', () => {
     })
     const fromChainId = 420
     const toChainId = 5
-    const endBlock = 3218900
-    const startBlock = endBlock - 100
-    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents(fromChainId, startBlock, endBlock)
-    const txData = await hop.getBundleExitPopulatedTx(fromChainId, bundleCommittedEvent)
+    const toBlock = 3218900
+    const fromBlock = toBlock - 100
+    const [bundleCommittedEvent] = await hop.getBundleCommittedEvents({ chainId: fromChainId, fromBlock, toBlock })
+    const txData = await hop.getBundleExitPopulatedTx({ fromChainId, bundleCommittedEvent })
     console.log(txData)
     expect(txData.data).toBeTruthy()
     expect(txData.to).toBeTruthy()
@@ -286,7 +285,7 @@ describe('sdk setup', () => {
     })
     const fromChainId = 420
     const toChainId = 5
-    const routeData = await hop.getRouteData(fromChainId, toChainId)
+    const routeData = await hop.getRouteData({ fromChainId, toChainId })
     console.log(routeData)
     expect(routeData.messageFee).toBeTruthy()
     expect(routeData.maxBundleMessages).toBeTruthy()
@@ -297,7 +296,7 @@ describe('sdk setup', () => {
     })
     const fromChainId = 420
     const toChainId = 5
-    const messageFee = await hop.getMessageFee(fromChainId, toChainId)
+    const messageFee = await hop.getMessageFee({ fromChainId, toChainId })
     console.log(messageFee)
     expect(messageFee.gt(0)).toBe(true)
   }, 60 * 1000)
@@ -307,7 +306,7 @@ describe('sdk setup', () => {
     })
     const fromChainId = 420
     const toChainId = 5
-    const maxBundleMessageCount = await hop.getMaxBundleMessageCount(fromChainId, toChainId)
+    const maxBundleMessageCount = await hop.getMaxBundleMessageCount({ fromChainId, toChainId })
     console.log(maxBundleMessageCount)
     expect(maxBundleMessageCount).toBe(8)
   }, 60 * 1000)
@@ -325,7 +324,7 @@ describe('sdk setup', () => {
     const bundleId = '0x5e26c4282d410e7e0c892561566ce0a6522f4762de1fc59d9bfba068890d9123'
     const fromChainId = 420
     const toChainId = 5
-    const isSet = await hop.getIsBundleSet(fromChainId, toChainId, bundleId)
+    const isSet = await hop.getIsBundleSet({ fromChainId, toChainId, bundleId })
     expect(isSet).toBe(false)
   })
   it('isBundleSet - true', async () => {
@@ -335,7 +334,7 @@ describe('sdk setup', () => {
     const bundleId = '0x5e26c4282d410e7e0c892561566ce0a6522f4762de1fc59d9bfba068890d9f75'
     const fromChainId = 420
     const toChainId = 5
-    const isSet = await hop.getIsBundleSet(fromChainId, toChainId, bundleId)
+    const isSet = await hop.getIsBundleSet({ fromChainId, toChainId, bundleId })
     expect(isSet).toBe(true)
   })
   it('getMessageSentEventFromTransactionHash', async () => {
@@ -344,7 +343,7 @@ describe('sdk setup', () => {
     })
     const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
     const fromChainId = 420
-    const event = await hop.getMessageSentEventFromTransactionHash(fromChainId, transactionHash)
+    const event = await hop.getMessageSentEventFromTransactionHash({ fromChainId, transactionHash })
     console.log(event)
     expect(event).toBeTruthy()
   })
@@ -354,7 +353,7 @@ describe('sdk setup', () => {
     })
     const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
     const fromChainId = 420
-    const event = await hop.getMessageBundledEventFromTransactionHash(fromChainId, transactionHash)
+    const event = await hop.getMessageBundledEventFromTransactionHash({ fromChainId, transactionHash })
     console.log(event)
     expect(event).toBeTruthy()
   })
@@ -364,7 +363,7 @@ describe('sdk setup', () => {
     })
     const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
     const fromChainId = 420
-    const bundleId = await hop.getMessageBundleIdFromTransactionHash(fromChainId, transactionHash)
+    const bundleId = await hop.getMessageBundleIdFromTransactionHash({ fromChainId, transactionHash })
     console.log(bundleId)
     expect(bundleId).toBe('0x5e26c4282d410e7e0c892561566ce0a6522f4762de1fc59d9bfba068890d9f7a')
   })
@@ -374,7 +373,7 @@ describe('sdk setup', () => {
     })
     const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
     const fromChainId = 420
-    const treeIndex = await hop.getMessageTreeIndexFromTransactionHash(fromChainId, transactionHash)
+    const treeIndex = await hop.getMessageTreeIndexFromTransactionHash({ fromChainId, transactionHash })
     console.log(treeIndex)
     expect(treeIndex).toBe(7)
   })
@@ -384,7 +383,7 @@ describe('sdk setup', () => {
     })
     const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
     const fromChainId = 420
-    const messageId = await hop.getMessageIdFromTransactionHash(fromChainId, transactionHash)
+    const messageId = await hop.getMessageIdFromTransactionHash({ fromChainId, transactionHash })
     console.log(messageId)
     expect(messageId).toBe('0xf0d21b61d0b49b40caf94be6bef72760e5a7b154d59f7ce7b06036718f55fecf')
   })
@@ -394,7 +393,7 @@ describe('sdk setup', () => {
     })
     const fromChainId = 420
     const bundleId = '0x5e26c4282d410e7e0c892561566ce0a6522f4762de1fc59d9bfba068890d9f7a'
-    const events = await hop.getMessageBundledEventsForBundleId(fromChainId, bundleId)
+    const events = await hop.getMessageBundledEventsForBundleId({ fromChainId, bundleId })
     console.log(events)
     expect(events.length).toBe(8)
   }, 5 * 60 * 1000)
@@ -404,7 +403,7 @@ describe('sdk setup', () => {
     })
     const fromChainId = 420
     const bundleId = '0x5e26c4282d410e7e0c892561566ce0a6522f4762de1fc59d9bfba068890d9f7a'
-    const messageIds = await hop.getMessageIdsForBundleId(fromChainId, bundleId)
+    const messageIds = await hop.getMessageIdsForBundleId({ fromChainId, bundleId })
     console.log(messageIds)
     expect(messageIds.length).toBe(8)
   }, 5 * 60 * 1000)
@@ -422,8 +421,8 @@ describe('sdk setup', () => {
       '0x03a110400ca2f3b59f856b6d839f3be1bcfc06f9b0ff3177f9fd8fb3138df3cd',
       '0xf0d21b61d0b49b40caf94be6bef72760e5a7b154d59f7ce7b06036718f55fecf'
     ]
-    const messageId = '0xf0d21b61d0b49b40caf94be6bef72760e5a7b154d59f7ce7b06036718f55fecf'
-    const proof = hop.getMerkleProofForMessageId(messageIds, messageId)
+    const targetMessageId = '0xf0d21b61d0b49b40caf94be6bef72760e5a7b154d59f7ce7b06036718f55fecf'
+    const proof = hop.getMerkleProofForMessageId({ messageIds, targetMessageId })
     console.log(proof)
     expect(proof.length).toBe(3)
   }, 5 * 60 * 1000)
@@ -433,7 +432,7 @@ describe('sdk setup', () => {
     })
     const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
     const fromChainId = 420
-    const bundleProof = await hop.getBundleProofFromTransactionHash(fromChainId, transactionHash)
+    const bundleProof = await hop.getBundleProofFromTransactionHash({ fromChainId, transactionHash })
     console.log(bundleProof)
     expect(bundleProof).toBeTruthy()
   }, 5 * 60 * 1000)
@@ -443,7 +442,7 @@ describe('sdk setup', () => {
     })
     const messageId = '0xf0d21b61d0b49b40caf94be6bef72760e5a7b154d59f7ce7b06036718f55fecf'
     const fromChainId = 420
-    const bundleProof = await hop.getBundleProofFromMessageId(fromChainId, messageId)
+    const bundleProof = await hop.getBundleProofFromMessageId({ fromChainId, messageId })
     console.log(bundleProof)
     expect(bundleProof).toBeTruthy()
   }, 5 * 60 * 1000)
@@ -451,7 +450,7 @@ describe('sdk setup', () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
     })
-    const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
+    // const transactionHash = '0x3992b59210847c9c6d180f05c96a8dcf94809c8f58f597ef0801942ddeecdf51'
     const fromChainId = 420
     const toChainId = 5
 
@@ -469,7 +468,7 @@ describe('sdk setup', () => {
       ],
       totalLeaves: 8
     }
-    const txData = await hop.getRelayMessagePopulatedTx(fromChainId, toChainId, fromAddress, toAddress, toCalldata, bundleProof)
+    const txData = await hop.getRelayMessagePopulatedTx({ fromChainId, toChainId, fromAddress, toAddress, toCalldata, bundleProof })
     console.log(txData)
     expect(txData).toBeTruthy()
     const shouldSend = false

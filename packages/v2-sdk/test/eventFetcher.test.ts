@@ -11,8 +11,8 @@ describe('EventFetcher', () => {
     const eventFetcher = new EventFetcher({
       provider
     })
-    const endBlock = 16072238
-    const startBlock = endBlock - 50
+    const toBlock = 16072238
+    const fromBlock = toBlock - 50
     const filter1 = {
       address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
       topics: [
@@ -40,8 +40,8 @@ describe('EventFetcher', () => {
     ]
 
     const options = {
-      startBlock,
-      endBlock
+      fromBlock,
+      toBlock
     }
 
     const aggregatedFilters = eventFetcher.aggregateFilters(filters, options)
@@ -85,9 +85,9 @@ describe('EventFetcher', () => {
     const seenFilterKeys = Object.keys(seen).length
     expect(seenFilterKeys).toBe(3)
 
-    const events1 = await provider.getLogs({ ...filter1, fromBlock: startBlock, toBlock: endBlock })
-    const events2 = await provider.getLogs({ ...filter2, fromBlock: startBlock, toBlock: endBlock })
-    const events3 = await provider.getLogs({ ...filter3, fromBlock: startBlock, toBlock: endBlock })
+    const events1 = await provider.getLogs({ ...filter1, fromBlock, toBlock })
+    const events2 = await provider.getLogs({ ...filter2, fromBlock, toBlock })
+    const events3 = await provider.getLogs({ ...filter3, fromBlock, toBlock })
     const expectedTotalEvents = events1.length + events2.length + events3.length
     expect(expectedTotalEvents).toBe(1725)
     expect(events.length).toBe(expectedTotalEvents)
@@ -99,8 +99,8 @@ describe('EventFetcher', () => {
     const eventFetcher = new EventFetcher({
       provider
     })
-    const endBlock = 16072238
-    const startBlock = endBlock - 11000 // should be >10k block range
+    const toBlock = 16072238
+    const fromBlock = toBlock - 11000 // should be >10k block range
     const filter1 = {
       address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
       topics: [
@@ -110,8 +110,8 @@ describe('EventFetcher', () => {
 
     const filters = [filter1]
     const options = {
-      startBlock,
-      endBlock
+      fromBlock,
+      toBlock
     }
 
     const events = await eventFetcher.fetchEvents(filters, options)
@@ -125,11 +125,11 @@ describe('EventFetcher', () => {
       provider,
       batchBlocks
     })
-    const endBlock = 16072238
-    const startBlock = endBlock - 1
-    const blockRanges = eventFetcher.getChunkedBlockRanges(startBlock, endBlock)
+    const toBlock = 16072238
+    const fromBlock = toBlock - 1
+    const blockRanges = eventFetcher.getChunkedBlockRanges(fromBlock, toBlock)
     expect(blockRanges.length).toBe(1)
-    expect(JSON.stringify(blockRanges)).toBe(JSON.stringify([[startBlock, endBlock]]))
+    expect(JSON.stringify(blockRanges)).toBe(JSON.stringify([[fromBlock, toBlock]]))
   })
 
   it('should get correct block range for same values', async () => {
@@ -139,47 +139,47 @@ describe('EventFetcher', () => {
       provider,
       batchBlocks
     })
-    const endBlock = 16072238
-    const startBlock = endBlock
-    const blockRanges = eventFetcher.getChunkedBlockRanges(startBlock, endBlock)
+    const toBlock = 16072238
+    const fromBlock = toBlock
+    const blockRanges = eventFetcher.getChunkedBlockRanges(fromBlock, toBlock)
     expect(blockRanges.length).toBe(1)
-    expect(JSON.stringify(blockRanges)).toBe(JSON.stringify([[startBlock, endBlock]]))
+    expect(JSON.stringify(blockRanges)).toBe(JSON.stringify([[fromBlock, toBlock]]))
   })
 
-  it('should get correct block range for startBlock > endBlock', async () => {
+  it('should get correct block range for fromBlock > toBlock', async () => {
     const batchBlocks = 2000
     const provider = new providers.StaticJsonRpcProvider(rpcUrl)
     const eventFetcher = new EventFetcher({
       provider,
       batchBlocks
     })
-    const endBlock = 16072238
-    const startBlock = endBlock + 100
-    const blockRanges = eventFetcher.getChunkedBlockRanges(startBlock, endBlock)
+    const toBlock = 16072238
+    const fromBlock = toBlock + 100
+    const blockRanges = eventFetcher.getChunkedBlockRanges(fromBlock, toBlock)
     expect(blockRanges.length).toBe(1)
-    expect(JSON.stringify(blockRanges)).toBe(JSON.stringify([[endBlock, endBlock]]))
+    expect(JSON.stringify(blockRanges)).toBe(JSON.stringify([[toBlock, toBlock]]))
   })
 
   it('should get correct chunked blocked range for large range', async () => {
-    const endBlock = 16072238
-    const startBlock = endBlock - 11000
+    const toBlock = 16072238
+    const fromBlock = toBlock - 11000
     const provider = new providers.StaticJsonRpcProvider(rpcUrl)
     const batchBlocks = 2000
     const eventFetcher = new EventFetcher({
       provider,
       batchBlocks
     })
-    const blockRanges = eventFetcher.getChunkedBlockRanges(startBlock, endBlock)
+    const blockRanges = eventFetcher.getChunkedBlockRanges(fromBlock, toBlock)
     const expectedRanges = [
-      [startBlock, startBlock + (batchBlocks * 1)],
-      [startBlock + (batchBlocks * 1), startBlock + (batchBlocks * 2)],
-      [startBlock + (batchBlocks * 2), startBlock + (batchBlocks * 3)],
-      [startBlock + (batchBlocks * 3), startBlock + (batchBlocks * 4)],
-      [startBlock + (batchBlocks * 4), startBlock + (batchBlocks * 5)],
-      [startBlock + (batchBlocks * 5), endBlock]
+      [fromBlock, fromBlock + (batchBlocks * 1)],
+      [fromBlock + (batchBlocks * 1), fromBlock + (batchBlocks * 2)],
+      [fromBlock + (batchBlocks * 2), fromBlock + (batchBlocks * 3)],
+      [fromBlock + (batchBlocks * 3), fromBlock + (batchBlocks * 4)],
+      [fromBlock + (batchBlocks * 4), fromBlock + (batchBlocks * 5)],
+      [fromBlock + (batchBlocks * 5), toBlock]
     ]
 
-    expect(blockRanges.length).toBe(6) // (endBlock-startBlock)/2000
+    expect(blockRanges.length).toBe(6) // (toBlock-fromBlock)/2000
     expect(JSON.stringify(blockRanges)).toBe(JSON.stringify(expectedRanges))
   }, 60 * 1000)
 })

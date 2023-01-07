@@ -61,12 +61,12 @@ export function RelayBundle (props: Props) {
   }, [bundleCommittedTxHash])
 
   async function getSendTxData() {
-    const args = [
-      Number(fromChainId),
-      bundleCommittedTxHash
-    ] as const
+    const args = {
+      fromChainId: Number(fromChainId),
+      bundleCommittedTransactionHash: bundleCommittedTxHash
+    }
     console.log('args', args)
-    const txData = await sdk.getBundleExitPopulatedTx(...args)
+    const txData = await sdk.getBundleExitPopulatedTx(args)
     return txData
   }
 
@@ -115,13 +115,13 @@ import { ethers } from 'ethers'
 
 async function main() {
   const fromChainId = ${fromChainId || 'undefined'}
-  const bundleCommittedTxHash = "${bundleCommittedTxHash}"
+  const bundleCommittedTransactionHash = "${bundleCommittedTxHash}"
 
   const hop = new Hop('goerli')
-  const txData = await hop.getBundleExitPopulatedTx(
+  const txData = await hop.getBundleExitPopulatedTx({
     fromChainId,
-    bundleCommittedTxHash
-  )
+    bundleCommittedTransactionHash
+  })
   ${populateTxDataOnly ? (
   'console.log(txData)'
   ) : (

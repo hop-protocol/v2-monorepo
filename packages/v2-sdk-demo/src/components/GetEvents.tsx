@@ -112,14 +112,14 @@ export function GetEvents (props: Props) {
         setStartBlock(_startBlock.toString())
       }
     }
-    const args = [
-      selectedEventNames,
-      Number(chainId),
-      _startBlock,
-      _endBlock
-    ] as const
+    const args = {
+      eventNames: selectedEventNames,
+      chainId: Number(chainId),
+      fromBlock: _startBlock,
+      toBlock: _endBlock
+    }
     console.log('args', args)
-    const _events = await sdk.getEvents(...args)
+    const _events = await sdk.getEvents(args)
     return _events
   }
 
@@ -144,16 +144,16 @@ import { Hop } from '@hop-protocol/v2-sdk'
 async function main() {
   const eventNames = ${JSON.stringify(selectedEventNames)}
   const chainId = ${chainId || 'undefined'}
-  const startBlock = ${startBlock || 'undefined'}
-  const endBlock = ${endBlock || 'undefined'}
+  const fromBlock = ${startBlock || 'undefined'}
+  const toBlock = ${endBlock || 'undefined'}
 
   const hop = new Hop('goerli')
-  const events = await hop.getEvents(
+  const events = await hop.getEvents({
     eventNames,
     chainId,
-    startBlock,
-    endBlock
-  )
+    fromBlock,
+    toBlock
+  })
   console.log(events)
 }
 
@@ -193,13 +193,13 @@ main().catch(console.error)
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
-                  <label>Start block <small><em>(number)</em></small></label>
+                  <label>From block <small><em>(number)</em></small></label>
                 </Box>
                 <TextField fullWidth placeholder="0" value={startBlock} onChange={event => setStartBlock(event.target.value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
-                  <label>End block <small><em>(number)</em></small></label>
+                  <label>To block <small><em>(number)</em></small></label>
                 </Box>
                 <TextField fullWidth placeholder="0" value={endBlock} onChange={event => setEndBlock(event.target.value)} />
               </Box>

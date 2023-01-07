@@ -20,15 +20,15 @@ export class Event {
     this.address = address
   }
 
-  async _getEvents (filter: any, startBlock: number, endBlock?: number) {
+  async _getEvents (filter: any, fromBlock: number, toBlock?: number) {
     const eventFetcher = new EventFetcher({
       provider: this.provider,
       batchBlocks: this.batchBlocks
     })
-    if (!endBlock) {
-      endBlock = await this.provider.getBlockNumber()
+    if (!toBlock) {
+      toBlock = await this.provider.getBlockNumber()
     }
-    const events = await eventFetcher.fetchEvents([filter as InputFilter], { startBlock, endBlock })
+    const events = await eventFetcher.fetchEvents([filter as InputFilter], { fromBlock, toBlock })
     return this.populateEvents(events)
   }
 
