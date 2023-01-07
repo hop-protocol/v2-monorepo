@@ -34,6 +34,7 @@ function TextInput (props: any = {}) {
         type='text'
         value={value || ''}
         onChange={handleChange}
+        fullWidth
       />
     )
   }

@@ -13,6 +13,8 @@ import { ChainSelect } from './ChainSelect'
 import { useStyles } from './useStyles'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { AbiMethodForm } from './AbiMethodForm'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
 
 type Props = {
   signer: Signer
@@ -331,13 +333,17 @@ main().catch(console.error)
                       <Box mb={1}>
                         <label>Select Method</label>
                       </Box>
-                      <select value={selectedAbiMethod} onChange={(event: any) => setSelectedAbiMethod(event.target.value)}>
+
+                      <Select
+                        fullWidth
+                        value={selectedAbiMethod}
+                        onChange={(event: any) => setSelectedAbiMethod(event.target.value)}>
                         {abiOptions.map((x: any, i: number) => {
                           return (
-                            <option key={i} value={x.value}>{x.label}</option>
+                            <MenuItem key={i} value={x.value}>{x.label}</MenuItem>
                           )
                         })}
-                      </select>
+                      </Select>
                     </Box>
                   )}
                   <AbiMethodForm abi={selectedAbiObj} provider={provider} contractAddress={toAddress} onChange={(txData: any) => {
