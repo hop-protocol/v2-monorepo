@@ -1,15 +1,15 @@
 import { BaseDb } from '../BaseDb'
 import { TxState } from '../txStateDb'
 
-export interface RelayableBundles {
+export interface ExitableBundles {
   bundleId: string
 }
 
-export class RelayableBundlesDb extends BaseDb {
+export class ExitableBundlesDb extends BaseDb {
   otherDbs: Record<string, any>
 
   constructor (dbPath: string, dbName: string) {
-    super(dbPath, `relayableBundles:${dbName}`)
+    super(dbPath, `exitableBundles:${dbName}`)
   }
 
   getKeyString (bundleId: string) {

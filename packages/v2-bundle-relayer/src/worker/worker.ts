@@ -50,7 +50,7 @@ export class Worker {
 
   async poll () {
     console.log('poll start')
-    const items = await db.relayableBundlesDb.getItems()
+    const items = await db.exitableBundlesDb.getItems()
     console.log('items', items.length)
 
     for (const bundleCommittedEvent of items) {
@@ -63,7 +63,7 @@ export class Worker {
       if (shouldAttempt) {
         const bundleSet = await this.sdk.getIsBundleSet({ fromChainId, toChainId, bundleId })
         if (bundleSet) {
-          await db.relayableBundlesDb.deleteItem(bundleId)
+          await db.exitableBundlesDb.deleteItem(bundleId)
           throw new RelayError('bundle already set')
         }
 

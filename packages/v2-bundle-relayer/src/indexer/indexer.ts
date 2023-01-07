@@ -98,25 +98,25 @@ export class Indexer {
       }
     }
 
-    const relayableBundles: any = {}
+    const exitableBundles: any = {}
 
     for (const event of events) {
       if (event.eventName === 'BundleCommitted') {
-        relayableBundles[event.bundleId] = true
+        exitableBundles[event.bundleId] = true
       }
     }
 
     for (const event of events) {
       if (event.eventName === 'BundleSet') {
-        relayableBundles[event.bundleId] = false
+        exitableBundles[event.bundleId] = false
       }
     }
 
-    for (const bundleId in relayableBundles) {
-      if (relayableBundles[bundleId]) {
-        await db.relayableBundlesDb.putItem(bundleId)
+    for (const bundleId in exitableBundles) {
+      if (exitableBundles[bundleId]) {
+        await db.exitableBundlesDb.putItem(bundleId)
       } else {
-        await db.relayableBundlesDb.deleteItem(bundleId)
+        await db.exitableBundlesDb.deleteItem(bundleId)
       }
     }
 
