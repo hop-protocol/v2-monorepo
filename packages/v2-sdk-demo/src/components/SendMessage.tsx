@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Signer, providers } from 'ethers'
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
@@ -12,6 +12,7 @@ import { Syntax } from './Syntax'
 import { ChainSelect } from './ChainSelect'
 import { useStyles } from './useStyles'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { AbiMethodForm } from './AbiMethodForm'
 
 type Props = {
   signer: Signer
@@ -65,6 +66,64 @@ export function SendMessage (props: Props) {
   const [messageId, setMessageId] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [abiString, setAbiString] = useState(() => {
+    try {
+      const cached = localStorage.getItem('sendMessage:abiString')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return ''
+  })
+  const [showAbiHelper, setShowAbiHelper] = useState(false)
+  const [selectedAbiMethod, setSelectedAbiMethod] = useState(() => {
+    try {
+      const cached = localStorage.getItem('sendMessage:selectedAbiMethod')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return ''
+  })
+
+  const abiJson = useMemo(() => {
+    try {
+      let json = JSON.parse(abiString.trim())
+      if (!Array.isArray(json)) {
+        if (Array.isArray(json.abi)) {
+          json = json.abi
+        }
+      }
+      return json
+    } catch (err) {}
+    return []
+  }, [abiString])
+
+  const selectedAbiObj = useMemo(() => {
+    const filtered = abiJson.filter((x: any) => x.name === selectedAbiMethod)
+    return filtered[0]
+  }, [abiJson, selectedAbiMethod])
+
+  const provider = useMemo(() => {
+    return sdk.getRpcProvider(Number(fromChainId))
+  }, [sdk, fromChainId])
+
+  const abiOptions = useMemo(() => {
+    const options = abiJson
+      .map((obj: any) => {
+        const value = obj.type === 'function' ? obj.name : null
+        let label = value
+        if (value && obj.signature) {
+          label = `${value} (${obj.signature})`
+        }
+        return {
+          label,
+          value
+        }
+      })
+      .filter((x: any) => x.value)
+    return options
+  }, [abiJson])
 
   useEffect(() => {
     try {
@@ -97,6 +156,22 @@ export function SendMessage (props: Props) {
       console.error(err)
     }
   }, [toCalldata])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sendMessage:abiString', abiString)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [abiString])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sendMessage:selectedAbiMethod', selectedAbiMethod)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [selectedAbiMethod])
 
   async function getSendTxData() {
     const args = {
@@ -164,7 +239,7 @@ async function main() {
   const fromChainId = ${fromChainId || 'undefined'}
   const toChainId = ${toChainId || 'undefined'}
   const toAddress = "${toAddress}"
-  const toCalldata = "${toCalldata}"
+  const toCalldata = ${toCalldata ? `"${toCalldata}"` : 'undefined'}
 
   const hop = new Hop('goerli')
   const txData = await hop.getSendMessagePopulatedTx({
@@ -233,17 +308,58 @@ main().catch(console.error)
                 <Box mb={1}>
                   <label>To <small><em>(address)</em></small></label>
                 </Box>
-                <TextField fullWidth placeholder="0x" value={toAddress} onChange={event => setToAddress(event.target.value)} />
+                <TextField fullWidth placeholder="0x" value={toAddress} onChange={(event: any) => setToAddress(event.target.value)} />
               </Box>
-              <Box mb={2}>
-                <Box mb={1}>
-                  <label>Data <small><em>(hex string)</em></small></label>
-                </Box>
-                <Textarea minRows={5} placeholder="0x" value={toCalldata} onChange={event => setToCalldata(event.target.value)} style={{ width: '100%' }} />
-              </Box>
+
               <Box mb={2}>
                 <Box>
-                  <Checkbox onChange={event => setPopulateTxDataOnly(event.target.checked)} checked={populateTxDataOnly} />
+                  <Checkbox onChange={(event: any) => setShowAbiHelper(event.target.checked)} checked={showAbiHelper} />
+                  <label>Use ABI Encoder Utility for Calldata</label>
+                </Box>
+              </Box>
+
+              {showAbiHelper && (
+                <Box mb={4} p={2} style={{ border: '1px dashed #ccc' }}>
+                  <Box mb={2}>
+                    <Box mb={1}>
+                      <label>ABI <small><em>(JSON)</em></small></label>
+                    </Box>
+                    <Textarea minRows={5} maxRows={5} placeholder="[]" value={abiString} onChange={(event: any) => setAbiString(event.target.value)} style={{ width: '100%' }} />
+                  </Box>
+                  {abiOptions?.length > 0 && (
+                    <Box mb={2}>
+                      <Box mb={1}>
+                        <label>Select Method</label>
+                      </Box>
+                      <select value={selectedAbiMethod} onChange={(event: any) => setSelectedAbiMethod(event.target.value)}>
+                        {abiOptions.map((x: any, i: number) => {
+                          return (
+                            <option key={i} value={x.value}>{x.label}</option>
+                          )
+                        })}
+                      </select>
+                    </Box>
+                  )}
+                  <AbiMethodForm abi={selectedAbiObj} provider={provider} contractAddress={toAddress} onChange={(txData: any) => {
+                    if (txData?.data) {
+                      setToCalldata(txData.data)
+                    } else {
+                      setToCalldata('')
+                    }
+                  }} />
+                </Box>
+              )}
+
+              <Box mb={2}>
+                <Box mb={1}>
+                  <label>Calldata <small><em>(hex string)</em></small> {showAbiHelper && <small>This is the abi encoder calldata output</small>}</label>
+                </Box>
+                <Textarea disabled={showAbiHelper} minRows={5} maxRows={5} placeholder="0x" value={toCalldata} onChange={(event: any) => setToCalldata(event.target.value)} style={{ width: '100%' }} />
+              </Box>
+
+              <Box mb={2}>
+                <Box>
+                  <Checkbox onChange={(event: any) => setPopulateTxDataOnly(event.target.checked)} checked={populateTxDataOnly} />
                   <label>Populate Tx Only</label>
                 </Box>
               </Box>

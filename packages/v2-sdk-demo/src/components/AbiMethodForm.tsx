@@ -1,5 +1,8 @@
 import React, { SyntheticEvent, useState, useEffect, useMemo } from 'react'
 import { Contract, providers, utils } from 'ethers'
+import TextField from '@mui/material/TextField'
+import Textarea from '@mui/material/TextareaAutosize'
+import Box from '@mui/material/Box'
 
 function TextInput (props: any = {}) {
   const [value, setValue] = useState('')
@@ -16,7 +19,7 @@ function TextInput (props: any = {}) {
   let el: any
   if (props.variant === 'textarea') {
     el = (
-      <textarea
+      <Textarea
         readOnly={props.readOnly}
         disabled={props.disabled}
         placeholder={props.placeholder}
@@ -26,9 +29,7 @@ function TextInput (props: any = {}) {
     )
   } else {
     el = (
-      <input
-        readOnly={props.readOnly}
-        disabled={props.disabled}
+      <TextField
         placeholder={props.placeholder}
         type='text'
         value={value || ''}
@@ -43,11 +44,11 @@ type AbiMethodFormProps = {
   abi: any
   provider: any
   contractAddress: string
-  network: string
+  onChange: (txData: any) => void
 }
 
 export function AbiMethodForm (props: AbiMethodFormProps) {
-  const { abi: abiObj, contractAddress, provider, network } = props
+  const { abi: abiObj, contractAddress, provider, onChange } = props
   const cacheKey = JSON.stringify(abiObj)
   const [args, setArgs] = useState<any>(() => {
     const defaultArgs: any = {}
@@ -66,7 +67,6 @@ export function AbiMethodForm (props: AbiMethodFormProps) {
   const [value, setValue] = useState<string>(() => {
     return localStorage.getItem('value') || ''
   })
-  const [fromAddress, setFromAddress] = useState<string>('')
   const [nonce, setNonce] = useState<string>(() => {
     return localStorage.getItem('nonce') || ''
   })
@@ -84,22 +84,15 @@ export function AbiMethodForm (props: AbiMethodFormProps) {
   })
   const [txhash, setTxhash] = useState<any>(null)
   const [tx, setTx] = useState<any>(null)
-  const windowWeb3 = (window as any).ethereum
+
   useEffect(() => {
-    const update = async () => {
-      try {
-        const address = await provider?.getSigner()?.getAddress()
-        setFromAddress(address || '')
-      } catch (err) {
-        console.error(err)
-      }
+    if (!abiObj) {
+      setTx({ data: '' })
     }
-    update()
-  }, [provider, fromAddress, setFromAddress])
+  }, [abiObj])
 
   useEffect(() => {
     const tx: any = {
-      from: fromAddress || undefined,
       to: contractAddress || undefined,
       value: value || undefined,
       gasPrice: gasPrice
@@ -127,22 +120,25 @@ export function AbiMethodForm (props: AbiMethodFormProps) {
 
         const data = iface.encodeFunctionData(
           abiObj.name,
-          Object.values(parsed)
+          Object.values(parsed).slice(0, abiObj?.inputs?.length ?? 0)
         )
         tx.data = data
       }
     } catch (err: any) {
+      console.error(err)
       setError(err.message)
     }
 
     setTx(tx)
+    if (onChange) {
+      onChange(tx)
+    }
   }, [
     abiObj,
     contractAddress,
     gasPrice,
     gasLimit,
     value,
-    fromAddress,
     nonce,
     args
   ])
@@ -165,10 +161,6 @@ export function AbiMethodForm (props: AbiMethodFormProps) {
       }
     } catch (err) {}
   }, [abiObj])
-
-  if (abiObj.type !== 'function') {
-    return null
-  }
 
   const handleSubmit = async (event: any) => {
     event.preventDefault()
@@ -252,9 +244,13 @@ export function AbiMethodForm (props: AbiMethodFormProps) {
     ['nonpayable', 'payable'].includes(stateMutability) &&
     methodType === 'function'
 
+  if (abiObj?.type !== 'function') {
+    return null
+  }
+
   return (
     <div>
-      <form onSubmit={handleSubmit}>
+      <Box>
         <label style={{ marginBottom: '0.5rem' }}>
           <strong>{abiObj.name}</strong>{' '}
           {stateMutability ? `(${stateMutability})` : null} (
@@ -286,40 +282,25 @@ export function AbiMethodForm (props: AbiMethodFormProps) {
             } catch (err) {}
           }
           return (
-            <div key={i}>
-              <label>
-                {input.name} ({input.type}) *{' '}
-                {input.type === 'address' && windowWeb3 ? (
-                  <button
-                    onClick={async (event: SyntheticEvent) => {
-                      event.preventDefault()
-                      const provider = new providers.Web3Provider(
-                        windowWeb3,
-                        'any'
-                      )
-                      const newArgs = Object.assign({}, args)
-                      newArgs[i] = await provider?.getSigner()?.getAddress()
-                      localStorage.setItem(cacheKey, JSON.stringify(newArgs))
-                      setArgs(newArgs)
-                    }}
-                  >
-                    from web3
-                  </button>
-                ) : null}
-                {input.type?.startsWith('bytes') ? (
-                  <>
-                    <span>
-                      (
-                      {input.type?.includes('[]')
-                        ? 'must be array of hex'
-                        : 'must be hex'}
-                      )
-                    </span>
-                    &nbsp;
-                    <button onClick={convertTextToHex}>hexlify</button>
-                  </>
-                ) : null}
-              </label>
+            <Box key={i} mb={2}>
+              <Box>
+                <label>
+                  {input.name} ({input.type}) *{' '}
+                  {input.type?.startsWith('bytes') ? (
+                    <>
+                      <span>
+                        (
+                        {input.type?.includes('[]')
+                          ? 'must be array of hex'
+                          : 'must be hex'}
+                        )
+                      </span>
+                      &nbsp;
+                      <button onClick={convertTextToHex}>hexlify</button>
+                    </>
+                  ) : null}
+                </label>
+              </Box>
               <TextInput
                 value={inputValue}
                 placeholder={input.type}
@@ -340,10 +321,13 @@ export function AbiMethodForm (props: AbiMethodFormProps) {
                   setArgs(newArgs)
                 }}
               />
-            </div>
+            </Box>
           )
         })}
+        {/*
         {abiObj?.inputs.length ? <small>* = Required</small> : null}
+        */}
+        {/*}
         <div style={{ padding: '1rem' }}>
           <label style={{ marginBottom: '0.5rem' }}>
             Transaction options (optional)
@@ -379,6 +363,7 @@ export function AbiMethodForm (props: AbiMethodFormProps) {
             onChange={updateBlockTag}
           />
         </div>
+        */}
         {abiObj?.outputs.length ? (
           <div>
             <label style={{ marginBottom: '0.5rem' }}>Return values</label>
@@ -393,12 +378,15 @@ export function AbiMethodForm (props: AbiMethodFormProps) {
             </ol>
           </div>
         ) : null}
+        {/*
         {tx && (
           <div>
             <label style={{ marginBottom: '0.5rem' }}>Transaction object</label>
             <pre>{JSON.stringify(tx, null, 2)}</pre>
           </div>
         )}
+        */}
+        {/*
         <div>
           <input
             type='checkbox'
@@ -410,7 +398,8 @@ export function AbiMethodForm (props: AbiMethodFormProps) {
         <div>
           <button type='submit'>Submit</button>
         </div>
-      </form>
+        */}
+      </Box>
       <pre>{result}</pre>
     </div>
   )
