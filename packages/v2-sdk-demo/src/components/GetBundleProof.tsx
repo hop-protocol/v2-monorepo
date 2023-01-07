@@ -8,6 +8,7 @@ import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
 import { ChainSelect } from './ChainSelect'
 import { useStyles } from './useStyles'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
 
 type Props = {
   sdk: Hop
@@ -16,6 +17,7 @@ type Props = {
 export function GetBundleProof (props: Props) {
   const { sdk } = props
   const styles = useStyles()
+  const [copied, setCopied] = useState(false)
   const [fromChainId, setFromChainId] = useState(() => {
     try {
       const cached = localStorage.getItem('getBundleProof:fromChainId')
@@ -115,6 +117,13 @@ async function main() {
 main().catch(console.error)
 `.trim()
 
+  function handleCopy () {
+    setCopied(true)
+    setTimeout(() => {
+      setCopied(false)
+    }, 1000)
+  }
+
   return (
     <Box>
       <Box mb={1}>
@@ -168,6 +177,12 @@ main().catch(console.error)
               }}>
                 {bundleProof}
               </pre>
+              <CopyToClipboard text={bundleProof}
+                onCopy={handleCopy}>
+                <Typography variant="body2" style={{ cursor: 'pointer' }}>
+                  {copied ? 'Copied!' : 'Copy to clipboard'}
+                </Typography>
+              </CopyToClipboard>
             </Box>
           )}
         </Box>

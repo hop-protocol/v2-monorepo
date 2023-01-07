@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
 import { useStyles } from './useStyles'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
 
 type Props = {
   sdk: Hop
@@ -12,6 +13,7 @@ type Props = {
 export function GetContractAddresses (props: Props) {
   const { sdk } = props
   const styles = useStyles()
+  const [copied, setCopied] = useState(false)
   const contractAddresses = useMemo(() => {
     return sdk?.getContractAddresses() ?? null
   }, [sdk])
@@ -27,6 +29,15 @@ async function main() {
 
 main().catch(console.error)
 `.trim()
+
+  function handleCopy () {
+    setCopied(true)
+    setTimeout(() => {
+      setCopied(false)
+    }, 1000)
+  }
+
+  const output = JSON.stringify(contractAddresses, null, 2)
 
   return (
     <Box>
@@ -46,7 +57,13 @@ main().catch(console.error)
               <pre style={{
                 maxWidth: '500px',
                 overflow: 'auto'
-              }}>{JSON.stringify(contractAddresses, null, 2)}</pre>
+              }}>{output}</pre>
+              <CopyToClipboard text={output}
+                onCopy={handleCopy}>
+                <Typography variant="body2" style={{ cursor: 'pointer' }}>
+                  {copied ? 'Copied!' : 'Copy to clipboard'}
+                </Typography>
+              </CopyToClipboard>
             </Box>
           )}
         </Box>

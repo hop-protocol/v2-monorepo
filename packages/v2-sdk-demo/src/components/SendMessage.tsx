@@ -11,6 +11,7 @@ import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
 import { ChainSelect } from './ChainSelect'
 import { useStyles } from './useStyles'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
 
 type Props = {
   signer: Signer
@@ -21,6 +22,7 @@ type Props = {
 export function SendMessage (props: Props) {
   const { signer, sdk, onboard } = props
   const styles = useStyles()
+  const [copied, setCopied] = useState(false)
   const [fromChainId, setFromChainId] = useState(() => {
     try {
       const cached = localStorage.getItem('sendMessage:fromChainId')
@@ -192,6 +194,13 @@ async function main() {
 main().catch(console.error)
 `.trim()
 
+  function handleCopy () {
+    setCopied(true)
+    setTimeout(() => {
+      setCopied(false)
+    }, 1000)
+  }
+
   return (
     <Box>
       <Box mb={1}>
@@ -269,6 +278,12 @@ main().catch(console.error)
               }}>
                 {txData}
               </pre>
+              <CopyToClipboard text={txData}
+                onCopy={handleCopy}>
+                <Typography variant="body2" style={{ cursor: 'pointer' }}>
+                  {copied ? 'Copied!' : 'Copy to clipboard'}
+                </Typography>
+              </CopyToClipboard>
             </Box>
           )}
         </Box>
