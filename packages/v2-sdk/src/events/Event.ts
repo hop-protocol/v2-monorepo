@@ -54,6 +54,7 @@ export class Event {
     const logIndex = event.logIndex
     const blockNumber = event.blockNumber
     const { timestamp: blockTimestamp } = await this.provider.getBlock(blockNumber)
+    const { from, to } = await this.provider.getTransaction(transactionHash)
 
     return {
       chainSlug,
@@ -62,7 +63,9 @@ export class Event {
       transactionIndex,
       logIndex,
       blockNumber,
-      blockTimestamp
+      blockTimestamp,
+      from,
+      to
     }
   }
 

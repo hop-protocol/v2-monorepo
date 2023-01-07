@@ -130,6 +130,9 @@ export function RelayMessage (props: Props) {
   }, [bundleProof])
 
   async function getSendTxData() {
+    if (!bundleProof) {
+      throw new Error('bundle proof json is required')
+    }
     const args = {
       fromChainId: Number(fromChainId),
       toChainId: Number(toChainId),

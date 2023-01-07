@@ -99,6 +99,8 @@ describe('sdk setup', () => {
     expect(events[0].commitTime).toBe(1670287396)
     expect(events[0].context).toBeTruthy()
     expect(events[0].context?.transactionHash).toBe('0xed78039ec57b7f1bc882aa833c921d22f407363fc95834b670ae64f78f128fd4')
+    expect(events[0].context?.from).toBeTruthy()
+    expect(events[0].context?.to).toBeTruthy()
     expect(events[0].eventLog).toBeTruthy()
   }, 60 * 1000)
   it('getBundleForwardedEvents', async () => {

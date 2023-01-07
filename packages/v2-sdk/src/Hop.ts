@@ -5,7 +5,6 @@ import { BundleForwarded, BundleForwardedEventFetcher } from './events/BundleFor
 import { BundleReceived, BundleReceivedEventFetcher } from './events/BundleReceived'
 import { BundleSet, BundleSetEventFetcher } from './events/BundleSet'
 import { DateTime } from 'luxon'
-import { EventContext } from './events/types'
 import { EventFetcher } from './eventFetcher'
 import { FeesSentToHub, FeesSentToHubEventFetcher } from './events/FeesSentToHub'
 import { HubMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/HubMessageBridge__factory'
@@ -657,26 +656,6 @@ export class Hop {
     }
   }
 
-  async getEventContext (input: GetEventContextInput): Promise<EventContext> {
-    const { chainId, event } = input
-    const chainSlug = this.getChainSlug(chainId)
-    const transactionHash = event.transactionHash
-    const transactionIndex = event.transactionIndex
-    const logIndex = event.logIndex
-    const blockNumber = event.blockNumber
-    const { timestamp: blockTimestamp } = await this.getBlock(chainId, blockNumber)
-
-    return {
-      chainSlug,
-      chainId,
-      transactionHash,
-      transactionIndex,
-      logIndex,
-      blockNumber,
-      blockTimestamp
-    }
-  }
-
   async getBlock (chainId: number, blockNumber: number): Promise<any> {
     const cacheKey = `${chainId}-${blockNumber}`
     if (cache[cacheKey]) {
@@ -912,6 +891,10 @@ export class Hop {
 
   getMerkleProofForMessageId (input: GetMerkleProofForMessageIdInput) {
     const { messageIds, targetMessageId } = input
+    if (!targetMessageId) {
+      throw new Error('targetMessageId is required')
+    }
+
     const tree = MerkleTree.from(messageIds)
     const proof = tree.getHexProof(targetMessageId)
     return proof
@@ -922,6 +905,10 @@ export class Hop {
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
+    }
+
+    if (!messageId) {
+      throw new Error('messageId is required')
     }
 
     const { treeIndex, bundleId } = await this.getMessageBundledEventFromMessageId({ fromChainId, messageId })

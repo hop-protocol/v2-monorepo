@@ -6,6 +6,8 @@ export type EventContext = {
   logIndex: number
   blockNumber: number
   blockTimestamp: number
+  from: string
+  to: string
 }
 
 export type EventBase = {
