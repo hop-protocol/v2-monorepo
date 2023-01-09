@@ -12,7 +12,7 @@ import Onboard from '@web3-onboard/core'
 import injectedModule from '@web3-onboard/injected-wallets'
 import { SendMessage } from './components/SendMessage'
 import { RelayMessage } from './components/RelayMessage'
-import { RelayBundle } from './components/RelayBundle'
+import { ExitBundle } from './components/ExitBundle'
 import { GetBundleProof } from './components/GetBundleProof'
 import { GetEvents } from './components/GetEvents'
 import { GetContractAddresses } from './components/GetContractAddresses'
@@ -232,7 +232,7 @@ function App () {
     <SendMessage signer={wallet} sdk={sdk} onboard={onboard} />,
     <GetBundleProof sdk={sdk} />,
     <RelayMessage signer={wallet} sdk={sdk} onboard={onboard} />,
-    <RelayBundle signer={wallet} sdk={sdk} onboard={onboard} />,
+    <ExitBundle signer={wallet} sdk={sdk} onboard={onboard} />,
     <GetEvents sdk={sdk} />,
     <GetContractAddresses sdk={sdk} />
   ]

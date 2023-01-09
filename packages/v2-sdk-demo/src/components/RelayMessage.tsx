@@ -170,7 +170,10 @@ export function RelayMessage (props: Props) {
 
         const success = await onboard.setChain({ chainId: Number(toChainId) })
         if (success) {
-          const tx = await _signer.sendTransaction(txData)
+          const tx = await _signer.sendTransaction({
+            ...txData,
+            // gasLimit: 1_000_000,
+          })
           setTxHash(tx.hash)
         }
       }

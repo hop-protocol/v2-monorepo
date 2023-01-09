@@ -18,13 +18,13 @@ type Props = {
   onboard: any
 }
 
-export function RelayBundle (props: Props) {
+export function ExitBundle (props: Props) {
   const { signer, sdk, onboard } = props
   const styles = useStyles()
   const [copied, setCopied] = useState(false)
   const [fromChainId, setFromChainId] = useState(() => {
     try {
-      const cached = localStorage.getItem('relayBundle:fromChainId')
+      const cached = localStorage.getItem('exitBundle:fromChainId')
       if (cached) {
         return cached
       }
@@ -33,7 +33,7 @@ export function RelayBundle (props: Props) {
   })
   const [bundleCommittedTxHash, setBundleCommittedTxHash] = useState(() => {
     try {
-      const cached = localStorage.getItem('relayBundle:bundleCommittedTxHash')
+      const cached = localStorage.getItem('exitBundle:bundleCommittedTxHash')
       if (cached) {
         return cached
       }
@@ -48,7 +48,7 @@ export function RelayBundle (props: Props) {
 
   useEffect(() => {
     try {
-      localStorage.setItem('relayBundle:fromChainId', fromChainId)
+      localStorage.setItem('exitBundle:fromChainId', fromChainId)
     } catch (err: any) {
       console.error(err)
     }
@@ -56,7 +56,7 @@ export function RelayBundle (props: Props) {
 
   useEffect(() => {
     try {
-      localStorage.setItem('relayBundle:bundleCommittedTxHash', bundleCommittedTxHash)
+      localStorage.setItem('exitBundle:bundleCommittedTxHash', bundleCommittedTxHash)
     } catch (err: any) {
       console.error(err)
     }
@@ -151,7 +151,7 @@ main().catch(console.error)
   return (
     <Box>
       <Box mb={1}>
-        <Typography variant="h5">Relay Bundle</Typography>
+        <Typography variant="h5">Exit Bundle</Typography>
       </Box>
       <Box mb={4}>
         <Typography variant="subtitle1">Exit bundle at the destination</Typography>
