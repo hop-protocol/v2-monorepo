@@ -1,5 +1,5 @@
 import React, { SyntheticEvent, useState, useEffect, useMemo } from 'react'
-import { Contract, providers, utils } from 'ethers'
+import { Contract, utils } from 'ethers'
 import TextField from '@mui/material/TextField'
 import Textarea from '@mui/material/TextareaAutosize'
 import Box from '@mui/material/Box'
