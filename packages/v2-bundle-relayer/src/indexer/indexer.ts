@@ -76,10 +76,9 @@ export class Indexer {
     }
   }
 
-  async poll () {
-    console.log('poll start')
-
+  async syncEvents (): Promise<any[]> {
     const events: any[] = []
+
     for (const eventName in this.eventsToSync) {
       const _db = this.eventsToSync[eventName]
       for (const _chainId in this.chainIds) {
@@ -98,6 +97,67 @@ export class Indexer {
       }
     }
 
+    return events
+  }
+
+  async syncEvents2 (): Promise<any[]> {
+    const l1Events = ['BundleForwarded', 'BundleReceived', 'BundleSet']
+    const l2Events = [
+      'BundleCommitted',
+      'FeesSentToHub',
+      'MessageBundled',
+      'MessageRelayed',
+      'MessageReverted',
+      'MessageSent'
+    ]
+
+    const _events: any[] = []
+
+    for (const _chainId in this.chainIds) {
+      const chainId = Number(_chainId)
+      const isL1 = this.getIsL1(chainId)
+      let _db: any
+      let eventNames: string[] = []
+
+      if (isL1) {
+        _db = this.eventsToSync[l1Events[0]]
+        eventNames = l1Events
+      } else {
+        _db = this.eventsToSync[l2Events[0]]
+        eventNames = l2Events
+      }
+
+      const syncState = await _db.getSyncState(chainId)
+      console.log('syncState', chainId, syncState)
+
+      const provider = this.sdk.getRpcProvider(chainId)
+      let fromBlock = this.startBlocks[chainId]
+      let toBlock = await provider.getBlockNumber()
+      if (syncState?.toBlock) {
+        fromBlock = syncState.toBlock + 1
+        toBlock = await provider.getBlockNumber()
+      }
+
+      console.log('get', eventNames, chainId, fromBlock, toBlock)
+      const events = await this.sdk.getEvents({ eventNames, chainId, fromBlock, toBlock })
+      console.log('events', eventNames, events.length)
+      for (const event of events) {
+        const _db = this.eventsToSync[event.eventName]
+        const key = _db.getKeyStringFromEvent(event)!
+        await _db.updateEvent(key, event)
+        await _db.putSyncState(chainId, { fromBlock, toBlock })
+        _events.push(event)
+      }
+      await _db.putSyncState(chainId, { fromBlock, toBlock })
+    }
+
+    return _events
+  }
+
+  async poll () {
+    console.log('poll start')
+
+    const events = await this.syncEvents2()
     const exitableBundles: any = {}
 
     for (const event of events) {
