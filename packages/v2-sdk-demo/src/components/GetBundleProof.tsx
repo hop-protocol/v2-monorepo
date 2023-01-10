@@ -138,21 +138,21 @@ main().catch(console.error)
             <form onSubmit={handleSubmit}>
               <Box mb={2}>
                 <Box mb={1}>
-                  <label>From Chain ID <small><em>(number)</em></small></label>
+                  <label>From Chain ID <small><em>(number)</em></small> <small><em>This is the origin chain the message was sent from</em></small></label>
                 </Box>
                 {/*<TextField fullWidth placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />*/}
                 <ChainSelect value={fromChainId} chains={['420', '5']} onChange={value => setFromChainId(value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
-                  <label>To Chain ID <small><em>(number)</em></small></label>
+                  <label>To Chain ID <small><em>(number)</em></small> <small><em>This is the destination chain specified for the message</em></small></label>
                 </Box>
                 {/*<TextField fullWidth placeholder="5" value={toChainId} onChange={event => setToChainId(event.target.value)} />*/}
                 <ChainSelect value={toChainId} chains={['420', '5']} onChange={value => setToChainId(value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
-                  <label>Message ID <small><em>(hex)</em></small></label>
+                  <label>Message ID <small><em>(hex)</em></small> <small><em>The Message ID is emitted as an event when sending message</em></small></label>
                 </Box>
                 <TextField fullWidth placeholder="0x" value={messageId} onChange={event => setMessageId(event.target.value)} />
               </Box>

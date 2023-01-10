@@ -201,13 +201,13 @@ main().catch(console.error)
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
-                  <label>From block <small><em>(number)</em></small></label>
+                  <label>From Block <small><em>(number)</em></small> <small><em>You can use negative value for number of blocks back of toBlock</em></small></label>
                 </Box>
                 <TextField fullWidth placeholder="0" value={startBlock} onChange={event => setStartBlock(event.target.value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
-                  <label>To block <small><em>(number)</em></small></label>
+                  <label>To Block <small><em>(number)</em></small> <small><em>Leave blank to use head block</em></small></label>
                 </Box>
                 <TextField fullWidth placeholder="0" value={endBlock} onChange={event => setEndBlock(event.target.value)} />
               </Box>

@@ -161,14 +161,14 @@ main().catch(console.error)
           <form onSubmit={handleSubmit}>
             <Box mb={2}>
               <Box mb={1}>
-                <label>From Chain ID <small><em>(number)</em></small></label>
+                <label>From Chain ID <small><em>(number)</em></small> <small><em>This is the origin chain of the message route</em></small></label>
               </Box>
               {/*<TextField fullWidth placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />*/}
               <ChainSelect value={fromChainId} chains={['420', '5']} onChange={value => setFromChainId(value)} />
             </Box>
             <Box mb={2}>
               <Box mb={1}>
-                <label>From Chain Bundle Committed Tx Hash <small><em>(hex string)</em></small></label>
+                <label>From Chain Bundle Committed Tx Hash <small><em>(hex string)</em></small> <small><em>This is tx hash that contains the <code>BundleComitted</code> event for the Bundle ID</em></small></label>
               </Box>
               <TextField fullWidth placeholder="0x" value={bundleCommittedTxHash} onChange={event => setBundleCommittedTxHash(event.target.value)} />
             </Box>

@@ -292,7 +292,7 @@ main().catch(console.error)
             <form onSubmit={handleSubmit}>
               <Box mb={2}>
                 <Box mb={1}>
-                  <label>From Chain ID <small><em>(number)</em></small></label>
+                  <label>From Chain ID <small><em>(number)</em></small> <small><em>This is the origin chain the message will be sent from</em></small></label>
                 </Box>
                 {/*
                 <TextField fullWidth placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />
@@ -301,14 +301,14 @@ main().catch(console.error)
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
-                  <label>To Chain ID <small><em>(number)</em></small></label>
+                  <label>To Chain ID <small><em>(number)</em></small> <small><em>This is the destination chain where the message should be received</em></small></label>
                 </Box>
                 {/*<TextField fullWidth placeholder="5" value={toChainId} onChange={event => setToChainId(event.target.value)} />*/}
                 <ChainSelect value={toChainId} chains={['420', '5']} onChange={value => setToChainId(value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
-                  <label>To <small><em>(address)</em></small></label>
+                  <label>To <small><em>(address)</em></small> <small><em>Address to call at the destination</em></small></label>
                 </Box>
                 <TextField fullWidth placeholder="0x" value={toAddress} onChange={(event: any) => setToAddress(event.target.value)} />
               </Box>
@@ -324,7 +324,7 @@ main().catch(console.error)
                 <Box mb={4} p={2} style={{ border: '1px dashed #ccc' }}>
                   <Box mb={2}>
                     <Box mb={1}>
-                      <label>ABI <small><em>(JSON)</em></small></label>
+                      <label>ABI <small><em>(JSON)</em></small> <small><em>This is the ABI JSON artifact that is generated when compiling contracts (e.g. ERC20.json)</em></small></label>
                     </Box>
                     <Textarea minRows={5} maxRows={5} placeholder="[]" value={abiString} onChange={(event: any) => setAbiString(event.target.value)} style={{ width: '100%' }} />
                   </Box>
@@ -358,7 +358,7 @@ main().catch(console.error)
 
               <Box mb={2}>
                 <Box mb={1}>
-                  <label>Calldata <small><em>(hex string)</em></small> {showAbiHelper && <small>This is the abi encoder calldata output</small>}</label>
+                  <label>Calldata <small><em>(hex string)</em></small> <small><em>{showAbiHelper ? 'This is the abi encoder calldata output which is the calldata to execute at the destination' : 'Calldata to execute at the destination'}</em></small></label>
                 </Box>
                 <Textarea disabled={showAbiHelper} minRows={5} maxRows={5} placeholder="0x" value={toCalldata} onChange={(event: any) => setToCalldata(event.target.value)} style={{ width: '100%' }} />
               </Box>
