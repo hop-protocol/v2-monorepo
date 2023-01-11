@@ -13,9 +13,9 @@ type EventsResult = {
 
 type EventsApiInput = {
   eventName: string
-  limit: number
-  lastKey: string | null
-  firstKey: string | null
+  limit?: number
+  lastKey?: string | null
+  firstKey?: string | null
   filter: any
 }
 
@@ -189,6 +189,41 @@ export class Controller {
       items: items.map(this.normalizeEventForApi),
       lastKey,
       firstKey
+    }
+  }
+
+  async getExplorerEventsForApi (input: any): Promise<any> {
+    const { limit = 10, lastKey = '~', firstKey = '', filter } = input
+    const eventName = 'MessageSent'
+    const { lastKey: newLastKey, firstKey: newFirstKey, items } = await this.getEventsForApi({
+      eventName,
+      limit,
+      lastKey,
+      firstKey,
+      filter
+    })
+
+    const promises = items.map(async (item: any) => {
+      const { messageId } = item
+      const messageRelayedEvent = await this.getEventsForApi({
+        eventName: 'MessageRelayed',
+        filter: {
+          messageId
+        }
+      })
+      item.messageRelayedEvent = null
+      if (messageRelayedEvent.items.length > 0) {
+        item.messageRelayedEvent = messageRelayedEvent.items[0]
+      }
+      return item
+    })
+
+    const explorerItems = await Promise.all(promises)
+
+    return {
+      lastKey: newLastKey,
+      firstKey: newFirstKey,
+      items: explorerItems
     }
   }
 

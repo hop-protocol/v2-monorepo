@@ -21,6 +21,34 @@ app.get('/health', (req: any, res: any) => {
   res.status(200).json({ status: 'ok' })
 })
 
+app.get('/v1/explorer', responseCache, async (req: any, res: any) => {
+  try {
+    let { firstKey, lastKey, limit = 10, filter } = req.query
+    limit = Number(limit)
+    if (limit < 1) {
+      throw new Error('limit must be greater than 0')
+    }
+    if (limit > 10) {
+      throw new Error('limit must be less than 10')
+    }
+    const controller = new Controller()
+    const { lastKey: newLastKey, firstKey: newFirstKey, items } = await controller.getExplorerEventsForApi({
+      limit,
+      lastKey,
+      firstKey,
+      filter
+    })
+    res.status(200).json({
+      events: items,
+      lastKey: newLastKey,
+      firstKey: newFirstKey
+    })
+  } catch (err: any) {
+    console.error(err)
+    res.json({ error: err.message })
+  }
+})
+
 app.get('/v1/events', responseCache, async (req: any, res: any) => {
   try {
     let { eventName, firstKey, lastKey, limit = 10, filter } = req.query

@@ -101,8 +101,9 @@ export class Indexer {
   }
 
   async syncEvents2 (): Promise<any[]> {
-    const l1Events = ['BundleForwarded', 'BundleReceived', 'BundleSet']
-    const l2Events = [
+    const l1Events = ['BundleForwarded', 'BundleReceived']
+    const baseEvents = [
+      'BundleSet',
       'BundleCommitted',
       'FeesSentToHub',
       'MessageBundled',
@@ -121,10 +122,10 @@ export class Indexer {
 
       if (isL1) {
         _db = this.eventsToSync[l1Events[0]]
-        eventNames = l1Events
+        eventNames = baseEvents.concat(...l1Events)
       } else {
-        _db = this.eventsToSync[l2Events[0]]
-        eventNames = l2Events
+        _db = this.eventsToSync[baseEvents[0]]
+        eventNames = baseEvents
       }
 
       const syncState = await _db.getSyncState(chainId)

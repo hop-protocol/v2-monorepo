@@ -9,6 +9,7 @@ const contractAddresses_v001 = {
   5: {
     startBlock: 8077320,
     hubCoreMessenger: '0x9827315F7D2B1AAd0aa4705c06dafEE6cAEBF920',
+    spokeCoreMessenger: '0x9827315F7D2B1AAd0aa4705c06dafEE6cAEBF920',
     ethFeeDistributor: '0x8fF09Ff3C87085Fe4607F2eE7514579FE50944C5'
   },
   420: {
@@ -22,6 +23,7 @@ const contractAddresses_v002 = {
   5: {
     startBlock: 8095954,
     hubCoreMessenger: '0xE3F4c0B210E7008ff5DE92ead0c5F6A5311C4FDC',
+    spokeCoreMessenger: '0xE3F4c0B210E7008ff5DE92ead0c5F6A5311C4FDC',
     ethFeeDistributor: '0xf6eED903Ac2A34E115547874761908DD3C5fe4bf'
   },
   420: {

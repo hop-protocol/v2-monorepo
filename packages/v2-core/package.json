@@ -1,6 +1,6 @@
 {
   "name": "@hop-protocol/v2-core",
-  "version": "0.0.0-beta.2",
+  "version": "0.0.0-beta.3",
   "description": "Hop Protocol v2 core config",
   "main": "index.js",
   "types": "index.d.ts",
@@ -23,7 +23,7 @@
     "publish:next": "npm publish --tag next --access public",
     "lerna:sync": "lerna-sync-version",
     "release": "npm run clean && npm test && npm run publish:latest",
-    "bump-release": "npm run version:bump && npm run lerna:sync && npm run release && npm run json:mainnet",
+    "bump-release": "npm run version:bump && npm run lerna:sync && npm run release",
     "prepare": "npm run lint && npm run build",
     "json:mainnet": "node -e \"console.log(JSON.stringify(require('./addresses').mainnet, null, 2))\" > build/addresses/mainnet.json",
     "json:staging": "node -e \"console.log(JSON.stringify(require('./addresses').staging, null, 2))\" > build/addresses/staging.json"

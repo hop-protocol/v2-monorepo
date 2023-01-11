@@ -318,7 +318,7 @@ export class Hop {
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
-    const address = this.getHubMessageBridgeContractAddress(chainId)
+    const address = this.getSpokeMessageBridgeContractAddress(chainId)
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
@@ -473,7 +473,7 @@ export class Hop {
         filters.push(filter)
         map[filter.topics[0] as string] = _eventFetcher
       } else if (eventName === 'BundleSet') {
-        const address = this.getHubMessageBridgeContractAddress(chainId)
+        const address = this.getSpokeMessageBridgeContractAddress(chainId)
         const _eventFetcher = new BundleSetEventFetcher(provider, chainId, this.batchBlocks, address)
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
@@ -728,7 +728,7 @@ export class Hop {
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${toChainId}`)
     }
-    const address = this.getHubMessageBridgeContractAddress(toChainId)
+    const address = this.getSpokeMessageBridgeContractAddress(toChainId)
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${toChainId}`)
     }
