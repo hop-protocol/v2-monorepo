@@ -135,7 +135,7 @@ export class Indexer {
       let fromBlock = this.startBlocks[chainId]
       let toBlock = await provider.getBlockNumber()
       if (syncState?.toBlock) {
-        fromBlock = syncState.toBlock + 1
+        fromBlock = Number(syncState.toBlock) + 1
         toBlock = await provider.getBlockNumber()
       }
 
