@@ -23,7 +23,7 @@ export type Header = {
 
 export type Row = {
   key: string
-  value: string
+  value: string | any
   valueUrl?: string
   clipboardValue?: string
 }
@@ -121,7 +121,9 @@ export function Table (props: Props) {
                                     <Typography variant="body2">{col.value}</Typography>
                                   </Link>
                                 ) : (
-                                  <Typography variant="body2">{col.value}</Typography>
+                                  typeof col.value === 'string'
+                                  ? <Typography variant="body2">{col.value}</Typography>
+                                  : col.value
                                 )}
                               </Box>
                             </Box>

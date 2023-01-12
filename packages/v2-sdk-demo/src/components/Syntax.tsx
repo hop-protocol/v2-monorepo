@@ -17,7 +17,7 @@ export function Syntax (props: { code: string }) {
   }
 
   return (
-    <Box>
+    <Box width="100%" overflow="auto">
       <Box display="flex" flexDirection="column">
         <SyntaxHighlighter
           language="javascript"

@@ -23,7 +23,11 @@ export function useEvents (eventName: string, filter: any = {}) {
 
   const updateEvents = async (_lastKey: string = '', _firstKey: string = '') => {
     try {
-      const url = lastUrl || `${apiUrl}/v1/events?limit=${limit}&lastKey=${_lastKey}&firstKey=${_firstKey}&eventName=${eventName}${filterString}`
+      let pathname = '/events'
+      if (eventName === 'explorer')  {
+        pathname = '/explorer'
+      }
+      const url = lastUrl || `${apiUrl}/v1${pathname}?limit=${limit}&lastKey=${_lastKey}&firstKey=${_firstKey}&eventName=${eventName}${filterString}`
       const res = await fetch(url)
       const json = await res.json()
       if (json.error) {

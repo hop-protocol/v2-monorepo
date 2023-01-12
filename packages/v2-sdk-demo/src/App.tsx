@@ -18,6 +18,8 @@ import { GetEvents } from './components/GetEvents'
 import { GetContractAddresses } from './components/GetContractAddresses'
 import { Hop } from '@hop-protocol/v2-sdk'
 import Card from '@mui/material/Card'
+import styled from 'styled-components'
+import bgImage from './assets/circles-bg.svg'
 
 const Buffer = require('buffer/').Buffer
 
@@ -58,6 +60,15 @@ if (!(window as any).Buffer) {
   ;(window as any).Buffer = Buffer
   ;(window as any).onboard = onboard
 }
+
+const AppWrapper = styled(Box)<any>`
+  align-items: stretch;
+  background-image: url(${bgImage});
+  background-color: rgb(253, 247, 249);
+  background-size: 120%;
+  transition: background 0.15s ease-out;
+  min-height: 100vh;
+`
 
 function App () {
   // const { sdk, connected, safe } = useSafeAppsSDK()
@@ -238,72 +249,74 @@ function App () {
   ]
 
   return (
-    <Box p={4} m="0 auto" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-      <Box width="100%" mb={4} display="flex" justifyContent="space-between">
-        <Box display="flex" justifyItems="center" alignItems="center">
-          <Box>
-            <Typography variant="h4">
-              <Box display="flex" justifyContent="center" alignItems="center">
-                <Box mr={1}><img width="32px" src="https://assets.hop.exchange/images/hop_logo.png" style={{ borderRadius: '50%' }}/></Box><Box>Hop v2 SDK Playground</Box>
-              </Box>
-            </Typography>
-          </Box>
-          <Box ml={2}>
-            <Typography variant="subtitle1">
-              Goerli
-            </Typography>
-          </Box>
-        </Box>
-        <Box>
-          {!address && (
+    <AppWrapper>
+      <Box p={4} m="0 auto" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
+        <Box width="100%" mb={4} display="flex" justifyContent="space-between">
+          <Box display="flex" justifyItems="center" alignItems="center">
             <Box>
-              <Button onClick={connect} variant="contained">Connect</Button>
-            </Box>
-          )}
-          {!!address && (
-            <Box>
-              <Button onClick={disconnect}>disconnect</Button>
-            </Box>
-          )}
-        </Box>
-      </Box>
-      {showAccountInfo && (
-        <Box mb={4} display="flex" flexDirection="column">
-          {!!address && (
-              <Box mb={2} display="flex">
-                <Typography variant="body2">
-                  account address: {address}
-                </Typography>
-              </Box>
-          )}
-          {!!address && (
-            <Box mb={2}>
-              <Typography variant="body2">
-                account balance: <span>{balance} ETH</span>
+              <Typography variant="h4">
+                <Box display="flex" justifyContent="center" alignItems="center">
+                  <Box mr={1}><img width="32px" src="https://assets.hop.exchange/images/hop_logo.png" style={{ borderRadius: '50%' }}/></Box><Box>Hop v2 SDK Playground</Box>
+                </Box>
               </Typography>
             </Box>
-          )}
-        </Box>
-      )}
-      <Box width="100%" mb={6} display="flex" flexDirection="column">
-        {components.map((component: any, i: number) => {
-          return (
-            <Box mb={8} key={i}>
-              <Box maxWidth="1400px" m="0 auto">
-                <Card>
-                  <Box p={4} minWidth="400px">
-                    {component}
-                  </Box>
-                </Card>
-              </Box>
+            <Box ml={2}>
+              <Typography variant="subtitle1">
+                Goerli
+              </Typography>
             </Box>
-          )
-        })}
+          </Box>
+          <Box>
+            {!address && (
+              <Box>
+                <Button onClick={connect} variant="contained">Connect</Button>
+              </Box>
+            )}
+            {!!address && (
+              <Box>
+                <Button onClick={disconnect}>disconnect</Button>
+              </Box>
+            )}
+          </Box>
+        </Box>
+        {showAccountInfo && (
+          <Box mb={4} display="flex" flexDirection="column">
+            {!!address && (
+                <Box mb={2} display="flex">
+                  <Typography variant="body2">
+                    account address: {address}
+                  </Typography>
+                </Box>
+            )}
+            {!!address && (
+              <Box mb={2}>
+                <Typography variant="body2">
+                  account balance: <span>{balance} ETH</span>
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        )}
+        <Box width="100%" mb={6} display="flex" flexDirection="column">
+          {components.map((component: any, i: number) => {
+            return (
+              <Box mb={8} key={i}>
+                <Box maxWidth="1400px" m="0 auto">
+                  <Card>
+                    <Box p={4} minWidth="400px">
+                      {component}
+                    </Box>
+                  </Card>
+                </Box>
+              </Box>
+            )
+          })}
+        </Box>
+        <Box mb={4}>
+          <a href="https://github.com/hop-protocol/v2-monorepo" target="_blank" rel="noopener noreferrer" style={{ color: '#c34be4' }}>Github</a>
+        </Box>
       </Box>
-      <Box mb={4}>
-        <a href="https://github.com/hop-protocol/v2-monorepo" target="_blank" rel="noopener noreferrer" style={{ color: '#c34be4' }}>Github</a>
-      </Box>
-    </Box>
+    </AppWrapper>
   )
 }
 
