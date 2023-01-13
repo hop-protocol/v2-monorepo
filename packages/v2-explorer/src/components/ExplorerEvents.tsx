@@ -54,7 +54,8 @@ export function ExplorerEvents () {
     let status = (
       <Chip icon={<PendingIcon />} label="Pending" />
     )
-    if (event.messageRelayedEvent) {
+    const isRelayed = !!event.messageRelayedEvent
+    if (isRelayed) {
       status = (
         <Chip icon={<CheckIcon style={{ color: '#fff' }} />} label="Relayed" style={{ backgroundColor: '#74d56e', color: '#fff' }} />
       )
@@ -62,11 +63,12 @@ export function ExplorerEvents () {
     return [
       {
         key: 'status',
-        value: status
+        value: status,
+        title: `${isRelayed ? 'This message has been relayed to the destination chain' : 'This message has not yet been relayed to the destination chain'}`,
       },
       {
         key: 'created',
-        value: `(${event.context.blockTimestampRelative})`
+        value: `${event.context.blockTimestampRelative}`
       },
       {
         key: 'messageId',

@@ -26,6 +26,7 @@ export type Row = {
   value: string | any
   valueUrl?: string
   clipboardValue?: string
+  title?: string
 }
 
 type Props = {
@@ -104,7 +105,7 @@ export function Table (props: Props) {
                     <TableRow key={i} onClick={() => onRowClick(row)}>
                       {row.map((col: Row, j: number) => {
                         return (
-                          <TableCell key={j}>
+                          <TableCell key={j} title={col.title || col.clipboardValue || col.value}>
                             <Box display="flex" alignItems="center">
                               {!!col.clipboardValue && (
                                 <Box mr={0.5}>
