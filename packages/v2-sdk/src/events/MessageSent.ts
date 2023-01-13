@@ -33,7 +33,7 @@ export class MessageSentEventFetcher extends Event {
 
     const messageId = decoded.args.messageId.toString()
     const from = decoded.args.from
-    const toChainId = decoded.args.toChainId.toNumber()
+    const toChainId = Number(decoded.args.toChainId.toString())
     const to = decoded.args.to
     const data = decoded.args.data
 

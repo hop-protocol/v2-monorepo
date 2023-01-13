@@ -42,7 +42,7 @@ export class MessageBundledEventFetcher extends Event {
     const decoded = iface.parseLog(ethersEvent)
 
     const bundleId = decoded.args.bundleId.toString()
-    const treeIndex = decoded.args.treeIndex.toNumber()
+    const treeIndex = Number(decoded.args.treeIndex.toString())
     const messageId = decoded.args.messageId.toString()
 
     return {

@@ -31,7 +31,7 @@ export class MessageRevertedEventFetcher extends Event {
     const decoded = iface.parseLog(ethersEvent)
 
     const messageId = decoded.args.messageId.toString()
-    const fromChainId = decoded.args.fromChainId.toNumber()
+    const fromChainId = Number(decoded.args.fromChainId.toString())
     const from = decoded.args.from
     const to = decoded.args.to
 

@@ -36,9 +36,9 @@ export class BundleReceivedEventFetcher extends Event {
     const bundleId = decoded.args.bundleId.toString()
     const bundleRoot = decoded.args.bundleRoot.toString()
     const bundleFees = decoded.args.bundleFees
-    const fromChainId = decoded.args.fromChainId.toNumber()
-    const toChainId = decoded.args.toChainId.toNumber()
-    const relayWindowStart = decoded.args.relayWindowStart.toNumber()
+    const fromChainId = Number(decoded.args.fromChainId.toString())
+    const toChainId = Number(decoded.args.toChainId.toString())
+    const relayWindowStart = Number(decoded.args.relayWindowStart.toString())
     const relayer = decoded.args.relayer.toString()
 
     return {

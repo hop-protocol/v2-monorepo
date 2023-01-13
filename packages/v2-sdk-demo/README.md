@@ -2,9 +2,7 @@
 
 > Hop v2 SDK Demo
 
-## Demo
-
-[https://hop-v2-sdk-demo.netlify.app/](https://hop-v2-sdk-demo.netlify.app/)
+[https://v2-playground.hop.exchange/](https://v2-playground.hop.exchange/)
 
 ---
 

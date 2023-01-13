@@ -20,7 +20,7 @@ export class SyncStateDb extends BaseDb {
     return true
   }
 
-  async getSyncState (chainId: number): Promise<SyncState> {
+  async getSyncState (chainId: number): Promise<SyncState | null> {
     const key = this.getKeyString(chainId)
     return this._get(key)
   }

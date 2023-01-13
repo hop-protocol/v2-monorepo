@@ -26,7 +26,7 @@ export class EventsBaseDb<T> extends BaseDb {
     return this.syncStateDb.putSyncState(chainId, syncState)
   }
 
-  async getSyncState (chainId: number): Promise<SyncState> {
+  async getSyncState (chainId: number): Promise<SyncState | null> {
     return this.syncStateDb.getSyncState(chainId)
   }
 

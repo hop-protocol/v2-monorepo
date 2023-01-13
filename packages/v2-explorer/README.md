@@ -2,9 +2,7 @@
 
 > Hop v2 Explorer
 
-## Demo
-
-[https://hop-v2-explorer.netlify.app/](https://hop-v2-explorer.netlify.app/)
+[https:/v2-explorer.hop.exchange/](https://v2-explorer.hop.exchange/)
 
 ---
 

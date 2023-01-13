@@ -557,7 +557,7 @@ export class Hop {
     }
     const hubMessageBridge = HubMessageBridge__factory.connect(address, provider)
     const exitTime = await hubMessageBridge.getSpokeExitTime(fromChainId)
-    const exitTimeSeconds = exitTime.toNumber()
+    const exitTimeSeconds = Number(exitTime.toString())
     return exitTimeSeconds
   }
 
@@ -692,7 +692,7 @@ export class Hop {
 
     return {
       messageFee: routeData.messageFee,
-      maxBundleMessages: routeData.maxBundleMessages.toNumber()
+      maxBundleMessages: Number(routeData.maxBundleMessages.toString())
     }
   }
 
@@ -738,7 +738,7 @@ export class Hop {
       return false
     }
 
-    return BigNumber.from(entity.root).gt(0) && entity.fromChainId.toNumber() === fromChainId
+    return BigNumber.from(entity.root).gt(0) && Number(entity.fromChainId.toString()) === fromChainId
   }
 
   async getMessageSentEventFromTransactionReceipt (input: GetMessageSentEventFromTransactionReceiptInput) {

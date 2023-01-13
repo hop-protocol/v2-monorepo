@@ -34,8 +34,8 @@ export class BundleCommittedEventFetcher extends Event {
     const bundleId = decoded.args.bundleId.toString()
     const bundleRoot = decoded.args.bundleRoot.toString()
     const bundleFees = decoded.args.bundleFees
-    const toChainId = decoded.args.toChainId.toNumber()
-    const commitTime = decoded.args.commitTime.toNumber()
+    const toChainId = Number(decoded.args.toChainId.toString())
+    const commitTime = Number(decoded.args.commitTime.toString())
 
     return {
       eventName: this.eventName,

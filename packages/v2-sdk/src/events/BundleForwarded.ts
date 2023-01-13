@@ -32,8 +32,8 @@ export class BundleForwardedEventFetcher extends Event {
 
     const bundleId = decoded.args.bundleId.toString()
     const bundleRoot = decoded.args.bundleRoot.toString()
-    const fromChainId = decoded.args.fromChainId.toNumber()
-    const toChainId = decoded.args.toChainId.toNumber()
+    const fromChainId = Number(decoded.args.fromChainId.toString())
+    const toChainId = Number(decoded.args.toChainId.toString())
 
     return {
       eventName: this.eventName,

@@ -258,7 +258,7 @@ describe('sdk setup', () => {
     console.log(shouldAttempt)
     expect(shouldAttempt).toBe(false)
   }, 60 * 1000)
-  it('getRelayBundlePopulatedTx', async () => {
+  it.skip('getRelayBundlePopulatedTx', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v001
     })

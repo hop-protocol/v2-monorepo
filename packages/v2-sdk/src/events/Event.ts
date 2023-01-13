@@ -2,6 +2,7 @@ import { EventContext } from './types'
 import { EventFetcher, InputFilter } from '../eventFetcher'
 import { chainSlugMap } from '../utils/chainSlugMap'
 import { providers } from 'ethers'
+import { promiseQueue } from '../promiseQueue'
 
 export class Event {
   provider: providers.Provider
@@ -29,12 +30,20 @@ export class Event {
       toBlock = await this.provider.getBlockNumber()
     }
     const events = await eventFetcher.fetchEvents([filter as InputFilter], { fromBlock, toBlock })
-    return this.populateEvents(events)
+    console.log(`populating events. count: ${events.length}`)
+    return await this.populateEvents(events)
   }
 
   async populateEvents (events: any[]) {
     events = events.map(x => this.toTypedEvent(x))
-    return Promise.all(events.map((event: any) => this.addContextToEvent(event, this.chainId)))
+    const promiseFns = events.map((event: any) => () => this.addContextToEvent(event, this.chainId))
+
+    const populatedEvents : any[] = []
+    await promiseQueue(promiseFns, async (fn: any) => {
+      populatedEvents.push(await fn())
+    }, { concurrency: 20 })
+
+    return populatedEvents
   }
 
   toTypedEvent (ethersEvent: any): any {
@@ -48,24 +57,34 @@ export class Event {
   }
 
   async getEventContext (event: any, chainId: number): Promise<EventContext> {
-    const chainSlug = this.getChainSlug(chainId)
-    const transactionHash = event.transactionHash
-    const transactionIndex = event.transactionIndex
-    const logIndex = event.logIndex
-    const blockNumber = event.blockNumber
-    const { timestamp: blockTimestamp } = await this.provider.getBlock(blockNumber)
-    const { from, to } = await this.provider.getTransaction(transactionHash)
+    try {
+      const chainSlug = this.getChainSlug(chainId)
+      const transactionHash = event.transactionHash
+      const transactionIndex = event.transactionIndex
+      const logIndex = event.logIndex
+      const blockNumber = event.blockNumber
+      const [
+        { timestamp: blockTimestamp },
+        { from, to }
+      ] = await Promise.all([
+        this.provider.getBlock(blockNumber),
+        this.provider.getTransactionReceipt(transactionHash)
+      ])
 
-    return {
-      chainSlug,
-      chainId,
-      transactionHash,
-      transactionIndex,
-      logIndex,
-      blockNumber,
-      blockTimestamp,
-      from,
-      to
+      return {
+        chainSlug,
+        chainId,
+        transactionHash,
+        transactionIndex,
+        logIndex,
+        blockNumber,
+        blockTimestamp,
+        from,
+        to
+      }
+    } catch (err: any) {
+      console.log('getEventContext error:', err, chainId, event)
+      throw err
     }
   }
 
