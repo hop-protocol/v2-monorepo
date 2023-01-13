@@ -38,10 +38,11 @@ type Props = {
   previousPage: any
   limit: number
   loading?: boolean
+  onRowClick?: any
 }
 
 export function Table (props: Props) {
-  const { title, headers, rows, showNextButton, showPreviousButton, nextPage, previousPage, limit, loading = false } = props
+  const { title, headers, rows, showNextButton, showPreviousButton, nextPage, previousPage, limit, loading = false, onRowClick } = props
   const [copied, setCopied] = useState('')
   const page = 0
 
@@ -100,7 +101,7 @@ export function Table (props: Props) {
                 )}
                 {rows.map((row: Row[], i: number) => {
                   return (
-                    <TableRow key={i}>
+                    <TableRow key={i} onClick={() => onRowClick(row)}>
                       {row.map((col: Row, j: number) => {
                         return (
                           <TableCell key={j}>

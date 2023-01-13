@@ -15,7 +15,7 @@ export function Header () {
       '/events': 'events'
     }
 
-    return routes[location.pathname] ?? 'home'
+    return routes[location.pathname]
   }, [])
 
   function handleTabChange (event: any, newValue: number) {

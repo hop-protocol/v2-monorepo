@@ -10,8 +10,10 @@ import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import CheckIcon from '@mui/icons-material/Check'
 import PendingIcon from '@mui/icons-material/Pending'
+import { useHistory, useLocation } from 'react-router-dom'
 
 export function ExplorerEvents () {
+  const history = useHistory()
   const [filterBy, setFilterBy] = useState('messageId')
   const [filterValue, setFilterValue] = useState('')
   const filter = { [filterBy]: filterValue }
@@ -94,9 +96,14 @@ export function ExplorerEvents () {
     ]
   })
 
+  function handleRowClick (row: any) {
+    const messageId = row.find((item: any) => item.key === 'messageId').clipboardValue
+    history.push(`/m/${messageId}`)
+  }
+
   return (
     <Box>
-      <Table title={'Messages'} headers={headers} rows={rows} showNextButton={showNextButton} showPreviousButton={showPreviousButton} nextPage={nextPage} previousPage={previousPage} limit={limit} loading={loading} />
+      <Table title={'Messages'} headers={headers} rows={rows} showNextButton={showNextButton} showPreviousButton={showPreviousButton} nextPage={nextPage} previousPage={previousPage} limit={limit} loading={loading} onRowClick={handleRowClick} />
     </Box>
   )
 }
