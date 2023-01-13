@@ -102,10 +102,21 @@ export function Table (props: Props) {
                 )}
                 {rows.map((row: Row[], i: number) => {
                   return (
-                    <TableRow key={i} onClick={() => onRowClick(row)}>
+                    <TableRow key={i}>
                       {row.map((col: Row, j: number) => {
                         return (
-                          <TableCell key={j} title={col.title || col.clipboardValue || col.value}>
+                          <TableCell key={j} title={col.title || col.clipboardValue || col.value}
+                            style={{
+                              cursor: onRowClick ? 'pointer' : 'default'
+                            }}
+                            onClick={(event) => {
+                              if (!col.valueUrl) {
+                                if (onRowClick) {
+                                  onRowClick(row)
+                                }
+                              }
+                            }}
+                          >
                             <Box display="flex" alignItems="center">
                               {!!col.clipboardValue && (
                                 <Box mr={0.5}>
@@ -125,7 +136,7 @@ export function Table (props: Props) {
                                 ) : (
                                   typeof col.value === 'string'
                                   ? <Typography variant="body2">{col.value}</Typography>
-                                  : col.value
+                                  : (col.value || '-')
                                 )}
                               </Box>
                             </Box>
