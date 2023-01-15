@@ -1,5 +1,7 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import { SiteWrapper } from '../components/SiteWrapper'
+import { Hop } from '@hop-protocol/v2-sdk'
+import { formatEther, formatUnits } from 'ethers/lib/utils'
 // import { ExplorerEvents } from '../components/ExplorerEvents'
 import { useHistory, useLocation } from 'react-router-dom'
 import Box from '@mui/material/Box'
@@ -22,10 +24,21 @@ export function Details () {
   const location = useLocation()
   const parts = location.pathname.split('/')
   const messageId = parts[2]
+  const [txValue, setTxValue] = useState('')
+  const [txValueFormatted, setTxValueFormatted] = useState('')
+  const [gasLimit, setGasLimit] = useState('')
+  const [gasUsed, setGasUsed] = useState('')
+  const [gasPrice, setGasPrice] = useState('')
+  const [gasPriceFormatted, setGasPriceFormatted] = useState('')
+  const [nonce, setNonce] = useState('')
+  const [sourceTxStatus, setSourceTxStatus] = useState('')
+  const [sourceTxFrom, setSourceTxFrom] = useState('')
+  const [sourceTxTo, setSourceTxTo] = useState('')
 
   const filter = { messageId: messageId }
-  const { events, loading } = useEvents('explorer', filter)
+  const { events, loading: isFetching } = useEvents('explorer', filter)
   const event: any = events[0]
+  const loading = !(!isFetching && gasLimit && gasUsed)
 
   let status :any = null
   const isRelayed = !!event?.messageRelayedEvent
@@ -38,6 +51,38 @@ export function Details () {
       <Chip icon={<PendingIcon />} label="Pending" />
     )
   }
+
+  useEffect(() => {
+    async function update() {
+      if (event) {
+        const sdk = new Hop('goerli')
+        const provider = sdk.getRpcProvider(event?.context?.chainId)
+        const txHash = event?.context?.transactionHash
+        const [tx, receipt] = await Promise.all([
+          provider.getTransaction(txHash),
+          provider.getTransactionReceipt(txHash)
+        ])
+        if (tx) {
+          setTxValue(tx?.value?.toString())
+          setTxValueFormatted(`${formatEther(tx?.value?.toString())} ETH`)
+          setGasLimit(tx?.gasLimit?.toString())
+          setNonce(tx?.nonce?.toString())
+          if (receipt) {
+            setGasUsed(receipt?.gasUsed?.toString())
+            setSourceTxStatus(receipt?.status?.toString() || '1')
+            setSourceTxFrom(receipt?.from?.toString())
+            setSourceTxTo(receipt?.to?.toString())
+            if ((tx as any)?.gasPrice) {
+              setGasPrice((tx as any)?.gasPrice?.toString())
+              setGasPriceFormatted(`${formatUnits((tx as any)?.gasPrice?.toString(), 9)} gwei`)
+            }
+          }
+        }
+      }
+    }
+
+    update().catch(console.error)
+  }, [event])
 
   return (
     <SiteWrapper>
@@ -71,7 +116,7 @@ export function Details () {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Timestamp</TableCell>
+              <TableCell>Created</TableCell>
               <TableCell>
                 {loading
                 ? (
@@ -96,19 +141,6 @@ export function Details () {
             </TableRow>
             <TableRow>
               <TableCell>
-Source Block Number
-              </TableCell>
-              <TableCell>
-                {loading
-                ? (
-                  <Skeleton variant="rectangular" width={200} height={20} />
-                ) : (
-                  event?.context?.blockNumber
-                )}
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>
 Source Transaction Hash
               </TableCell>
               <TableCell>
@@ -119,6 +151,124 @@ Source Transaction Hash
                 <Link href={event?.context?.transactionHashExplorerUrl} target="_blank" rel="noreferrer">
                   {event?.context?.transactionHash}
                 </Link>
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+        Source Transaction Status
+              </TableCell>
+              <TableCell>
+                {loading
+                ? (
+                  <Skeleton variant="rectangular" width={350} height={20} />
+                ) : (
+                  sourceTxStatus || <Skeleton variant="rectangular" width={350} height={20} />
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+        Source Transaction From Address
+              </TableCell>
+              <TableCell>
+                {loading
+                ? (
+                  <Skeleton variant="rectangular" width={350} height={20} />
+                ) : (
+                  sourceTxFrom || <Skeleton variant="rectangular" width={350} height={20} />
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+        Source Transaction To Address
+              </TableCell>
+              <TableCell>
+                {loading
+                ? (
+                  <Skeleton variant="rectangular" width={350} height={20} />
+                ) : (
+                  sourceTxTo || <Skeleton variant="rectangular" width={350} height={20} />
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+        Source Transaction Value
+              </TableCell>
+              <TableCell>
+                {loading
+                ? (
+                  <Skeleton variant="rectangular" width={350} height={20} />
+                ) : (
+                  txValue ? (`${txValue} (${txValueFormatted})`) : <Skeleton variant="rectangular" width={350} height={20} />
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+        Source Transaction Gas Limit
+              </TableCell>
+              <TableCell>
+                {loading
+                ? (
+                  <Skeleton variant="rectangular" width={200} height={20} />
+                ) : (
+                  gasLimit || <Skeleton variant="rectangular" width={200} height={20} />
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+        Source Transaction Gas Used
+              </TableCell>
+              <TableCell>
+                {loading
+                ? (
+                  <Skeleton variant="rectangular" width={200} height={20} />
+                ) : (
+                  gasUsed || <Skeleton variant="rectangular" width={200} height={20} />
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+        Source Transaction Gas Price
+              </TableCell>
+              <TableCell>
+                {loading
+                ? (
+                  <Skeleton variant="rectangular" width={200} height={20} />
+                ) : (
+                  gasPrice ? `${gasPrice} (${gasPriceFormatted})` : <Skeleton variant="rectangular" width={200} height={20} />
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+        Source Transaction Nonce
+              </TableCell>
+              <TableCell>
+                {loading
+                ? (
+                  <Skeleton variant="rectangular" width={200} height={20} />
+                ) : (
+                  nonce || <Skeleton variant="rectangular" width={200}
+                  height={20} />
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+Source Transaction Block Number
+              </TableCell>
+              <TableCell>
+                {loading
+                ? (
+                  <Skeleton variant="rectangular" width={200} height={20} />
+                ) : (
+                  event?.context?.blockNumber
                 )}
               </TableCell>
             </TableRow>
@@ -137,6 +287,19 @@ event?.toChainLabel
             </TableRow>
             <TableRow>
               <TableCell>
+        Message Sender
+              </TableCell>
+              <TableCell>
+                {loading
+                ? (
+                  <Skeleton variant="rectangular" width={350} height={20} />
+                ) : (
+                  event?.from
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
 Destination Transaction Hash
               </TableCell>
               <TableCell>
@@ -149,13 +312,13 @@ Destination Transaction Hash
                     <Link href={event?.messageRelayedEvent?.context?.transactionHashExplorerUrl} target="_blank" rel="noreferrer">
                       {event?.messageRelayedEvent?.context?.transactionHash}
                     </Link>
-                  ) : '-')
+                  ) : <Box>- <small><em>(Destination tx hash wil be availabe once message is relayed)</em></small></Box>)
                 }
               </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>
-          Destination address specified
+          Destination call address
               </TableCell>
               <TableCell>
                 {loading
@@ -163,6 +326,24 @@ Destination Transaction Hash
                   <Skeleton variant="rectangular" width={500} height={20} />
                 ) : (
                   event?.to
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+          Destination calldata
+              </TableCell>
+              <TableCell>
+                {loading
+                ? (
+                  <Skeleton variant="rectangular" width={500} height={20} />
+                ) : (
+                  <Box maxWidth={'400px'} style={{
+                    whiteSpace: 'break-spaces',
+                    wordBreak: 'break-all'
+                  }}>
+                    {event?.data}
+                  </Box>
                 )}
               </TableCell>
             </TableRow>
