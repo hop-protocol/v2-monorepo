@@ -104,16 +104,15 @@ export function Table (props: Props) {
                   return (
                     <TableRow key={i}>
                       {row.map((col: Row, j: number) => {
+                        const allowClick = onRowClick && !(col.valueUrl || col.clipboardValue)
                         return (
                           <TableCell key={j} title={col.title || col.clipboardValue || col.value}
                             style={{
-                              cursor: onRowClick ? 'pointer' : 'default'
+                              cursor: allowClick ? 'pointer' : 'default'
                             }}
                             onClick={(event) => {
-                              if (!col.valueUrl) {
-                                if (onRowClick) {
-                                  onRowClick(row)
-                                }
+                              if (allowClick) {
+                                onRowClick(row)
                               }
                             }}
                           >

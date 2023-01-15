@@ -103,8 +103,28 @@ export function ExplorerEvents () {
     history.push(`/m/${messageId}`)
   }
 
+  function handleFilterByChange (event: any) {
+    setFilterBy(event.target.value)
+  }
+
   return (
     <Box>
+      <Box display="flex" justifyContent="flex-end" alignItems="center">
+        <Box mr={2}>
+          <Typography variant="body1">Filter</Typography>
+        </Box>
+        <Box mr={2}>
+          <Select
+            value={filterBy}
+            onChange={handleFilterByChange}>
+              <MenuItem value={'messageId'}>Message ID</MenuItem>
+              <MenuItem value={'transactionHash'}>Transaction Hash</MenuItem>
+          </Select>
+        </Box>
+        <Box>
+          <TextField value={filterValue} onChange={(event: any) => setFilterValue(event.target.value)} />
+        </Box>
+      </Box>
       <Table title={'Messages'} headers={headers} rows={rows} showNextButton={showNextButton} showPreviousButton={showPreviousButton} nextPage={nextPage} previousPage={previousPage} limit={limit} loading={loading} onRowClick={handleRowClick} />
     </Box>
   )
