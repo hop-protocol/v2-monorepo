@@ -14,6 +14,10 @@ export class MessageSentEventsDb extends EventsBaseDb<MessageSent> {
     super(dbPath, EventType.MessageSent)
   }
 
+  getPrimaryKeyProperty (): string {
+    return 'messageId'
+  }
+
   getKeyStringFromEvent (data: Partial<MessageSent>): string | null {
     return data?.messageId ?? null
   }

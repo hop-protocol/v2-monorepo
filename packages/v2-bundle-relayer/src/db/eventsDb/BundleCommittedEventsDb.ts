@@ -17,6 +17,10 @@ export class BundleCommittedEventsDb extends EventsBaseDb<BundleCommitted> {
     this.addPropertyIndex('bundleRoot')
   }
 
+  getPrimaryKeyProperty (): string {
+    return 'bundleId'
+  }
+
   getKeyStringFromEvent (data: Partial<BundleCommitted>): string | null {
     return data?.bundleId ?? null
   }

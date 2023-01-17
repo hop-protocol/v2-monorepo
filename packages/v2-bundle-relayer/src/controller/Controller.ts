@@ -240,17 +240,15 @@ export class Controller {
     const eventsDb = this.events[eventName]
 
     if (filter.messageId) {
-      if (eventName === 'MessageSent' || eventName === 'MessageRelayed' || eventName === 'MessageReverted') {
-        return eventsDb.getEvent(filter.messageId)
-      } else if (eventName === 'MessageBundled') {
+      if (['MessageSent', 'MessageRelayed', 'MessageReverted', 'MessageBundled'].includes(eventName)) {
         return eventsDb.getEventByPropertyIndex('messageId', filter.messageId)
       }
     } else if (filter.bundleId) {
-      if (eventName === 'BundleCommitted' || eventName === 'BundleForwarded' || eventName === 'BundleReceived' || eventName === 'BundleSet' || eventName === 'MessageBundled') {
-        return eventsDb.getEvent(filter.bundleId)
+      if (['BundleCommitted', 'BundleForwarded', 'BundleReceived', 'BundleSet', 'MessageBundled'].includes(eventName)) {
+        return eventsDb.getEventByPropertyIndex('bundleId', filter.bundleId)
       }
     } else if (filter.bundleRoot) {
-      if (eventName === 'BundleCommitted' || eventName === 'BundleForwarded' || eventName === 'BundleReceived' || eventName === 'BundleSet') {
+      if (['BundleCommitted', 'BundleForwarded', 'BundleReceived', 'BundleSet'].includes(eventName)) {
         return eventsDb.getEventByPropertyIndex('bundleRoot', filter.bundleRoot)
       }
     } else if (filter.transactionHash) {

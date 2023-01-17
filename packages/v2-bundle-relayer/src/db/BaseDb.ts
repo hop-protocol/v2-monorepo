@@ -1,5 +1,6 @@
 import fs from 'fs'
 import level from 'level-party'
+// import level from 'level'
 import sub from 'subleveldown'
 import { Mutex } from 'async-mutex'
 
@@ -20,6 +21,8 @@ export type KV = {
   value: any
 }
 
+const cache: Record<string, any> = {}
+
 export class BaseDb {
   db: any
   mutex: Mutex = new Mutex()
@@ -35,12 +38,20 @@ export class BaseDb {
     }
     this.dbPath = dbPath
     this.dbName = dbName
-    const eventsDb = level(dbPath)
-    const subDb = sub(eventsDb, dbName, { valueEncoding: 'json' })
+    // console.log('dbPath:', dbPath)
+    const eventsDb = cache[dbPath] || level(dbPath)
+    if (!cache[dbPath]) {
+      cache[dbPath] = eventsDb
+    }
+    // console.log('dbName:', dbName)
+    const subDb = cache[dbName] || sub(eventsDb, dbName, { valueEncoding: 'json' })
+    if (!cache[dbName]) {
+      cache[dbName] = subDb
+    }
     this.db = subDb
     this.db
       .on('open', () => {
-        console.debug('open')
+        // console.debug('open')
       })
       .on('closed', () => {
         console.debug('closed')

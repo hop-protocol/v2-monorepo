@@ -120,12 +120,22 @@ export class EventsBaseDb<T> extends BaseDb {
     return null
   }
 
+  getPrimaryKeyProperty (): string {
+    throw new Error('Not implemented')
+  }
+
   getKeyStringFromEvent (data: Partial<T>): string | null {
     throw new Error('Not implemented')
   }
 
   async getEventByPropertyIndex (propertyName: string, value: string): Promise<Partial<T> | null> {
-    const result = await this.propertyIndexDb[propertyName].getPropertyIndex(value)
+    if (propertyName === this.getPrimaryKeyProperty()) {
+      return this.getEvent(value)
+    }
+    if (!this.propertyIndexDb[propertyName]) {
+      throw new Error(`propertyIndex "${propertyName}" not found`)
+    }
+    const result = await this.propertyIndexDb[propertyName]?.getPropertyIndex(value)
     if (result?.id) {
       return this.getEvent(result.id)
     }

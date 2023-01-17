@@ -15,6 +15,10 @@ export class BundleForwardedEventsDb extends EventsBaseDb<BundleForwarded> {
     this.addPropertyIndex('bundleRoot')
   }
 
+  getPrimaryKeyProperty (): string {
+    return 'bundleId'
+  }
+
   getKeyStringFromEvent (data: Partial<BundleForwarded>): string | null {
     return data?.bundleId ?? null
   }

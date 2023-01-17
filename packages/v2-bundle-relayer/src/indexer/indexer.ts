@@ -112,6 +112,11 @@ export class Indexer {
       'MessageSent'
     ]
 
+    /*
+    const l1Events: string[] = []
+    const baseEvents = ['MessageBundled']
+    */
+
     const _events: any[] = []
 
     for (const _chainId in this.chainIds) {
@@ -126,6 +131,10 @@ export class Indexer {
       } else {
         _db = this.eventsToSync[baseEvents[0]]
         eventNames = baseEvents
+      }
+
+      if (!_db) {
+        continue
       }
 
       const syncState = await _db.getSyncState(chainId)

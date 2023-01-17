@@ -19,7 +19,9 @@ describe('BundleCommittedEventsDb', () => {
         transactionIndex: 0,
         logIndex: 0,
         blockNumber: 1000,
-        blockTimestamp: 1000000000
+        blockTimestamp: 1000000000,
+        from: '0x123',
+        to: '0x123'
       }
     }
 

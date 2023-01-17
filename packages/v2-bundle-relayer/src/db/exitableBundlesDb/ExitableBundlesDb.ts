@@ -8,8 +8,8 @@ export interface ExitableBundles {
 export class ExitableBundlesDb extends BaseDb {
   otherDbs: Record<string, any>
 
-  constructor (dbPath: string, dbName: string) {
-    super(dbPath, `exitableBundles:${dbName}`)
+  constructor (dbPath: string) {
+    super(dbPath, 'exitableBundles')
   }
 
   getKeyString (bundleId: string) {

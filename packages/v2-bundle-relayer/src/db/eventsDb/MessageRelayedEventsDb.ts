@@ -13,6 +13,10 @@ export class MessageRelayedEventsDb extends EventsBaseDb<MessageRelayed> {
     super(dbPath, EventType.MessageRelayed)
   }
 
+  getPrimaryKeyProperty (): string {
+    return 'messageId'
+  }
+
   getKeyStringFromEvent (data: Partial<MessageRelayed>): string | null {
     return data?.messageId ?? null
   }
