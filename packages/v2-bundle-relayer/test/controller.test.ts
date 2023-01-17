@@ -1,5 +1,7 @@
 import { Controller } from '../src/controller'
 
+// note: this requires worker to have indexed events
+
 describe('Controller', () => {
   it('should get paginated events', async () => {
     const controller = new Controller()

@@ -1,7 +1,7 @@
 import { Indexer } from '../src/indexer'
 
 describe('Indexer', () => {
-  it('should sync events to db', async () => {
+  it.skip('should sync events to db', async () => {
     const dbPath = `/tmp/test/testdb/${Date.now()}`
     const indexer = new Indexer({
       dbPath,

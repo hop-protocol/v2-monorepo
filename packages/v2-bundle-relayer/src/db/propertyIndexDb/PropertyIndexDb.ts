@@ -13,4 +13,11 @@ export class PropertyIndexDb extends BaseDb {
   async getPropertyIndex (key: string): Promise<any> {
     return this._get(key)
   }
+
+  async getPropertyIndexes (key: string): Promise<any> {
+    return this._getKeyValues({
+      gte: key,
+      lte: '~' // tilde is intentional
+    })
+  }
 }

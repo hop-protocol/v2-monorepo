@@ -36,4 +36,56 @@ describe('BundleCommittedEventsDb', () => {
 
     expect(await db.getEvent(data.bundleId)).toStrictEqual(updatedData)
   }, 60 * 1000)
+
+  it('should return multiple events for same property index', async () => {
+    const dbPath = '/tmp/test/testdb'
+    const db = new BundleCommittedEventsDb(dbPath)
+
+    const events = [
+      {
+        bundleId: '123',
+        bundleRoot: '0x123',
+        bundleFees: BigNumber.from(123),
+        toChainId: 1,
+        commitTime: 1000000000,
+        context: {
+          chainSlug: 'abc',
+          chainId: 1,
+          transactionHash: '0x456',
+          transactionIndex: 0,
+          logIndex: 0,
+          blockNumber: 1000,
+          blockTimestamp: 1000000000,
+          from: '0x123',
+          to: '0x123'
+        }
+      },
+      {
+        bundleId: '789',
+        bundleRoot: '0x123',
+        bundleFees: BigNumber.from(123),
+        toChainId: 1,
+        commitTime: 1000000000,
+        context: {
+          chainSlug: 'abc',
+          chainId: 1,
+          transactionHash: '0x456',
+          transactionIndex: 0,
+          logIndex: 0,
+          blockNumber: 1000,
+          blockTimestamp: 1000000000,
+          from: '0x123',
+          to: '0x123'
+        }
+      }
+    ]
+
+    for (const event of events) {
+      await db.putEvent(event.bundleId, event)
+      expect(await db.getEvent(event.bundleId)).toStrictEqual(event)
+    }
+
+    const items = await db.getEventsByPropertyIndex('context.transactionHash', '0x456')
+    expect(items?.length).toEqual(2)
+  }, 60 * 1000)
 })

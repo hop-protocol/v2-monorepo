@@ -83,13 +83,19 @@ export class EventsBaseDb<T> extends BaseDb {
     return true
   }
 
-  async updatePropertyIndexes (key: string, data: Partial<T>): Promise<boolean> {
+  async updatePropertyIndexes (primaryKey: string, data: Partial<T>): Promise<boolean> {
     for (const propertyName in this.propertyIndexDb) {
       const propertyIndexDb = this.propertyIndexDb[propertyName]
-      const value = get(data, propertyName)
-      console.log('updatePropertyIndex', propertyName, value)
-      if (value) {
-        await propertyIndexDb.putPropertyIndex(value, key)
+      let keyToIndexBy = get(data, propertyName)
+      console.log('updatePropertyIndex', propertyName, keyToIndexBy)
+      if (keyToIndexBy) {
+        const existingItem = await propertyIndexDb.getPropertyIndex(keyToIndexBy)
+        if (existingItem && existingItem.id !== keyToIndexBy) {
+          keyToIndexBy = `${keyToIndexBy}-${primaryKey}`
+          await propertyIndexDb.putPropertyIndex(keyToIndexBy, primaryKey)
+        } else {
+          await propertyIndexDb.putPropertyIndex(keyToIndexBy, primaryKey)
+        }
       }
     }
     return true
@@ -126,6 +132,21 @@ export class EventsBaseDb<T> extends BaseDb {
 
   getKeyStringFromEvent (data: Partial<T>): string | null {
     throw new Error('Not implemented')
+  }
+
+  async getEventsByPropertyIndex (propertyName: string, value: string): Promise<Array<Partial<T>> | null> {
+    if (propertyName === this.getPrimaryKeyProperty()) {
+      return this.getEventsFromIds([value])
+    }
+    if (!this.propertyIndexDb[propertyName]) {
+      throw new Error(`propertyIndex "${propertyName}" not found`)
+    }
+    const results = await this.propertyIndexDb[propertyName]?.getPropertyIndexes(value)
+    if (results) {
+      return this.getEventsFromIds(results.map((x: any) => x.value.id))
+    }
+
+    return null
   }
 
   async getEventByPropertyIndex (propertyName: string, value: string): Promise<Partial<T> | null> {
