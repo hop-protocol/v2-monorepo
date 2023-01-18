@@ -87,5 +87,7 @@ describe('BundleCommittedEventsDb', () => {
 
     const items = await db.getEventsByPropertyIndex('context.transactionHash', '0x456')
     expect(items?.length).toEqual(2)
+    expect(items?.[0].bundleId).toEqual('123')
+    expect(items?.[1].bundleId).toEqual('789')
   }, 60 * 1000)
 })

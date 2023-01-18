@@ -199,6 +199,8 @@ export class Hop {
     goerli: goerliAddresses
   }
 
+  providers: Record<string, any> = {}
+
   l1ChainId : number
 
   constructor (network: string = 'goerli', options?: Options) {
@@ -227,7 +229,21 @@ export class Hop {
   }
 
   getRpcProvider (chainId: number) {
+    if (this.providers[chainId]) {
+      return this.providers[chainId]
+    }
+
     return getProvider(this.network, chainId)
+  }
+
+  setRpcProviders (providers: Record<string, any>) {
+    for (const chainId in providers) {
+      this.providers[chainId] = providers[chainId]
+    }
+  }
+
+  setRpcProvider (chainId: number, provider: any) {
+    this.providers[chainId] = provider
   }
 
   getSpokeMessageBridgeContractAddress (chainId: number): string {

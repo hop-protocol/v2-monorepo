@@ -1,8 +1,8 @@
 import { EventContext } from './types'
 import { EventFetcher, InputFilter } from '../eventFetcher'
 import { chainSlugMap } from '../utils/chainSlugMap'
-import { providers } from 'ethers'
 import { promiseQueue } from '../promiseQueue'
+import { providers } from 'ethers'
 
 export class Event {
   provider: providers.Provider

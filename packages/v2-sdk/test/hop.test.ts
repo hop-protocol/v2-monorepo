@@ -1,6 +1,6 @@
 import pkg from '../package.json'
 import { Hop } from '../src/index'
-import { Wallet } from 'ethers'
+import { Wallet, providers } from 'ethers'
 require('dotenv').config()
 
 const privateKey = process.env.PRIVATE_KEY
@@ -487,4 +487,13 @@ describe('sdk setup', () => {
       expect(tx.hash).toBeTruthy()
     }
   }, 5 * 60 * 1000)
+  it('setRpcProviders', async () => {
+    const hop = new Hop('goerli')
+    expect(hop.getRpcProvider(5).connection.url).toBe('https://goerli.infura.io/v3/84842078b09946638c03157f83405213')
+    const rpcProviders = {
+      5: new providers.StaticJsonRpcProvider('https://rpc.ankr.com/eth_goerli')
+    }
+    hop.setRpcProviders(rpcProviders)
+    expect(hop.getRpcProvider(5).connection.url).toBe('https://rpc.ankr.com/eth_goerli')
+  })
 })
