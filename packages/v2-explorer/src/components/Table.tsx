@@ -117,16 +117,6 @@ export function Table (props: Props) {
                             }}
                           >
                             <Box display="flex" alignItems="center">
-                              {!!col.clipboardValue && (
-                                <Box mr={0.5}>
-                                  <CopyToClipboard text={col.clipboardValue}
-                                    onCopy={event => handleCopy(col.clipboardValue!)}>
-                                    <Typography variant="body2" style={{ cursor: 'pointer' }}>
-                                      {copied === col.clipboardValue ? '✅' : '📋'}
-                                    </Typography>
-                                  </CopyToClipboard>
-                                </Box>
-                              )}
                               <Box>
                                 {col.valueUrl ? (
                                   <Link href={col.valueUrl} target="_blank" rel="noreferrer">
@@ -138,6 +128,16 @@ export function Table (props: Props) {
                                   : (col.value || '-')
                                 )}
                               </Box>
+                              {!!col.clipboardValue && (
+                                <Box ml={0.5}>
+                                  <CopyToClipboard text={col.clipboardValue}
+                                    onCopy={event => handleCopy(col.clipboardValue!)}>
+                                    <Typography variant="body2" style={{ cursor: 'pointer' }}>
+                                      {copied === col.clipboardValue ? '✅' : '📋'}
+                                    </Typography>
+                                  </CopyToClipboard>
+                                </Box>
+                              )}
                             </Box>
                           </TableCell>
                         )

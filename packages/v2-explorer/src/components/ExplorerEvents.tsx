@@ -108,7 +108,7 @@ export function ExplorerEvents () {
   }
 
   return (
-    <Box>
+    <Box width="100%">
       <Box display="flex" justifyContent="flex-end" alignItems="center">
         <Box mr={2}>
           <Typography variant="body1">Filter</Typography>

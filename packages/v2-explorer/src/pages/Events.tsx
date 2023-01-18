@@ -30,7 +30,7 @@ export function Events () {
     <SiteWrapper>
       <Box width="100%" mb={6} display="flex" flexDirection="column">
         <Box mb={8}>
-          <Box maxWidth="2000px" m="0 auto">
+          <Box width="100%" maxWidth="2000px" m="0 auto">
             {tables.map((table, i) => {
               return (
                 <Box key={i} mb={8}>

@@ -19,8 +19,26 @@ import TableRow from '@mui/material/TableRow'
 import TableFooter from '@mui/material/TableFooter'
 import Skeleton from '@mui/material/Skeleton'
 import Link from '@mui/material/Link'
+import { makeStyles } from '@mui/styles'
+
+const useStyles = makeStyles((theme: any) => ({
+  tableRow: {
+    wordBreak: 'break-all',
+    '& td:first-child': {
+      [theme.breakpoints.down('md')]: {
+        borderBottom: 'none',
+        paddingBottom: 0
+      }
+    },
+    [theme.breakpoints.down('md')]: {
+      display: 'flex !important',
+      flexDirection: 'column'
+    }
+  }
+}))
 
 export function Details () {
+  const styles = useStyles()
   const location = useLocation()
   const parts = location.pathname.split('/')
   const messageId = parts[2]
@@ -93,8 +111,8 @@ export function Details () {
       <TableContainer>
         <Table width="100%">
           <TableBody>
-            <TableRow>
-              <TableCell>Message ID</TableCell>
+            <TableRow className={styles.tableRow}>
+              <TableCell>Message ID:</TableCell>
               <TableCell>
                 {loading
                 ? (
@@ -104,8 +122,8 @@ export function Details () {
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
-              <TableCell>Status</TableCell>
+            <TableRow className={styles.tableRow}>
+              <TableCell>Status:</TableCell>
               <TableCell>
                 {loading
                 ? (
@@ -115,8 +133,8 @@ export function Details () {
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
-              <TableCell>Created</TableCell>
+            <TableRow className={styles.tableRow}>
+              <TableCell>Created:</TableCell>
               <TableCell>
                 {loading
                 ? (
@@ -126,9 +144,9 @@ export function Details () {
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-        Source Chain
+        Source Chain:
               </TableCell>
               <TableCell>
                 {loading
@@ -139,9 +157,9 @@ export function Details () {
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-Source Transaction Hash
+Source Transaction Hash:
               </TableCell>
               <TableCell>
                 {loading
@@ -154,9 +172,9 @@ Source Transaction Hash
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-        Source Transaction Status
+        Source Transaction Status:
               </TableCell>
               <TableCell>
                 {loading
@@ -167,9 +185,9 @@ Source Transaction Hash
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-        Source Transaction From Address
+        Source Transaction From Address:
               </TableCell>
               <TableCell>
                 {loading
@@ -180,9 +198,9 @@ Source Transaction Hash
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-        Source Transaction To Address
+        Source Transaction To Address:
               </TableCell>
               <TableCell>
                 {loading
@@ -193,9 +211,9 @@ Source Transaction Hash
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-        Source Transaction Value
+        Source Transaction Value:
               </TableCell>
               <TableCell>
                 {loading
@@ -206,9 +224,9 @@ Source Transaction Hash
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-        Source Transaction Gas Limit
+        Source Transaction Gas Limit:
               </TableCell>
               <TableCell>
                 {loading
@@ -219,9 +237,9 @@ Source Transaction Hash
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-        Source Transaction Gas Used
+        Source Transaction Gas Used:
               </TableCell>
               <TableCell>
                 {loading
@@ -232,9 +250,9 @@ Source Transaction Hash
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-        Source Transaction Gas Price
+        Source Transaction Gas Price:
               </TableCell>
               <TableCell>
                 {loading
@@ -245,9 +263,9 @@ Source Transaction Hash
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-        Source Transaction Nonce
+        Source Transaction Nonce:
               </TableCell>
               <TableCell>
                 {loading
@@ -259,9 +277,9 @@ Source Transaction Hash
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-Source Transaction Block Number
+Source Transaction Block Number:
               </TableCell>
               <TableCell>
                 {loading
@@ -272,9 +290,9 @@ Source Transaction Block Number
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-Destination Chain
+Destination Chain:
               </TableCell>
               <TableCell>
                 {loading
@@ -285,9 +303,9 @@ event?.toChainLabel
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-        Message Sender
+        Message Sender:
               </TableCell>
               <TableCell>
                 {loading
@@ -298,9 +316,9 @@ event?.toChainLabel
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-Destination Transaction Hash
+Destination Transaction Hash:
               </TableCell>
               <TableCell>
                 {loading
@@ -316,9 +334,9 @@ Destination Transaction Hash
                 }
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-          Destination call address
+          Destination call address:
               </TableCell>
               <TableCell>
                 {loading
@@ -329,9 +347,9 @@ Destination Transaction Hash
                 )}
               </TableCell>
             </TableRow>
-            <TableRow>
+            <TableRow className={styles.tableRow}>
               <TableCell>
-          Destination calldata
+          Destination calldata:
               </TableCell>
               <TableCell>
                 {loading
