@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Table } from './Table'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
@@ -11,13 +11,19 @@ import Chip from '@mui/material/Chip'
 import CheckIcon from '@mui/icons-material/Check'
 import PendingIcon from '@mui/icons-material/Pending'
 import { useHistory, useLocation } from 'react-router-dom'
+import { useQueryParams } from '../hooks/useQueryParams'
 
 export function ExplorerEvents () {
+  const { queryParams, updateQueryParams } = useQueryParams()
   const history = useHistory()
   const [filterBy, setFilterBy] = useState('messageId')
   const [filterValue, setFilterValue] = useState('')
   const filter = { [filterBy]: filterValue }
-  const { events, nextPage, previousPage, showNextButton, showPreviousButton, limit, loading } = useEvents('explorer', filter)
+  function onPagination (params: any) {
+    const { firstKey, lastKey } = params
+    updateQueryParams({ firstKey, lastKey })
+  }
+  const { events, nextPage, previousPage, showNextButton, showPreviousButton, limit, loading } = useEvents('explorer', filter, onPagination, queryParams)
 
   const headers = [
     {

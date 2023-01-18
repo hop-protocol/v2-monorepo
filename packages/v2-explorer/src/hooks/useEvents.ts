@@ -2,10 +2,10 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import { useInterval } from 'react-use'
 import { apiUrl } from '../config'
 
-export function useEvents (eventName: string, filter: any = {}) {
+export function useEvents (eventName: string, filter: any = {}, onPagination?: any, queryParams?: any) {
   const [events, setEvents] = useState([])
-  const [lastKey, setLastKey] = useState('')
-  const [firstKey, setFirstKey] = useState('')
+  const [lastKey, setLastKey] = useState(queryParams?.lastKey || '')
+  const [firstKey, setFirstKey] = useState(queryParams?.firstKey || '')
   const [lastUrl, setLastUrl] = useState('')
   const [loading, setLoading] = useState(true)
   const limit = 10
@@ -51,7 +51,7 @@ export function useEvents (eventName: string, filter: any = {}) {
   const updateEventsCb = useCallback(updateEvents, [filterString])
 
   useEffect(() => {
-    updateEventsCb().catch(console.error)
+    updateEventsCb(lastKey, firstKey).catch(console.error)
   }, [updateEventsCb])
 
   useInterval(updateEvents, 10 * 1000)
@@ -59,11 +59,17 @@ export function useEvents (eventName: string, filter: any = {}) {
   async function previousPage (event: any) {
     event.preventDefault()
     setLastUrl(await updateEventsCb('', firstKey))
+    if (onPagination) {
+      onPagination({ lastKey: '', firstKey })
+    }
   }
 
   async function nextPage (event: any) {
     event.preventDefault()
     setLastUrl(await updateEventsCb(lastKey, ''))
+    if (onPagination) {
+      onPagination({ lastKey, firstKey: '' })
+    }
   }
 
   const showNextButton = events.length === limit && !!lastKey
