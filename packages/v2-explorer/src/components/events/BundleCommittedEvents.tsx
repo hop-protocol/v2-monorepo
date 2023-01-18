@@ -102,6 +102,7 @@ export function BundleCommittedEvents () {
 
   return (
     <Box>
+      <Table title={`${eventName} Events`} headers={headers} rows={rows} showNextButton={showNextButton} showPreviousButton={showPreviousButton} nextPage={nextPage} previousPage={previousPage} limit={limit} loading={loading} filters={
       <Box display="flex" justifyContent="flex-end" alignItems="center">
         <Box mr={2}>
           <Typography variant="body1">Filter</Typography>
@@ -116,10 +117,10 @@ export function BundleCommittedEvents () {
           </Select>
         </Box>
         <Box>
-          <TextField value={filterValue} onChange={(event: any) => setFilterValue(event.target.value)} />
+          <TextField placeholder="0x" value={filterValue} onChange={(event: any) => setFilterValue(event.target.value)} />
         </Box>
       </Box>
-      <Table title={`${eventName} Events`} headers={headers} rows={rows} showNextButton={showNextButton} showPreviousButton={showPreviousButton} nextPage={nextPage} previousPage={previousPage} limit={limit} loading={loading} />
+        } />
     </Box>
   )
 }

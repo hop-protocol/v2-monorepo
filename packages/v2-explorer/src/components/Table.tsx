@@ -15,6 +15,27 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight'
 import Skeleton from '@mui/material/Skeleton'
 import Link from '@mui/material/Link'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { makeStyles } from '@mui/styles'
+
+const useStyles = makeStyles((theme: any) => ({
+  titleContainer: {
+    '& > div': {
+      [theme.breakpoints.down('md')]: {
+        display: 'flex',
+        marginTop: '1rem',
+        flexDirection: 'column'
+      }
+    },
+    '& > div > div': {
+      [theme.breakpoints.down('md')]: {
+        marginTop: '0.5rem'
+      }
+    },
+    [theme.breakpoints.down('md')]: {
+      flexDirection: 'column'
+    }
+  }
+}))
 
 export type Header = {
   key: string
@@ -40,10 +61,12 @@ type Props = {
   limit: number
   loading?: boolean
   onRowClick?: any
+  filters?: any
 }
 
 export function Table (props: Props) {
   const { title, headers, rows, showNextButton, showPreviousButton, nextPage, previousPage, limit, loading = false, onRowClick } = props
+  const styles = useStyles()
   const [copied, setCopied] = useState('')
   const page = 0
 
@@ -62,8 +85,9 @@ export function Table (props: Props) {
 
   return (
     <Box>
-      <Box mb={2}>
+      <Box mb={2} display="flex" alignItems="center" justifyContent="space-between" className={styles.titleContainer}>
         <Typography variant="h5">{title}</Typography>
+        {props.filters ? props.filters : null}
       </Box>
       <Box width="100%" display="flex" justifyContent="space-between">
         <Box width="100%" mr={4}>
@@ -146,32 +170,32 @@ export function Table (props: Props) {
                   )
                 })}
               </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TableCell colSpan={headers.length}>
-                    <Box width="100%" display="flex" justifyContent="flex-end">
-                        <IconButton
-                          onClick={previousPage}
-                          disabled={!showPreviousButton}
-                          aria-label="previous page"
-                        >
-                        <KeyboardArrowLeft />
-                      </IconButton>
-                        <IconButton
-                          onClick={nextPage}
-                          disabled={!showNextButton}
-                          aria-label="next page"
-                        >
-                        <KeyboardArrowRight />
-                      </IconButton>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              </TableFooter>
             </_Table>
           </TableContainer>
         </Box>
       </Box>
+      <TableFooter style={{ display: 'flex', width: '100%' }}>
+        <TableRow style={{ display: 'flex', width: '100%' }}>
+          <TableCell colSpan={headers.length} style={{ display: 'flex', width: '100%' }}>
+            <Box width="100%" display="flex" justifyContent="flex-end">
+                <IconButton
+                  onClick={previousPage}
+                  disabled={!showPreviousButton}
+                  aria-label="previous page"
+                >
+                <KeyboardArrowLeft />
+              </IconButton>
+                <IconButton
+                  onClick={nextPage}
+                  disabled={!showNextButton}
+                  aria-label="next page"
+                >
+                <KeyboardArrowRight />
+              </IconButton>
+            </Box>
+          </TableCell>
+        </TableRow>
+      </TableFooter>
     </Box>
   )
 }
