@@ -18,6 +18,7 @@ import { GetEvents } from './components/GetEvents'
 import { GetMessageIdFromTxHash } from './components/GetMessageIdFromTxHash'
 import { GetMessageCalldata } from './components/GetMessageCalldata'
 import { GetContractAddresses } from './components/GetContractAddresses'
+import { GetMessageSentEvent } from './components/GetMessageSentEvent'
 import { Hop } from '@hop-protocol/v2-sdk'
 import Card from '@mui/material/Card'
 import styled from 'styled-components'
@@ -248,6 +249,7 @@ function App () {
     <ExitBundle signer={wallet} sdk={sdk} onboard={onboard} />,
     <GetMessageIdFromTxHash sdk={sdk} />,
     <GetMessageCalldata sdk={sdk} />,
+    <GetMessageSentEvent sdk={sdk} />,
     <GetEvents sdk={sdk} />,
     <GetContractAddresses sdk={sdk} />
   ]

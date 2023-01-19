@@ -822,6 +822,12 @@ export class Hop {
 
   async getMessageSentEventFromMessageId (input: GetMessageSentEventFromMessageIdInput) {
     const { fromChainId, messageId } = input
+    if (!fromChainId) {
+      throw new Error('fromChainId is required')
+    }
+    if (!messageId) {
+      throw new Error('messageId is required')
+    }
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
