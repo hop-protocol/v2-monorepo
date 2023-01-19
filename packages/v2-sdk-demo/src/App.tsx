@@ -272,9 +272,14 @@ function App () {
               </Typography>
             </Box>
           </Box>
-          <Box>
+          <Box display="flex">
+            <Box>
+              <Button variant="outlined" href="https://v2-explorer.hop.exchange/" target="_blank" rel="noopener noreferrer">
+                View Explorer
+              </Button>
+            </Box>
             {!address && (
-              <Box>
+              <Box ml={4}>
                 <Button onClick={connect} variant="contained">Connect</Button>
               </Box>
             )}
