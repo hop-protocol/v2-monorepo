@@ -1,6 +1,6 @@
 import pkg from '../package.json'
 import { Hop } from '../src/index'
-import { Wallet, providers } from 'ethers'
+import { BigNumber, Wallet, providers } from 'ethers'
 require('dotenv').config()
 
 const privateKey = process.env.PRIVATE_KEY
@@ -50,6 +50,9 @@ describe('sdk setup', () => {
     expect(txData.data.startsWith('0x7056f41f')).toBe(true)
     // expect(txData.to).toBe('0x4b844c25EF430e71D42EEA89d87Ffe929f8db927')
     expect(txData.to).toBe('0xeA35E10f763ef2FD5634dF9Ce9ad00434813bddB')
+    const fee = await hop.getMessageFee({ fromChainId, toChainId })
+    expect(BigNumber.from(txData.value).gt(0)).toBe(true)
+    expect(txData.value).toBe(fee.toString())
     const shouldSend = false
     const times = 8
     if (shouldSend) {

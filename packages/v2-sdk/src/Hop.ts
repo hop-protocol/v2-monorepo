@@ -665,10 +665,12 @@ export class Hop {
     }
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
     const txData = await spokeMessageBridge.populateTransaction.sendMessage(toChainId, toAddress, toCalldata)
+    const value = await this.getMessageFee({ fromChainId, toChainId })
 
     return {
       ...txData,
-      chainId: fromChainId
+      chainId: fromChainId,
+      value: value.toString()
     }
   }
 
