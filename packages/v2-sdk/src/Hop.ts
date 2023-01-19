@@ -1,5 +1,5 @@
 import pkg from '../package.json'
-import { BigNumber } from 'ethers'
+import { BigNumber, providers } from 'ethers'
 import { BundleCommitted, BundleCommittedEventFetcher } from './events/BundleCommitted'
 import { BundleForwarded, BundleForwardedEventFetcher } from './events/BundleForwarded'
 import { BundleReceived, BundleReceivedEventFetcher } from './events/BundleReceived'
@@ -248,11 +248,14 @@ export class Hop {
 
   setRpcProviders (providers: Record<string, any>) {
     for (const chainId in providers) {
-      this.providers[chainId] = providers[chainId]
+      this.setRpcProvider(Number(chainId), providers[chainId])
     }
   }
 
   setRpcProvider (chainId: number, provider: any) {
+    if (typeof provider === 'string') {
+      provider = new providers.StaticJsonRpcProvider(provider)
+    }
     this.providers[chainId] = provider
   }
 

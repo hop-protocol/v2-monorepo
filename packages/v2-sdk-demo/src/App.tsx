@@ -19,6 +19,7 @@ import { GetMessageIdFromTxHash } from './components/GetMessageIdFromTxHash'
 import { GetMessageCalldata } from './components/GetMessageCalldata'
 import { GetContractAddresses } from './components/GetContractAddresses'
 import { GetMessageSentEvent } from './components/GetMessageSentEvent'
+import { SetRpcProviders } from './components/SetRpcProviders'
 import { Hop } from '@hop-protocol/v2-sdk'
 import Card from '@mui/material/Card'
 import styled from 'styled-components'
@@ -82,11 +83,13 @@ function App () {
   const [balance, setBalance] = useState('-')
   const [onboardWallet, setOnboardWallet] = useState<any>()
   const [wallet, setWallet] = useState<any>()
-  const sdk = useMemo(() => {
-    const _sdk = new Hop('goerli')
-    ;(window as any).sdk = _sdk
-    return _sdk
-  }, [])
+  const [sdk, setSdk] = useState(() => {
+    return new Hop('goerli')
+  })
+
+  useEffect(() => {
+    ;(window as any).sdk = sdk
+  }, [sdk])
 
   async function onboardConnect() {
     const wallets = await onboard.connectWallet()
@@ -251,7 +254,8 @@ function App () {
     <GetMessageCalldata sdk={sdk} />,
     <GetMessageSentEvent sdk={sdk} />,
     <GetEvents sdk={sdk} />,
-    <GetContractAddresses sdk={sdk} />
+    <GetContractAddresses sdk={sdk} />,
+    <SetRpcProviders sdk={sdk} />
   ]
 
   return (
