@@ -1037,6 +1037,14 @@ export class Hop {
   async getMessageCalldata (input: GetMessageCalldataInput): Promise<string> {
     const { fromChainId, messageId } = input
 
+    if (!fromChainId) {
+      throw new Error('fromChainId is required')
+    }
+
+    if (!messageId) {
+      throw new Error('messageId is required')
+    }
+
     const event = await this.getMessageSentEventFromMessageId({ fromChainId, messageId })
     if (!event) {
       throw new Error(`Event not found for messageId: ${messageId}`)

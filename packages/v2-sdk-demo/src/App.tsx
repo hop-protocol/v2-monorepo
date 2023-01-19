@@ -16,6 +16,7 @@ import { ExitBundle } from './components/ExitBundle'
 import { GetBundleProof } from './components/GetBundleProof'
 import { GetEvents } from './components/GetEvents'
 import { GetMessageIdFromTxHash } from './components/GetMessageIdFromTxHash'
+import { GetMessageCalldata } from './components/GetMessageCalldata'
 import { GetContractAddresses } from './components/GetContractAddresses'
 import { Hop } from '@hop-protocol/v2-sdk'
 import Card from '@mui/material/Card'
@@ -246,6 +247,7 @@ function App () {
     <RelayMessage signer={wallet} sdk={sdk} onboard={onboard} />,
     <ExitBundle signer={wallet} sdk={sdk} onboard={onboard} />,
     <GetMessageIdFromTxHash sdk={sdk} />,
+    <GetMessageCalldata sdk={sdk} />,
     <GetEvents sdk={sdk} />,
     <GetContractAddresses sdk={sdk} />
   ]
