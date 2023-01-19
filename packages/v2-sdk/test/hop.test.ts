@@ -1,6 +1,6 @@
 import pkg from '../package.json'
-import { Hop } from '../src/index'
 import { BigNumber, Wallet, providers } from 'ethers'
+import { Hop } from '../src/index'
 require('dotenv').config()
 
 const privateKey = process.env.PRIVATE_KEY

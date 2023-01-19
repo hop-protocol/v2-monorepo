@@ -834,6 +834,14 @@ export class Hop {
 
   async getMessageIdFromTransactionHash (input: GetMessageIdFromTransactionHashInput) {
     const { fromChainId, transactionHash } = input
+    if (!fromChainId) {
+      throw new Error('fromChainId is required')
+    }
+
+    if (!transactionHash) {
+      throw new Error('transactionHash is required')
+    }
+
     const event = await this.getMessageSentEventFromTransactionHash({ fromChainId, transactionHash })
     if (!event) {
       throw new Error('event not found for transaction hash')
