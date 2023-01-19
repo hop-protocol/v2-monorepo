@@ -17,21 +17,18 @@ type Props = {
   sdk: Hop
 }
 
-export function SetRpcProviders (props: Props) {
+export function SetContractAddresses (props: Props) {
   const { sdk } = props
   const styles = useStyles()
   const [copied, setCopied] = useState(false)
   const [configString, setConfigString] = useState(() => {
     try {
-      const cached = localStorage.getItem('setRpcProviders:configStringi')
+      const cached = localStorage.getItem('setContractAddresses:configStringi')
       if (cached) {
         return cached
       }
     } catch (err: any) {}
-    return JSON.stringify({
-      5: 'https://goerli.infura.io/v3/84842078b09946638c03157f83405213',
-      420: 'https://goerli.optimism.io'
-    }, null, 2)
+    return JSON.stringify(sdk.getContractAddresses(), null, 2)
   })
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState('')
@@ -39,7 +36,7 @@ export function SetRpcProviders (props: Props) {
 
   useEffect(() => {
     try {
-      localStorage.setItem('setRpcProviders:configString', configString)
+      localStorage.setItem('setContractAddresses:configString', configString)
     } catch (err: any) {
       console.error(err)
     }
@@ -53,7 +50,7 @@ export function SetRpcProviders (props: Props) {
       setResult('')
 
       const config = JSON.parse(configString)
-      sdk.setRpcProviders(config)
+      sdk.setContractAddresses(config)
       setResult('set')
     } catch (err: any) {
       console.error(err)
@@ -66,10 +63,10 @@ export function SetRpcProviders (props: Props) {
 import { Hop } from '@hop-protocol/v2-sdk'
 
 async function main() {
-  const rpcProviders = ${configString}
+  const contractAddresses = ${configString}
 
   const hop = new Hop('goerli')
-  hop.setRpcProviders(rpcProviders)
+  hop.setContractAddresses(contractAddresses)
 }
 
 main().catch(console.error)
@@ -85,17 +82,17 @@ main().catch(console.error)
   return (
     <Box>
       <Box mb={1}>
-        <Typography variant="h5">Set RPC Providers</Typography>
+        <Typography variant="h5">Set Contract Addresses</Typography>
       </Box>
       <Box mb={4}>
-        <Typography variant="subtitle1">Set RPC Providers</Typography>
+        <Typography variant="subtitle1">Set contract addresses config</Typography>
       </Box>
       <Box width="100%" display="flex" justifyContent="space-between" className={styles.container}>
         <Box mr={4} className={styles.formContainer}>
           <form onSubmit={handleSubmit}>
             <Box mb={2}>
               <Box mb={1}>
-                <label>RPC Providers Config <small><em>(JSON)</em></small> <small><em>JSON Object with RPC providers config</em></small></label>
+                <label>Contract Addresses Config <small><em>(JSON)</em></small> <small><em>JSON Object with contract addresses config</em></small></label>
               </Box>
               <Textarea minRows={10} placeholder="{}" value={configString} onChange={(event: any) => setConfigString(event.target.value)} style={{ width: '100%' }} />
             </Box>

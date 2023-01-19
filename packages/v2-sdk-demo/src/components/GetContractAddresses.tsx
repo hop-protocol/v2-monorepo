@@ -5,6 +5,7 @@ import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
 import { useStyles } from './useStyles'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
+import LoadingButton from '@mui/lab/LoadingButton'
 
 type Props = {
   sdk: Hop
@@ -14,9 +15,17 @@ export function GetContractAddresses (props: Props) {
   const { sdk } = props
   const styles = useStyles()
   const [copied, setCopied] = useState(false)
-  const contractAddresses = useMemo(() => {
-    return sdk?.getContractAddresses() ?? null
-  }, [sdk])
+  const [output, setOutput] = useState(JSON.stringify(sdk?.getContractAddresses() ?? null, null, 2))
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    try {
+      const contractAddresses = sdk?.getContractAddresses()
+      setOutput(JSON.stringify(contractAddresses, null, 2))
+    } catch (err: any) {
+      console.error(err)
+    }
+  }
 
   const code = `
 import { Hop } from '@hop-protocol/v2-sdk'
@@ -37,8 +46,6 @@ main().catch(console.error)
     }, 1000)
   }
 
-  const output = JSON.stringify(contractAddresses, null, 2)
-
   return (
     <Box>
       <Box mb={1}>
@@ -49,7 +56,12 @@ main().catch(console.error)
       </Box>
       <Box width="100%" display="flex" justifyContent="space-between" className={styles.container}>
         <Box mr={4} className={styles.formContainer}>
-          {!!contractAddresses && (
+          <form onSubmit={handleSubmit}>
+            <Box mb={2} display="flex" justifyContent="center">
+              <LoadingButton fullWidth type="submit" variant="contained" size="large">Get</LoadingButton>
+            </Box>
+          </form>
+          {!!output && (
             <Box>
               <Box mb={2}>
                 <Typography variant="body1">Output</Typography>

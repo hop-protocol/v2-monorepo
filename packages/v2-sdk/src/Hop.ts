@@ -753,6 +753,10 @@ export class Hop {
     return this.contractAddresses[this.network]
   }
 
+  setContractAddresses (contractAddresses: any) {
+    this.contractAddresses[this.network] = contractAddresses
+  }
+
   async getIsBundleSet (input: GetIsBundleSetInput) {
     const { fromChainId, toChainId, bundleId } = input
     const provider = this.getRpcProvider(toChainId)

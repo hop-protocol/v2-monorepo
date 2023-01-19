@@ -97,7 +97,7 @@ main().catch(console.error)
               <Box mb={1}>
                 <label>RPC Providers Config <small><em>(JSON)</em></small> <small><em>JSON Object with RPC providers config</em></small></label>
               </Box>
-              <Textarea minRows={10} placeholder="{}" value={configString} onChange={(event: any) => setConfigString(event.target.value)} style={{ width: '100%' }} />
+              <Textarea minRows={5} maxRows={5} placeholder="{}" value={configString} onChange={(event: any) => setConfigString(event.target.value)} style={{ width: '100%' }} />
             </Box>
             <Box mb={2} display="flex" justifyContent="center">
               <LoadingButton loading={loading} fullWidth type="submit" variant="contained" size="large">Set</LoadingButton>

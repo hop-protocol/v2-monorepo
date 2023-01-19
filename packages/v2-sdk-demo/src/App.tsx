@@ -18,6 +18,7 @@ import { GetEvents } from './components/GetEvents'
 import { GetMessageIdFromTxHash } from './components/GetMessageIdFromTxHash'
 import { GetMessageCalldata } from './components/GetMessageCalldata'
 import { GetContractAddresses } from './components/GetContractAddresses'
+import { SetContractAddresses } from './components/SetContractAddresses'
 import { GetMessageSentEvent } from './components/GetMessageSentEvent'
 import { SetRpcProviders } from './components/SetRpcProviders'
 import { Hop } from '@hop-protocol/v2-sdk'
@@ -254,6 +255,7 @@ function App () {
     <GetMessageCalldata sdk={sdk} />,
     <GetMessageSentEvent sdk={sdk} />,
     <GetEvents sdk={sdk} />,
+    <SetContractAddresses sdk={sdk} />,
     <GetContractAddresses sdk={sdk} />,
     <SetRpcProviders sdk={sdk} />
   ]
