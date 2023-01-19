@@ -503,4 +503,12 @@ describe('sdk setup', () => {
     hop.setRpcProviders(rpcProviders)
     expect(hop.getRpcProvider(5).connection.url).toBe('https://rpc.ankr.com/eth_goerli')
   })
+  it('getMessageCalldata', async () => {
+    const hop = new Hop('goerli')
+    const fromChainId = 5
+    const messageId = '0x1d1e0dacfa77b6efe93040cf26d2054b03f1d594383a936498e29c26b7ff0130'
+    const calldata = await hop.getMessageCalldata({ fromChainId, messageId })
+    console.log(calldata)
+    expect(calldata.length > 10).toBe(true)
+  })
 })

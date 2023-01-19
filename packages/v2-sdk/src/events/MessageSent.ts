@@ -22,6 +22,12 @@ export class MessageSentEventFetcher extends Event {
     return filter
   }
 
+  getMessageIdFilter (messageId: string) {
+    const spokeMessageBridge = SpokeMessageBridge__factory.connect(this.address, this.provider)
+    const filter = spokeMessageBridge.filters.MessageSent(messageId)
+    return filter
+  }
+
   async getEvents (startBlock: number, endBlock: number): Promise<MessageSent[]> {
     const filter = this.getFilter()
     return this._getEvents(filter, startBlock, endBlock)

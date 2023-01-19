@@ -126,6 +126,11 @@ export type GetMessageBundledEventFromMessageIdInput = {
   messageId: string
 }
 
+export type GetMessageSentEventFromMessageIdInput = {
+  fromChainId: number,
+  messageId: string
+}
+
 export type GetMessageBundledEventFromTransactionHashInput = {
   fromChainId: number,
   transactionHash: string
@@ -188,6 +193,11 @@ export type GetRelayMessagePopulatedTxInput = {
   toAddress: string,
   toCalldata: string,
   bundleProof: BundleProof
+}
+
+export type GetMessageCalldataInput = {
+  fromChainId: number
+  messageId: string
 }
 
 export class Hop {
@@ -810,6 +820,26 @@ export class Hop {
     return events?.[0] ?? null
   }
 
+  async getMessageSentEventFromMessageId (input: GetMessageSentEventFromMessageIdInput) {
+    const { fromChainId, messageId } = input
+    const provider = this.getRpcProvider(fromChainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${fromChainId}`)
+    }
+
+    const address = this.getSpokeMessageBridgeContractAddress(fromChainId)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${fromChainId}`)
+    }
+
+    const eventFetcher = new MessageSentEventFetcher(provider, fromChainId, 1_000_000_000, address)
+    const filter = eventFetcher.getMessageIdFilter(messageId)
+    const toBlock = await provider.getBlockNumber()
+    const fromBlock = 0 // endBlock - 100_000
+    const events = await eventFetcher._getEvents(filter, fromBlock, toBlock)
+    return events?.[0] ?? null
+  }
+
   async getMessageBundledEventFromTransactionHash (input: GetMessageBundledEventFromTransactionHashInput) {
     const { fromChainId, transactionHash } = input
     const provider = this.getRpcProvider(fromChainId)
@@ -1002,5 +1032,16 @@ export class Hop {
   getSupportedChainIds (): number[] {
     const keys = Object.keys(this.contractAddresses[this.network])
     return keys.map((chainId: string) => Number(chainId))
+  }
+
+  async getMessageCalldata (input: GetMessageCalldataInput): Promise<string> {
+    const { fromChainId, messageId } = input
+
+    const event = await this.getMessageSentEventFromMessageId({ fromChainId, messageId })
+    if (!event) {
+      throw new Error(`Event not found for messageId: ${messageId}`)
+    }
+
+    return event.data
   }
 }
