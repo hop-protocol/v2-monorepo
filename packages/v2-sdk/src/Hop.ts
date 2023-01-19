@@ -990,4 +990,9 @@ export class Hop {
       chainId: toChainId
     }
   }
+
+  getSupportedChainIds (): number[] {
+    const keys = Object.keys(this.contractAddresses[this.network])
+    return keys.map((chainId: string) => Number(chainId))
+  }
 }

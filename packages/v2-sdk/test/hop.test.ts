@@ -38,6 +38,10 @@ describe('sdk setup', () => {
     const hop = new Hop()
     expect(hop.version).toBe(pkg.version)
   })
+  it('should return supported chains', () => {
+    const hop = new Hop('goerli')
+    expect(hop.getSupportedChainIds()).toStrictEqual([5, 420])
+  })
   it('getSendMessagePopulatedTx', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
