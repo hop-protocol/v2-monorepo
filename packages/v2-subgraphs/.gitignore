@@ -74,11 +74,7 @@ config/*
 !config/nova.json
 
 src/*
-!src/L1_mapping.template.ts
-!src/L2_mapping.template.ts
-!src/L2_Amm_mapping.template.ts
-!src/L1_token_mapping.template.ts
-!src/L2_token_mapping.template.ts
+!src/spokeCoreMessenger.template.ts
 !src/shared.ts
 
 buildfiles.sh
