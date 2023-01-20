@@ -75,6 +75,7 @@ config/*
 
 src/*
 !src/spokeCoreMessenger.template.ts
+!src/hubCoreMessenger.template.ts
 !src/shared.ts
 
 buildfiles.sh

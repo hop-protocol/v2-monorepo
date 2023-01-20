@@ -10,7 +10,7 @@ cat config/$NETWORK.json | jq "{ network: .network, isMainnet: .isMainnet, subgr
 
 #npx mustache $TEMP_CONFIG config/mapping_config.template.json > config/${NETWORK}.json
 {{#isMainnet}}
-npx mustache $TEMP_CONFIG src/spokeCoreMessenger.template.ts > src/spokeCoreMessenger_mapping_${NETWORK}.ts
+npx mustache $TEMP_CONFIG src/hubCoreMessenger.template.ts > src/hubCoreMessenger_mapping_${NETWORK}.ts
 {{/isMainnet}}
 {{^isMainnet}}
 npx mustache $TEMP_CONFIG src/spokeCoreMessenger.template.ts > src/spokeCoreMessenger_mapping_${NETWORK}.ts

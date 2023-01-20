@@ -17,63 +17,6 @@ type BundleSet @entity {
   transaction: Transaction
 }
 
-type FeesSentToHub @entity {
-  "Entity ID"
-  id: ID!
-
-  "Amount"
-  amount: BigInt!
-
-  "Block entity"
-  block: Block
-  "Transaction entity"
-  transaction: Transaction
-}
-
-type MessageBundled @entity {
-  "Entity ID"
-  id: ID!
-
-  "Bundle ID"
-  bundleId: Bytes!
-
-  "Tree Index"
-  treeIndex: BigInt!
-
-  "Message ID"
-  messageId: Bytes!
-
-  "Block entity"
-  block: Block
-  "Transaction entity"
-  transaction: Transaction
-}
-
-type BundleCommitted @entity {
-  "Entity ID"
-  id: ID!
-
-  "Bundle ID"
-  bundleId: Bytes!
-
-  "Bundle Root"
-  bundleRoot: Bytes!
-
-  "Bundle Fees"
-  bundleFees: BigInt!
-
-  "Destination Chain ID"
-  toChainId: BigInt!
-
-  "Commit Time"
-  commitTime: BigInt!
-
-  "Block entity"
-  block: Block
-  "Transaction entity"
-  transaction: Transaction
-}
-
 type MessageRelayed @entity {
   "Entity ID"
   id: ID!
@@ -174,7 +117,7 @@ type BundleReceived @entity {
   transaction: Transaction
 }
 
-type BundleForwared @entity {
+type BundleForwarded @entity {
   "Entity ID"
   id: ID!
 

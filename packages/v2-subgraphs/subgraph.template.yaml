@@ -3,30 +3,45 @@ description: Hop Protocol v2
 repository: https://github.com/hop-protocol/v2-subgraph/
 {{#isMainnet}}
 schema:
-  file: ./spokeCoreMessenger.graphql
+  file: ./hubCoreMessenger.graphql
 dataSources:
-{{#spokeCoreMessengers}}
+{{#hubCoreMessengers}}
   - kind: ethereum/contract
     name: {{dataSourceName}}
     network: {{network}}
     source:
       address: '{{address}}'
-      abi: SpokeMessageBridge
+      abi: HubMessageBridge
       startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
+        - BundleSet
+        - MessageRelayed
+        - MessageReverted
         - MessageSent
+        - BundleReceived
+        - BundleForwarded
       abis:
-        - name: SpokeMessageBridge
-          file: ./abis/SpokeMessageBridge.json
+        - name: HubMessageBridge
+          file: ./abis/HubMessageBridge.json
       eventHandlers:
+        - event: BundleSet(indexed bytes32,bytes32,indexed uint256)
+          handler: handleBundleSet
         - event: MessageSent(indexed bytes32,indexed address,indexed uint256,address,bytes)
           handler: handleMessageSent
-      file: ./src/spokeCoreMessenger_mapping_{{network}}.ts
-{{/spokeCoreMessengers}}
+        - event: MessageRelayed(bytes32,uint256,indexed address,indexed address)
+          handler: handleMessageRelayed
+        - event: MessageReverted(bytes32,uint256,indexed address,indexed address)
+          handler: handleMessageReverted
+        - event: BundleReceived(indexed bytes32,bytes32,uint256,uint256,uint256,uint256,indexed address)
+          handler: handleBundleReceived
+        - event: BundleForwarded(indexed bytes32,bytes32,indexed uint256,indexed uint256)
+          handler: handleBundleForwarded
+      file: ./src/hubCoreMessenger_mapping_{{network}}.ts
+{{/hubCoreMessengers}}
 {{/isMainnet}}
 {{^isMainnet}}
 schema:
@@ -47,8 +62,8 @@ dataSources:
       entities:
         - BundleSet
         - FeesSentToHub
-        - FeesSentToHub
         - MessageBundled
+        - MessageCommitted
         - MessageRelayed
         - MessageReverted
         - MessageSent
