@@ -1,0 +1,32 @@
+{
+  "name": "hop",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "build-contract": "solc contracts/Gravity.sol --abi -o abis --overwrite && solc contracts/Gravity.sol --bin -o bin --overwrite",
+    "create": "graph create hop-protocol/v2 --node https://api.thegraph.com/deploy/",
+    "create-local": "graph create hop-protocol/v2 --node http://127.0.0.1:8020",
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy hop-protocol/v2 --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "deploy-local": "graph deploy hop-protocol/v2 --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "build-deploy:goerli": "NETWORK=goerli ./build.sh",
+    "build-deploy:optimism-goerli": "NETWORK=optimism-goerli ./build.sh",
+    "clean": "./clean.sh",
+    "clean:data": "rimraf data"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "0.33.1",
+    "@graphprotocol/graph-ts": "0.29.0",
+    "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "babel-register": "^6.26.0",
+    "gluegun": "github:edgeandnode/gluegun#v4.3.1-pin-colors-dep",
+    "mustache": "^4.2.0",
+    "truffle": "^5.0.4",
+    "truffle-contract": "^4.0.5",
+    "truffle-hdwallet-provider": "^1.0.4"
+  }
+}

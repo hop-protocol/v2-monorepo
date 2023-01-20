@@ -1,0 +1,293 @@
+type BundleSet @entity {
+  "Entity ID"
+  id: ID!
+
+  "Bundle ID"
+  bundleId: Bytes!
+
+  "Bundle Root"
+  bundleRoot: Bytes!
+
+  "Origin Chain ID"
+  fromChainId: BigInt!
+
+  "Block entity"
+  block: Block
+  "Transaction entity"
+  transaction: Transaction
+}
+
+type FeesSentToHub @entity {
+  "Entity ID"
+  id: ID!
+
+  "Amount"
+  amount: BigInt!
+
+  "Block entity"
+  block: Block
+  "Transaction entity"
+  transaction: Transaction
+}
+
+type MessageBundled @entity {
+  "Entity ID"
+  id: ID!
+
+  "Bundle ID"
+  bundleId: Bytes!
+
+  "Tree Index"
+  treeIndex: BigInt!
+
+  "Message ID"
+  messageId: Bytes!
+
+  "Block entity"
+  block: Block
+  "Transaction entity"
+  transaction: Transaction
+}
+
+type BundleCommitted @entity {
+  "Entity ID"
+  id: ID!
+
+  "Bundle ID"
+  bundleId: Bytes!
+
+  "Bundle Root"
+  bundleRoot: Bytes!
+
+  "Bundle Fees"
+  bundleFees: BigInt!
+
+  "Destination Chain ID"
+  toChainId: BigInt!
+
+  "Commit Time"
+  commitTime: BigInt!
+
+  "Block entity"
+  block: Block
+  "Transaction entity"
+  transaction: Transaction
+}
+
+type MessageRelayed @entity {
+  "Entity ID"
+  id: ID!
+
+  "Message ID"
+  messageId: Bytes!
+
+  "Origin Chain ID"
+  fromChainId: BigInt!
+
+  "Sender Address"
+  from: Bytes!
+
+  "Destination Address"
+  to: Bytes!
+
+  "Block entity"
+  block: Block
+  "Transaction entity"
+  transaction: Transaction
+}
+
+type MessageReverted @entity {
+  "Entity ID"
+  id: ID!
+
+  "Message ID"
+  messageId: Bytes!
+
+  "Origin Chain ID"
+  fromChainId: BigInt!
+
+  "Sender Address"
+  from: Bytes!
+
+  "Destination Address"
+  to: Bytes!
+
+  "Block entity"
+  block: Block
+  "Transaction entity"
+  transaction: Transaction
+}
+
+type MessageSent @entity {
+  "Entity ID"
+  id: ID!
+
+  "Message ID"
+  messageId: Bytes!
+
+  "Message Sender Address"
+  from: Bytes!
+
+  "Destination Chain ID"
+  toChainId: BigInt!
+
+  "Destination Address"
+  to: Bytes!
+
+  "Message Calldata"
+  data: Bytes!
+
+  "Block entity"
+  block: Block
+  "Transaction entity"
+  transaction: Transaction
+}
+
+type BundleReceived @entity {
+  "Entity ID"
+  id: ID!
+
+  "Bundle ID"
+  bundleId: Bytes!
+
+  "Bundle Root"
+  bundleRoot: Bytes!
+
+  "Bundle Fees"
+  bundleFees: BigInt!
+
+  "Origin Chain ID"
+  fromChainId: BigInt!
+
+  "Destination Chain ID"
+  toChainId: BigInt!
+
+  "Relay Window Start"
+  relayWindowStart: BigInt!
+
+  "Relayer Address"
+  relayer: Bytes!
+
+  "Block entity"
+  block: Block
+  "Transaction entity"
+  transaction: Transaction
+}
+
+type BundleForwared @entity {
+  "Entity ID"
+  id: ID!
+
+  "Bundle ID"
+  bundleId: Bytes!
+
+  "Bundle Root"
+  bundleRoot: Bytes!
+
+  "Origin Chain ID"
+  fromChainId: BigInt!
+
+  "Destination Chain ID"
+  toChainId: BigInt!
+
+  "Block entity"
+  block: Block
+  "Transaction entity"
+  transaction: Transaction
+}
+
+type Block @entity {
+  "Block hash"
+  id: ID!
+
+  "Block author"
+  author: Bytes!
+
+  "Block difficulty"
+  difficulty: BigInt!
+
+  "Block gas limit"
+  gasLimit: BigInt!
+
+  "Block gas used"
+  gasUsed: BigInt!
+
+  "Block hash"
+  hash: Bytes!
+
+  "Block number"
+  number: BigInt!
+
+  "Block parent hash"
+  parentHash: Bytes!
+
+  "Block receipts root"
+  receiptsRoot: Bytes!
+
+  "Block size"
+  size: BigInt
+
+  "Block state root"
+  stateRoot: Bytes!
+
+  "Block timestamp"
+  timestamp: BigInt!
+
+  "Block total difficulty"
+  totalDifficulty: BigInt!
+
+  "Block transactions root"
+  transactionsRoot: Bytes!
+
+  "Block uncles hash"
+  unclesHash: Bytes!
+}
+
+type Transaction @entity {
+  "Transaction hash"
+  id: ID!
+
+  "Transaction from address"
+  from: Bytes!
+
+  "Transaction gas limit"
+  gasLimit: BigInt!
+
+  "Transaction gas price"
+  gasPrice: BigInt!
+
+  "Transaction hash"
+  hash: Bytes!
+
+  "Transaction index"
+  index: BigInt!
+
+  # NOTE: disabled because it'll go over index limit
+  # https://github.com/graphprotocol/graph-node/issues/1133
+  #"Transaction input"
+  #input: Bytes!
+
+  "Transaction to address"
+  to: Bytes
+
+  "Transaction value"
+  value: BigInt!
+}
+
+type Token @entity {
+  "Token address"
+  id: ID!
+
+  "Token address"
+  address: Bytes!
+
+  "Token decimals"
+  decimals: Int!
+
+  "Token name"
+  name: String!
+
+  "Token symbol"
+  symbol: String!
+}
+

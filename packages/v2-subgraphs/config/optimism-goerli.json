@@ -1,0 +1,10 @@
+{
+  "network": "optimism-goerli",
+  "isMainnet": false,
+  "subgraphName": "v2-hop-optimism-goerli",
+  "spokeCoreMessengers": [{
+    "dataSourceName": "SpokeCoreMessenger",
+    "address": "0xeA35E10f763ef2FD5634dF9Ce9ad00434813bddB",
+    "startBlock": 3218800
+  }]
+}

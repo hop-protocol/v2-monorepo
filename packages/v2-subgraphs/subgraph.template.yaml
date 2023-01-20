@@ -1,0 +1,75 @@
+specVersion: 0.0.2
+description: Hop Protocol v2
+repository: https://github.com/hop-protocol/v2-subgraph/
+{{#isMainnet}}
+schema:
+  file: ./spokeCoreMessenger.graphql
+dataSources:
+{{#spokeCoreMessengers}}
+  - kind: ethereum/contract
+    name: {{dataSourceName}}
+    network: {{network}}
+    source:
+      address: '{{address}}'
+      abi: SpokeMessageBridge
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - MessageSent
+      abis:
+        - name: SpokeMessageBridge
+          file: ./abis/SpokeMessageBridge.json
+      eventHandlers:
+        - event: MessageSent(indexed bytes32,indexed address,indexed uint256,address,bytes)
+          handler: handleMessageSent
+      file: ./src/spokeCoreMessenger_mapping_{{network}}.ts
+{{/spokeCoreMessengers}}
+{{/isMainnet}}
+{{^isMainnet}}
+schema:
+  file: ./spokeCoreMessenger.graphql
+dataSources:
+{{#spokeCoreMessengers}}
+  - kind: ethereum/contract
+    name: {{dataSourceName}}
+    network: {{network}}
+    source:
+      address: '{{address}}'
+      abi: SpokeMessageBridge
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - BundleSet
+        - FeesSentToHub
+        - FeesSentToHub
+        - MessageBundled
+        - MessageRelayed
+        - MessageReverted
+        - MessageSent
+      abis:
+        - name: SpokeMessageBridge
+          file: ./abis/SpokeMessageBridge.json
+      eventHandlers:
+        - event: BundleSet(indexed bytes32,bytes32,indexed uint256)
+          handler: handleBundleSet
+        - event: FeesSentToHub(uint256)
+          handler: handleFeesSentToHub
+        - event: MessageBundled(indexed bytes32,indexed uint256,indexed bytes32)
+          handler: handleMessageBundled
+        - event: BundleCommitted(indexed bytes32,bytes32,uint256,indexed uint256,uint256)
+          handler: handleBundleCommitted
+        - event: MessageSent(indexed bytes32,indexed address,indexed uint256,address,bytes)
+          handler: handleMessageSent
+        - event: MessageRelayed(bytes32,uint256,indexed address,indexed address)
+          handler: handleMessageRelayed
+        - event: MessageReverted(bytes32,uint256,indexed address,indexed address)
+          handler: handleMessageReverted
+      file: ./src/spokeCoreMessenger_mapping_{{network}}.ts
+{{/spokeCoreMessengers}}
+{{/isMainnet}}
