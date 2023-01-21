@@ -54,7 +54,7 @@ export class EventsBaseDb<T> extends BaseDb {
     if (!key) {
       throw new Error('key is required')
     }
-    // TODO: add validation is child
+    // TODO: add validation in child
     if ((data as any).eventLog) {
       delete (data as any).eventLog
     }

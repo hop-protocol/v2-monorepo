@@ -7,19 +7,34 @@ import { signer } from '../signer'
 
 class RelayError extends Error {}
 
+export type Options = {
+  indexerPollSeconds?: number
+  exitBundlePollSeconds?: number
+  exitBundleRetryDelaySeconds?: number
+}
+
+export const defaultPollSeconds = 10
+
 export class Worker {
   sdk: Hop
-  pollIntervalMs: number = 10 * 1000
+  pollIntervalMs: number = defaultPollSeconds * 1000
   indexer: Indexer
 
-  constructor () {
+  constructor (options: Options = {}) {
+    if (options.exitBundlePollSeconds) {
+      this.pollIntervalMs = options.exitBundlePollSeconds * 1000
+    }
     this.sdk = new Hop('goerli')
     this.indexer = new Indexer({
+      pollIntervalSeconds: options.indexerPollSeconds,
       startBlocks: {
         5: goerliAddresses['5'].startBlock,
         420: goerliAddresses['420'].startBlock
       }
     })
+    if (options.exitBundleRetryDelaySeconds) {
+      db.exitableBundlesDb.setRetryDelaySeconds(options.exitBundleRetryDelaySeconds)
+    }
   }
 
   async start () {

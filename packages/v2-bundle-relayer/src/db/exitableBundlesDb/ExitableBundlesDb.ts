@@ -7,9 +7,14 @@ export interface ExitableBundles {
 
 export class ExitableBundlesDb extends BaseDb {
   otherDbs: Record<string, any>
+  retryDelaySeconds = 10 * 60
 
   constructor (dbPath: string) {
     super(dbPath, 'exitableBundles')
+  }
+
+  setRetryDelaySeconds (seconds: number) {
+    this.retryDelaySeconds = seconds
   }
 
   getKeyString (bundleId: string) {
@@ -27,7 +32,7 @@ export class ExitableBundlesDb extends BaseDb {
     for (const bundleId of bundleIds) {
       const eventItem = await this.otherDbs.bundleCommittedEventsDb.getEvent(bundleId)
       if (eventItem) {
-        const delayMs = 10 * 60 * 1000 // 10min // TODO: make env var
+        const delayMs = this.retryDelaySeconds * 1000
         const txState: TxState = await this.otherDbs.txStateDb.getTxState(bundleId)
         let recentlyAttempted = false
         if (txState?.lastAttemptedAtMs) {

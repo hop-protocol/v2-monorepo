@@ -10,11 +10,14 @@ type StartBlocks = {
 type Options = {
   dbPath?: string
   startBlocks: StartBlocks
+  pollIntervalSeconds?: number
 }
+
+export const defaultPollSeconds = 10
 
 export class Indexer {
   sdk: Hop
-  pollIntervalMs: number = 10 * 1000
+  pollIntervalMs: number = defaultPollSeconds * 1000
   startBlocks: StartBlocks = {}
   chainIds: any = {
     5: true, // goerli
@@ -27,6 +30,9 @@ export class Indexer {
   eventsToSync: Record<string, EventsBaseDb<any>>
 
   constructor (options?: Options) {
+    if (options?.pollIntervalSeconds) {
+      this.pollIntervalMs = options?.pollIntervalSeconds * 1000
+    }
     this.sdk = new Hop('goerli', {
       batchBlocks: 10_000
     })
