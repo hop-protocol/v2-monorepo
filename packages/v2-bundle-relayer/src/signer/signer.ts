@@ -3,8 +3,17 @@ import { privateKey } from '../config'
 
 let signer: Wallet | null = null
 
-if (privateKey) {
-  signer = new Wallet(privateKey)
+function getSigner () {
+  if (!signer) {
+    if (privateKey) {
+      signer = new Wallet(privateKey)
+    }
+  }
+  return signer
 }
 
-export { signer }
+function setSignerUsingPrivateKey (_privateKey: string) {
+  signer = new Wallet(_privateKey)
+}
+
+export { getSigner, setSignerUsingPrivateKey }

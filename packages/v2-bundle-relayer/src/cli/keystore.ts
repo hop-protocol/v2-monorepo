@@ -6,7 +6,7 @@ import { actionHandler, parseBool, parseString, root } from './shared'
 import {
   defaultKeystoreFilePath
 } from 'src/config'
-import { generateKeystore, generateMnemonic, hdpath, recoverKeystore } from 'src/keystore'
+import { generateKeystore, generateMnemonic, getKeystore, hdpath, recoverKeystore } from 'src/keystore'
 import { promptConfirmMnemonic, promptPassphrase, promptRetryMnemonic, promptShowKeystore, promptShowMnemonic, promptShowReencryption } from 'src/prompt'
 
 enum Actions {
@@ -113,15 +113,5 @@ async function generatePassphrase (): Promise<string> {
     throw new Error('ERROR: passphrases did not match')
   }
 
-  return (passphrase as string)
-}
-
-function getKeystore (filepath: string): any {
-  try {
-    return JSON.parse(
-      fs.readFileSync(path.resolve(filepath), 'utf8')
-    )
-  } catch (err) {
-    throw new Error(`keystore does not exist at ${filepath}`)
-  }
+  return (passphrase)
 }

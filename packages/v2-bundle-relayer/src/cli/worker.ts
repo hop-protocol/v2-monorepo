@@ -1,5 +1,12 @@
+import fs from 'fs'
 import { Worker } from '../worker'
 import { actionHandler, parseBool, parseNumber, root } from './shared'
+import {
+  defaultKeystoreFilePath
+} from 'src/config'
+import { getKeystore, recoverKeystore } from 'src/keystore'
+import { promptPassphrase } from 'src/prompt'
+import { setSignerUsingPrivateKey } from 'src/signer'
 
 root
   .command('worker')
@@ -33,13 +40,22 @@ root
 
 async function main (source: any) {
   const { dry: dryMode, server, indexerPollSeconds, exitBundlePollSeconds, exitBundleRetryDelaySeconds } = source
+  const keystoreFilePath = defaultKeystoreFilePath
 
   console.log('starting worker')
   console.log('dryMode:', !!dryMode)
   console.log('server:', !!server)
-  console.log('indexerPollSeconds:', indexerPollSeconds)
-  console.log('exitBundlePollSeconds:', exitBundlePollSeconds)
-  console.log('exitBundleRetryDelaySeconds:', exitBundleRetryDelaySeconds)
+  console.log('indexerPollSeconds:', indexerPollSeconds || 'default')
+  console.log('exitBundlePollSeconds:', exitBundlePollSeconds || 'default')
+  console.log('exitBundleRetryDelaySeconds:', exitBundleRetryDelaySeconds || 'default')
+
+  const exists = fs.existsSync(keystoreFilePath)
+  if (exists) {
+    const passphrase = await promptPassphrase()
+    const keystore = getKeystore(keystoreFilePath)
+    const recoveredPrivateKey = await recoverKeystore(keystore, passphrase)
+    setSignerUsingPrivateKey(recoveredPrivateKey)
+  }
 
   if (server) {
     require('../server')

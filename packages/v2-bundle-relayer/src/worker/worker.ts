@@ -2,8 +2,8 @@ import wait from 'wait'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { Indexer } from '../indexer'
 import { db } from '../db'
+import { getSigner } from '../signer'
 import { goerliAddresses } from '@hop-protocol/v2-core/addresses'
-import { signer } from '../signer'
 
 class RelayError extends Error {}
 
@@ -99,6 +99,7 @@ export class Worker {
         }
 
         const provider = this.sdk.getRpcProvider(toChainId)
+        const signer = getSigner()
         if (!signer) {
           throw new Error('no signer connected')
         }
