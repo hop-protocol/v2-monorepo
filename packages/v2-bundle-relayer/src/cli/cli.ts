@@ -2,6 +2,7 @@ import '../moduleAlias'
 import packageJson from '../../package.json'
 import { program } from './shared'
 
+import './keystore'
 import './worker'
 
 program.version(packageJson.version)
