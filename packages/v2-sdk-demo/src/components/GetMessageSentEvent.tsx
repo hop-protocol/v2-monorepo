@@ -88,11 +88,11 @@ async function main() {
   const messageId = "${messageId}"
 
   const hop = new Hop('goerli')
-  const calldata = await hop.getMessageSentEventFromMessageId({
+  const event = await hop.getMessageSentEventFromMessageId({
     fromChainId,
     messageId
   })
-  console.log(calldata)
+  console.log(event)
 }
 
 main().catch(console.error)
