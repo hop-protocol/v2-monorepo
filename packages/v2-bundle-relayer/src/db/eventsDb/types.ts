@@ -25,6 +25,8 @@ export type EventContext = {
   nonce: number
   gasLimit: number
   gasUsed: number
+  gasPrice: string
+  data: string
 }
 
 export type EventBase = {

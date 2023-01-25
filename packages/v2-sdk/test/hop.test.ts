@@ -114,6 +114,8 @@ describe('sdk setup', () => {
     expect(events[0].context?.nonce).toBeTruthy()
     expect(events[0].context?.gasLimit).toBeTruthy()
     expect(events[0].context?.gasUsed).toBeTruthy()
+    expect(events[0].context?.gasPrice).toBeTruthy()
+    expect(events[0].context?.data).toBeTruthy()
     expect(events[0].eventLog).toBeTruthy()
   }, 60 * 1000)
   it('getBundleForwardedEvents', async () => {
