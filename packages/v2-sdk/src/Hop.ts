@@ -594,6 +594,9 @@ export class Hop {
 
   async hasAuctionStarted (input: HasAuctionStartedInput): Promise<boolean> {
     const { fromChainId, bundleCommittedEvent } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const { commitTime, toChainId } = bundleCommittedEvent
     const exitTime = await this.getSpokeExitTime({ fromChainId, toChainId })
     return commitTime + exitTime < DateTime.utc().toSeconds()
@@ -601,6 +604,12 @@ export class Hop {
 
   async getSpokeExitTime (input: GetSpokeExitTimeInput): Promise<number> {
     const { fromChainId, toChainId } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
+    if (!this.isValidChainId(toChainId)) {
+      throw new Error(`Invalid toChainId: ${toChainId}`)
+    }
     const provider = this.getRpcProvider(toChainId)
     if (!provider) {
       throw new Error(`Invalid chain: ${toChainId}`)
@@ -620,6 +629,9 @@ export class Hop {
   // reference: https://github.com/hop-protocol/contracts-v2/blob/master/contracts/bridge/FeeDistributor/FeeDistributor.sol#L83-L106
   async getRelayReward (input: GetRelayRewardInput): Promise<number> {
     const { fromChainId, bundleCommittedEvent } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Invalid chain: ${fromChainId}`)
@@ -648,6 +660,9 @@ export class Hop {
 
   async shouldAttemptForwardMessage (input: ShouldAttemptForwardMessageInput): Promise<boolean> {
     const { fromChainId, bundleCommittedEvent } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const estimatedTxCost = await this.getEstimatedTxCostForForwardMessage({ chainId: fromChainId })
     const relayReward = await this.getRelayReward({ fromChainId, bundleCommittedEvent })
     const txOk = relayReward > estimatedTxCost
@@ -658,6 +673,9 @@ export class Hop {
 
   async getBundleExitPopulatedTx (input: GetBundleExitPopulatedTxInput): Promise<any> {
     let { fromChainId, bundleCommittedEvent, bundleCommittedTransactionHash } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     if (bundleCommittedTransactionHash) {
       if (!this.isValidTxHash(bundleCommittedTransactionHash)) {
         throw new Error(`Invalid transaction hash: ${bundleCommittedTransactionHash}`)
@@ -684,6 +702,12 @@ export class Hop {
 
   async getSendMessagePopulatedTx (input: GetSendMessagePopulatedTxInput): Promise<any> {
     let { fromChainId, toChainId, toAddress, toCalldata = '0x' } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
+    if (!this.isValidChainId(toChainId)) {
+      throw new Error(`Invalid toChainId: ${toChainId}`)
+    }
     if (fromChainId === toChainId) {
       throw new Error('fromChainId and toChainId must be different')
     }
@@ -739,6 +763,12 @@ export class Hop {
 
   async getRouteData (input: GetRouteDataInput) {
     const { fromChainId, toChainId } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
+    if (!this.isValidChainId(toChainId)) {
+      throw new Error(`Invalid toChainId: ${toChainId}`)
+    }
     if (fromChainId === toChainId) {
       throw new Error('fromChainId and toChainId must be different')
     }
@@ -755,6 +785,12 @@ export class Hop {
 
   async getMessageFee (input: GetMessageFeeInput) {
     const { fromChainId, toChainId } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
+    if (!this.isValidChainId(toChainId)) {
+      throw new Error(`Invalid toChainId: ${toChainId}`)
+    }
     if (fromChainId === toChainId) {
       throw new Error('fromChainId and toChainId must be different')
     }
@@ -785,6 +821,12 @@ export class Hop {
 
   async getIsBundleSet (input: GetIsBundleSetInput) {
     const { fromChainId, toChainId, bundleId } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
+    if (!this.isValidChainId(toChainId)) {
+      throw new Error(`Invalid toChainId: ${toChainId}`)
+    }
     const provider = this.getRpcProvider(toChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${toChainId}`)
@@ -804,6 +846,9 @@ export class Hop {
 
   async getMessageSentEventFromTransactionReceipt (input: GetMessageSentEventFromTransactionReceiptInput) {
     const { fromChainId, receipt } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
@@ -825,6 +870,9 @@ export class Hop {
 
   async getMessageSentEventFromTransactionHash (input: GetMessageSentEventFromTransactionHashInput) {
     const { fromChainId, transactionHash } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
@@ -835,6 +883,9 @@ export class Hop {
 
   async getMessageBundledEventFromMessageId (input: GetMessageBundledEventFromMessageIdInput) {
     const { fromChainId, messageId } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
@@ -855,6 +906,9 @@ export class Hop {
 
   async getMessageSentEventFromMessageId (input: GetMessageSentEventFromMessageIdInput) {
     const { fromChainId, messageId } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     if (!fromChainId) {
       throw new Error('fromChainId is required')
     }
@@ -882,11 +936,11 @@ export class Hop {
   // note: this is broken because messageId is not indexed in event
   async getMessageRelayedEventFromMessageId (input: GetMessageRelayedEventFromMessageIdInput) {
     const { fromChainId, toChainId, messageId } = input
-    if (!fromChainId) {
-      throw new Error('fromChainId is required')
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
     }
-    if (!toChainId) {
-      throw new Error('toChainId is required')
+    if (!this.isValidChainId(toChainId)) {
+      throw new Error(`Invalid toChainId: ${toChainId}`)
     }
     if (!messageId) {
       throw new Error('messageId is required')
@@ -911,6 +965,9 @@ export class Hop {
 
   async getMessageBundledEventFromTransactionHash (input: GetMessageBundledEventFromTransactionHashInput) {
     const { fromChainId, transactionHash } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
@@ -933,6 +990,9 @@ export class Hop {
 
   async getMessageIdFromTransactionHash (input: GetMessageIdFromTransactionHashInput) {
     const { fromChainId, transactionHash } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     if (!fromChainId) {
       throw new Error('fromChainId is required')
     }
@@ -951,6 +1011,9 @@ export class Hop {
 
   async getMessageBundleIdFromMessageId (input: GetMessageBundleIdFromMessageIdInput): Promise<string> {
     const { fromChainId, messageId } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const event = await this.getMessageBundledEventFromMessageId({ fromChainId, messageId })
     if (!event) {
       throw new Error('event not found for messageId')
@@ -971,6 +1034,9 @@ export class Hop {
 
   async getMessageTreeIndexFromMessageId (input: GetMessageTreeIndexFromMessageIdInput): Promise<number> {
     const { fromChainId, messageId } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const event = await this.getMessageBundledEventFromMessageId({ fromChainId, messageId })
     if (!event) {
       throw new Error('event not found for messageId')
@@ -981,6 +1047,9 @@ export class Hop {
 
   async getMessageTreeIndexFromTransactionHash (input: GetMessageTreeIndexFromTransactionHashInput): Promise<number> {
     const { fromChainId, transactionHash } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const event = await this.getMessageBundledEventFromTransactionHash({ fromChainId, transactionHash })
     if (!event) {
       throw new Error('event not found for transaction hash')
@@ -991,6 +1060,9 @@ export class Hop {
 
   async getMessageBundledEventsForBundleId (input: GetMessageBundledEventsForBundleIdInput): Promise<any[]> {
     const { fromChainId, bundleId } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
@@ -1009,6 +1081,9 @@ export class Hop {
 
   async getMessageIdsForBundleId (input: GetMessageIdsForBundleIdInput): Promise<string[]> {
     const { fromChainId, bundleId } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const messageEvents = await this.getMessageBundledEventsForBundleId({ fromChainId, bundleId })
     const messageIds = messageEvents.map((item: any) => item.messageId)
     return messageIds
@@ -1027,6 +1102,9 @@ export class Hop {
 
   async getBundleProofFromMessageId (input: GetBundleProofFromMessageIdInput): Promise<BundleProof> {
     const { fromChainId, messageId } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
@@ -1051,6 +1129,9 @@ export class Hop {
 
   async getBundleProofFromTransactionHash (input: GetBundleProofFromTransactionHashInput): Promise<BundleProof> {
     const { fromChainId, transactionHash } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
     const provider = this.getRpcProvider(fromChainId)
     if (!provider) {
       throw new Error(`Provider not found for chainId: ${fromChainId}`)
@@ -1073,6 +1154,12 @@ export class Hop {
 
   async getRelayMessagePopulatedTx (input: GetRelayMessagePopulatedTxInput) {
     const { fromChainId, toChainId, fromAddress, toAddress, toCalldata, bundleProof } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
+    if (!this.isValidChainId(toChainId)) {
+      throw new Error(`Invalid toChainId: ${toChainId}`)
+    }
     const provider = this.getRpcProvider(toChainId)
     if (!provider) {
       throw new Error(`Invalid chain: ${toChainId}`)
@@ -1105,9 +1192,8 @@ export class Hop {
 
   async getMessageCalldata (input: GetMessageCalldataInput): Promise<string> {
     const { fromChainId, messageId } = input
-
-    if (!fromChainId) {
-      throw new Error('fromChainId is required')
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
     }
 
     if (!messageId) {
@@ -1128,15 +1214,24 @@ export class Hop {
       throw new Error('messageId is required')
     }
 
-    if (!fromChainId) {
-      throw new Error('fromChainId is required')
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
     }
 
-    if (!toChainId) {
-      throw new Error('toChainId is required')
+    if (!this.isValidChainId(toChainId)) {
+      throw new Error(`Invalid toChainId: ${toChainId}`)
     }
 
     const event = await this.getMessageRelayedEventFromMessageId({ messageId, fromChainId, toChainId })
     return !!event
+  }
+
+  private isValidChainId (chainId: number) {
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+
+    const chainIds = new Set(Object.keys(this.contractAddresses[this.network]).map((chainId: string) => Number(chainId)))
+    return chainIds.has(chainId)
   }
 }
