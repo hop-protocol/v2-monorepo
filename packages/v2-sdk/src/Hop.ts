@@ -480,6 +480,20 @@ export class Hop {
       throw new Error(`Provider not found for chainId: ${chainId}`)
     }
 
+    const latestBlock = await provider.getBlockNumber()
+    if (latestBlock) {
+      if (!toBlock) {
+        toBlock = latestBlock
+      }
+      if (!fromBlock) {
+        const start = latestBlock - 1000
+        fromBlock = start
+      }
+      if (fromBlock < 0) {
+        fromBlock = toBlock + fromBlock
+      }
+    }
+
     if (eventName) {
       eventNames = [eventName]
     }
