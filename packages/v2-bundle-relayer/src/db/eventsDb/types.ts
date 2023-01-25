@@ -21,6 +21,10 @@ export type EventContext = {
   blockTimestamp: number
   from: string
   to: string
+  value: string
+  nonce: number
+  gasLimit: number
+  gasUsed: number
 }
 
 export type EventBase = {
