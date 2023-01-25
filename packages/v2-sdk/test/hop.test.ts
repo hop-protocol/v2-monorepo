@@ -504,11 +504,35 @@ describe('sdk setup', () => {
     expect(hop.getRpcProvider(5).connection.url).toBe('https://rpc.ankr.com/eth_goerli')
   })
   it('getMessageCalldata', async () => {
-    const hop = new Hop('goerli')
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
     const fromChainId = 5
     const messageId = '0x1d1e0dacfa77b6efe93040cf26d2054b03f1d594383a936498e29c26b7ff0130'
     const calldata = await hop.getMessageCalldata({ fromChainId, messageId })
     console.log(calldata)
     expect(calldata.length > 10).toBe(true)
+  })
+  it.skip('getIsMessageIdRelayed - true', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const fromChainId = 5
+    const toChainId = 420
+    const messageId = '0x1d1e0dacfa77b6efe93040cf26d2054b03f1d594383a936498e29c26b7ff0130'
+    const isRelayed = await hop.getIsMessageIdRelayed({ fromChainId, toChainId, messageId })
+    console.log(isRelayed)
+    expect(isRelayed).toBe(true)
+  })
+  it.skip('getIsMessageIdRelayed - false', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v002
+    })
+    const fromChainId = 5
+    const toChainId = 420
+    const messageId = '0xe8e4885871d370ef17693db9fc0f34bda218c8685a9bb3ab40648cf8d2a5358e'
+    const isRelayed = await hop.getIsMessageIdRelayed({ fromChainId, toChainId, messageId })
+    console.log(isRelayed)
+    expect(isRelayed).toBe(false)
   })
 })

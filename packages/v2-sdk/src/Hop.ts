@@ -131,6 +131,12 @@ export type GetMessageSentEventFromMessageIdInput = {
   messageId: string
 }
 
+export type GetMessageRelayedEventFromMessageIdInput = {
+  messageId: string
+  fromChainId: number,
+  toChainId: number,
+}
+
 export type GetMessageBundledEventFromTransactionHashInput = {
   fromChainId: number,
   transactionHash: string
@@ -198,6 +204,12 @@ export type GetRelayMessagePopulatedTxInput = {
 export type GetMessageCalldataInput = {
   fromChainId: number
   messageId: string
+}
+
+export type GetIsMessageIdRelayedInput = {
+  messageId: string
+  fromChainId: number
+  toChainId: number
 }
 
 export class Hop {
@@ -745,7 +757,7 @@ export class Hop {
     return routeData.maxBundleMessages
   }
 
-  isValidTxHash (txHash: string): boolean {
+  private isValidTxHash (txHash: string): boolean {
     return txHash.slice(0, 2) === '0x' && txHash.length === 66
   }
 
@@ -846,6 +858,36 @@ export class Hop {
     }
 
     const eventFetcher = new MessageSentEventFetcher(provider, fromChainId, 1_000_000_000, address)
+    const filter = eventFetcher.getMessageIdFilter(messageId)
+    const toBlock = await provider.getBlockNumber()
+    const fromBlock = 0 // endBlock - 100_000
+    const events = await eventFetcher._getEvents(filter, fromBlock, toBlock)
+    return events?.[0] ?? null
+  }
+
+  // note: this is broken because messageId is not indexed in event
+  async getMessageRelayedEventFromMessageId (input: GetMessageRelayedEventFromMessageIdInput) {
+    const { fromChainId, toChainId, messageId } = input
+    if (!fromChainId) {
+      throw new Error('fromChainId is required')
+    }
+    if (!toChainId) {
+      throw new Error('toChainId is required')
+    }
+    if (!messageId) {
+      throw new Error('messageId is required')
+    }
+    const provider = this.getRpcProvider(fromChainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${toChainId}`)
+    }
+
+    const address = this.getSpokeMessageBridgeContractAddress(toChainId)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${toChainId}`)
+    }
+
+    const eventFetcher = new MessageRelayedEventFetcher(provider, toChainId, 1_000_000_000, address)
     const filter = eventFetcher.getMessageIdFilter(messageId)
     const toBlock = await provider.getBlockNumber()
     const fromBlock = 0 // endBlock - 100_000
@@ -1064,5 +1106,23 @@ export class Hop {
     }
 
     return event.data
+  }
+
+  async getIsMessageIdRelayed (input: GetIsMessageIdRelayedInput): Promise<boolean> {
+    const { messageId, fromChainId, toChainId } = input
+    if (!messageId) {
+      throw new Error('messageId is required')
+    }
+
+    if (!fromChainId) {
+      throw new Error('fromChainId is required')
+    }
+
+    if (!toChainId) {
+      throw new Error('toChainId is required')
+    }
+
+    const event = await this.getMessageRelayedEventFromMessageId({ messageId, fromChainId, toChainId })
+    return !!event
   }
 }
