@@ -65,9 +65,11 @@ export class Event {
       const blockNumber = event.blockNumber
       const [
         { timestamp: blockTimestamp },
-        { from, to }
+        { value, nonce, gasLimit, gasPrice },
+        { from, to, gasUsed }
       ] = await Promise.all([
         this.provider.getBlock(blockNumber),
+        this.provider.getTransaction(transactionHash),
         this.provider.getTransactionReceipt(transactionHash)
       ])
 
@@ -80,7 +82,11 @@ export class Event {
         blockNumber,
         blockTimestamp,
         from,
-        to
+        to,
+        value: value.toString(),
+        nonce: Number(nonce.toString()),
+        gasLimit: Number(gasLimit.toString()),
+        gasUsed: Number(gasUsed.toString())
       }
     } catch (err: any) {
       console.log('getEventContext error:', err, chainId, event)
