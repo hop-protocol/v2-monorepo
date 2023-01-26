@@ -1,5 +1,6 @@
 import pkg from '../package.json'
 import { ArbitrumRelayer } from './exitRelayers/ArbitrumRelayer'
+import { PolygonRelayer } from './exitRelayers/PolygonRelayer'
 import { BigNumber, providers } from 'ethers'
 import { BundleCommitted, BundleCommittedEventFetcher } from './events/BundleCommitted'
 import { BundleForwarded, BundleForwardedEventFetcher } from './events/BundleForwarded'
@@ -697,6 +698,8 @@ export class Hop {
       exitRelayer = new OptimismRelayer(this.network, l1Provider, l2Provider)
     } else if ([421613, 42161, 42170].includes(fromChainId)) {
       exitRelayer = new ArbitrumRelayer(this.network, l1Provider, l2Provider)
+    } else if ([80001, 137].includes(fromChainId)) {
+      exitRelayer = new PolygonRelayer(this.network, l1Provider, l2Provider)
     }
     const txData = await exitRelayer.getExitPopulatedTx(bundleCommittedTransactionHash)
 
