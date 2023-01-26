@@ -67,7 +67,7 @@ export class OptimismRelayer {
   }
   */
 
-  async getExitPopulatedTx (l2TxHash: string) {
+  async getExitPopulatedTx (l2TxHash: string): Promise<any> {
     const messagePairs = await getMessagesAndProofsForL2Transaction(
       this.l1Provider,
       this.l2Provider,

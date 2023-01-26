@@ -1,4 +1,5 @@
 import pkg from '../package.json'
+import { ArbitrumRelayer } from './exitRelayers/ArbitrumRelayer'
 import { BigNumber, providers } from 'ethers'
 import { BundleCommitted, BundleCommittedEventFetcher } from './events/BundleCommitted'
 import { BundleForwarded, BundleForwardedEventFetcher } from './events/BundleForwarded'
@@ -6,6 +7,7 @@ import { BundleReceived, BundleReceivedEventFetcher } from './events/BundleRecei
 import { BundleSet, BundleSetEventFetcher } from './events/BundleSet'
 import { DateTime } from 'luxon'
 import { EventFetcher } from './eventFetcher'
+import { ExitRelayer } from './exitRelayers/ExitRelayer'
 import { FeesSentToHub, FeesSentToHubEventFetcher } from './events/FeesSentToHub'
 import { HubMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/HubMessageBridge__factory'
 import { MerkleTree } from './utils/MerkleTree'
@@ -690,8 +692,12 @@ export class Hop {
 
     const l1Provider = this.getRpcProvider(this.l1ChainId)
     const l2Provider = this.getRpcProvider(fromChainId)
-    // TODO: generalize
-    const exitRelayer = new OptimismRelayer(this.network, l1Provider, l2Provider)
+    let exitRelayer : ExitRelayer
+    if ([420, 10].includes(fromChainId)) {
+      exitRelayer = new OptimismRelayer(this.network, l1Provider, l2Provider)
+    } else if ([421613, 42161, 42170].includes(fromChainId)) {
+      exitRelayer = new ArbitrumRelayer(this.network, l1Provider, l2Provider)
+    }
     const txData = await exitRelayer.getExitPopulatedTx(bundleCommittedTransactionHash)
 
     return {
