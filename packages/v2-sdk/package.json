@@ -37,6 +37,7 @@
     "@eth-optimism/message-relayer": "^0.2.18",
     "@eth-optimism/sdk": "^1.8.0",
     "@fxportal/maticjs-fxportal": "1.1.1",
+    "@hop-protocol/core": "0.0.1-beta.111",
     "@hop-protocol/v2-core": "0.0.0-beta.3",
     "@maticnetwork/maticjs": "3.2.0",
     "@maticnetwork/maticjs-ethers": "1.0.2",
@@ -49,7 +50,8 @@
     "luxon": "2.5.0",
     "merkletreejs": "^0.2.32",
     "p-queue": "^6.6.2",
-    "wait": "^0.4.2"
+    "wait": "^0.4.2",
+    "web3-utils": "1.7.5"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.0",

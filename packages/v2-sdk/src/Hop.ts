@@ -1,6 +1,5 @@
 import pkg from '../package.json'
 import { ArbitrumRelayer } from './exitRelayers/ArbitrumRelayer'
-import { PolygonRelayer } from './exitRelayers/PolygonRelayer'
 import { BigNumber, providers } from 'ethers'
 import { BundleCommitted, BundleCommittedEventFetcher } from './events/BundleCommitted'
 import { BundleForwarded, BundleForwardedEventFetcher } from './events/BundleForwarded'
@@ -10,6 +9,7 @@ import { DateTime } from 'luxon'
 import { EventFetcher } from './eventFetcher'
 import { ExitRelayer } from './exitRelayers/ExitRelayer'
 import { FeesSentToHub, FeesSentToHubEventFetcher } from './events/FeesSentToHub'
+import { GnosisChainRelayer } from './exitRelayers/GnosisChainRelayer'
 import { HubMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/HubMessageBridge__factory'
 import { MerkleTree } from './utils/MerkleTree'
 import { MessageBundled, MessageBundledEventFetcher } from './events/MessageBundled'
@@ -17,6 +17,7 @@ import { MessageRelayed, MessageRelayedEventFetcher } from './events/MessageRela
 import { MessageReverted, MessageRevertedEventFetcher } from './events/MessageReverted'
 import { MessageSent, MessageSentEventFetcher } from './events/MessageSent'
 import { OptimismRelayer } from './exitRelayers/OptimismRelayer'
+import { PolygonRelayer } from './exitRelayers/PolygonRelayer'
 import { SpokeMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/SpokeMessageBridge__factory'
 import { chainSlugMap } from './utils/chainSlugMap'
 import { formatEther, formatUnits } from 'ethers/lib/utils'
@@ -700,6 +701,8 @@ export class Hop {
       exitRelayer = new ArbitrumRelayer(this.network, l1Provider, l2Provider)
     } else if ([80001, 137].includes(fromChainId)) {
       exitRelayer = new PolygonRelayer(this.network, l1Provider, l2Provider)
+    } else if ([100].includes(fromChainId)) {
+      exitRelayer = new GnosisChainRelayer(this.network, l1Provider, l2Provider)
     }
     const txData = await exitRelayer.getExitPopulatedTx(bundleCommittedTransactionHash)
 
