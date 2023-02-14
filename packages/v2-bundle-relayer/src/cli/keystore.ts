@@ -19,13 +19,17 @@ enum Actions {
 export const keystoreProgram = root
   .command('keystore')
   .description('Keystore')
+  .option('--skip-main [boolean]', 'Skip running main function (for testing).', parseBool)
   .option('--pass <secret>', 'Passphrase to encrypt keystore with.', parseString)
+  .option('--newpass <secret>', 'Passphrase to reencrypt keystore with.', parseString)
   .option('--path <path>', 'File path of encrypted keystore.', parseString)
   .option('--override [boolean]', 'Override existing keystore if it exists.', parseBool)
   .option('--private-key <private-key>', 'The private key to encrypt.', parseString)
+  .option('--skip-interactive-prompts', 'Skip interactive prompts (for testing).', parseBool)
+  .action(actionHandler(main))
 
 async function main (source: any) {
-  let { override, args, pass: passphrase, path: keystoreFilePath = defaultKeystoreFilePath, privateKey } = source
+  let { override, args, pass: passphrase, newpass: newPassphrase, path: keystoreFilePath = defaultKeystoreFilePath, privateKey, skipInteractivePrompts } = source
   const action = args[0]
   const actionOptions = Object.values(Actions)
 
@@ -50,17 +54,23 @@ async function main (source: any) {
       hdnode = hdnode.derivePath(hdpath)
       privateKey = hdnode.privateKey
 
-      await promptShowMnemonic(mnemonic)
+      if (!skipInteractivePrompts) {
+        await promptShowMnemonic(mnemonic)
+      }
     }
 
     if (mnemonic) {
       let mnemonicConfirmed = false
-      while (!mnemonicConfirmed) {
-        const mnemonicConfirm = await promptConfirmMnemonic()
-        if (mnemonicConfirm === mnemonic) {
-          mnemonicConfirmed = true
-        } else {
-          await promptRetryMnemonic()
+      if (skipInteractivePrompts) {
+        mnemonicConfirmed = true
+      } else {
+        while (!mnemonicConfirmed) {
+          const mnemonicConfirm = await promptConfirmMnemonic()
+          if (mnemonicConfirm === mnemonic) {
+            mnemonicConfirmed = true
+          } else {
+            await promptRetryMnemonic()
+          }
         }
       }
     }
@@ -76,7 +86,11 @@ async function main (source: any) {
       }
     }
     fse.outputFileSync(filepath, JSON.stringify(keystore))
-    await promptShowKeystore(keystore.address, filepath)
+    if (skipInteractivePrompts) {
+      console.log(`Public address: 0x${keystore.address}.\nYour keys can be found at: ${filepath}`)
+    } else {
+      await promptShowKeystore(keystore.address, filepath)
+    }
   } else if (action === Actions.Decrypt) {
     if (!passphrase) {
       passphrase = await promptPassphrase()
@@ -92,7 +106,9 @@ async function main (source: any) {
     let keystore = getKeystore(keystoreFilePath)
     const recoveredPrivateKey = await recoverKeystore(keystore, oldPassphrase)
 
-    const newPassphrase = await generatePassphrase()
+    if (!passphrase) {
+      newPassphrase = await generatePassphrase()
+    }
     keystore = await generateKeystore(recoveredPrivateKey, newPassphrase)
     fse.outputFileSync(keystoreFilePath, JSON.stringify(keystore))
     await promptShowReencryption(keystore.address, keystoreFilePath)
@@ -113,8 +129,4 @@ async function generatePassphrase (): Promise<string> {
   }
 
   return (passphrase)
-}
-
-if (require.main === module) {
-  keystoreProgram.action(actionHandler(main))
 }

@@ -11,8 +11,10 @@ export const root = program
 export function actionHandler (fn: Function) {
   return async (source: any = {}) => {
     try {
-      await fn(source)
-      process.exit(0)
+      if (!source.skipMain) {
+        await fn(source)
+        process.exit(0)
+      }
     } catch (err) {
       console.error(`program error: ${err.message}\ntrace: ${err.stack}`)
       process.exit(1)
