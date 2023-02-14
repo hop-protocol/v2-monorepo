@@ -8,7 +8,7 @@ import { getKeystore, recoverKeystore } from 'src/keystore'
 import { promptPassphrase } from 'src/prompt'
 import { setSignerUsingPrivateKey } from 'src/signer'
 
-root
+export const workerProgram = root
   .command('worker')
   .description('Start the worker')
   .option(
@@ -36,7 +36,6 @@ root
     'The number of seconds to wait between exit bundle retries',
     parseNumber
   )
-  .action(actionHandler(main))
 
 async function main (source: any) {
   const { dry: dryMode, server, indexerPollSeconds, exitBundlePollSeconds, exitBundleRetryDelaySeconds } = source
@@ -67,4 +66,8 @@ async function main (source: any) {
     exitBundleRetryDelaySeconds
   })
   await worker.start()
+}
+
+if (require.main === module) {
+  workerProgram.action(actionHandler(main))
 }
