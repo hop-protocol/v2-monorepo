@@ -3,7 +3,7 @@ import { BundleCommittedEventsDb } from '../src/db/eventsDb/BundleCommittedEvent
 
 describe('BundleCommittedEventsDb', () => {
   it('should put, get, and update data', async () => {
-    const dbPath = '/tmp/test/testdb'
+    const dbPath = `/tmp/test/testdb/${Date.now()}`
     const db = new BundleCommittedEventsDb(dbPath)
 
     const data = {
@@ -21,7 +21,13 @@ describe('BundleCommittedEventsDb', () => {
         blockNumber: 1000,
         blockTimestamp: 1000000000,
         from: '0x123',
-        to: '0x123'
+        to: '0x123',
+        value: '0',
+        nonce: 1,
+        gasLimit: 10000,
+        gasUsed: 10000,
+        gasPrice: '1',
+        data: '0x'
       }
     }
 
@@ -38,7 +44,7 @@ describe('BundleCommittedEventsDb', () => {
   }, 60 * 1000)
 
   it('should return multiple events for same property index', async () => {
-    const dbPath = '/tmp/test/testdb'
+    const dbPath = `/tmp/test/testdb/${Date.now()}`
     const db = new BundleCommittedEventsDb(dbPath)
 
     const events = [
@@ -57,7 +63,13 @@ describe('BundleCommittedEventsDb', () => {
           blockNumber: 1000,
           blockTimestamp: 1000000000,
           from: '0x123',
-          to: '0x123'
+          to: '0x123',
+          value: '0',
+          nonce: 1,
+          gasLimit: 10000,
+          gasUsed: 10000,
+          gasPrice: '1',
+          data: '0x'
         }
       },
       {
@@ -75,7 +87,13 @@ describe('BundleCommittedEventsDb', () => {
           blockNumber: 1000,
           blockTimestamp: 1000000000,
           from: '0x123',
-          to: '0x123'
+          to: '0x123',
+          value: '0',
+          nonce: 1,
+          gasLimit: 10000,
+          gasUsed: 10000,
+          gasPrice: '1',
+          data: '0x'
         }
       }
     ]

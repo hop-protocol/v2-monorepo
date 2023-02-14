@@ -2,15 +2,22 @@ import wait from 'wait'
 import { EventsBaseDb } from '../db/eventsDb/EventsBaseDb'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { db } from '../db'
+import { sdkContractAddresses } from 'src/config'
 
 type StartBlocks = {
+  [chainId: string]: number
+}
+
+type EndBlocks = {
   [chainId: string]: number
 }
 
 type Options = {
   dbPath?: string
   startBlocks: StartBlocks
+  endBlocks?: EndBlocks // used for testing
   pollIntervalSeconds?: number
+  sdkContractAddresses?: any
 }
 
 export const defaultPollSeconds = 10
@@ -19,6 +26,7 @@ export class Indexer {
   sdk: Hop
   pollIntervalMs: number = defaultPollSeconds * 1000
   startBlocks: StartBlocks = {}
+  endBlocks: EndBlocks = {}
   chainIds: any = {
     5: true, // goerli
     420: true // goerli optimism
@@ -34,13 +42,20 @@ export class Indexer {
       this.pollIntervalMs = options?.pollIntervalSeconds * 1000
     }
     this.sdk = new Hop('goerli', {
-      batchBlocks: 10_000
+      batchBlocks: 10_000,
+      contractAddresses: options?.sdkContractAddresses ?? sdkContractAddresses
     })
     if (options?.startBlocks) {
       this.startBlocks = options.startBlocks
     }
     for (const chainId in this.chainIds) {
       this.startBlocks[chainId] = this.startBlocks[chainId] ?? 0
+    }
+    if (options?.endBlocks) {
+      this.endBlocks = options.endBlocks
+    }
+    for (const chainId in this.chainIds) {
+      this.endBlocks[chainId] = this.endBlocks[chainId] ?? 0
     }
     if (options?.dbPath) {
       this.db.setDbPath(options.dbPath)
@@ -118,11 +133,6 @@ export class Indexer {
       'MessageSent'
     ]
 
-    /*
-    const l1Events: string[] = []
-    const baseEvents = ['MessageBundled']
-    */
-
     const _events: any[] = []
 
     for (const _chainId in this.chainIds) {
@@ -148,10 +158,14 @@ export class Indexer {
 
       const provider = this.sdk.getRpcProvider(chainId)
       let fromBlock = this.startBlocks[chainId]
-      let toBlock = await provider.getBlockNumber()
+      let headBlock = await provider.getBlockNumber()
+      if (this.endBlocks[chainId]) {
+        headBlock = this.endBlocks[chainId]
+      }
+      let toBlock = headBlock
       if (syncState?.toBlock) {
         fromBlock = syncState.toBlock as number + 1
-        toBlock = await provider.getBlockNumber()
+        toBlock = headBlock
       }
 
       console.log('get', eventNames, chainId, fromBlock, toBlock)

@@ -22,6 +22,12 @@ Run worker
 npm start
 ```
 
+## Test
+
+```bash
+npm test
+```
+
 ## License
 
 [MIT](LICENSE)
