@@ -1,0 +1,1 @@
+export const goerliHubFactoryAddress = '0x34655508eb75469dd240A5C1b47594386a67C6b2'
