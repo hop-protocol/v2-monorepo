@@ -648,7 +648,7 @@ npx hardhat run --network goerli scripts/connectTargets.js
           language="bash"
           code={`
 tx: 0x33b5980b0a29288cecf0a5fccfd0996c2b2383e99f42f7453c58e4d94eeb0e18
-connector address: 0x981df0d837f03a80031AE1ba60828283734b0efD
+connector address: ${connectorAddress || '0x981df0d837f03a80031AE1ba60828283734b0efD'}
           `.trim()}
           />
         </Box>
@@ -784,12 +784,12 @@ tx: 0xcb9024d0d94cc45c84b6aa5812590a8385a9d2e8fa99d34b1bdfa0d046d9dadd
 const hre = require('hardhat')
 
 async function main() {
-  let pingPongAddress = '0xf92201C1113f6164C47115976c1330b87273e476'
+  let target = '${target1 || '0xf92201C1113f6164C47115976c1330b87273e476'}' // goerli
   if (hre.network.name === 'optimism') {
-    pingPongAddress = '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'
+    target = '${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}'
   }
   const PingPong = await hre.ethers.getContractFactory('PingPong')
-  const pingPong = await PingPong.attach(pingPongAddress)
+  const pingPong = await PingPong.attach(target)
   await pingPong.deployed()
 
   const tx = await pingPong.ping(0)
