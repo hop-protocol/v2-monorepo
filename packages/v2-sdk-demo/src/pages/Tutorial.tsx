@@ -347,8 +347,7 @@ export function Tutorial () {
         </Typography>
 
         <Typography variant="body1">
-          After receiving testnet ETH, bridge some to Optimism (Goerli):
-          Goerli ETH Faucet: <Link href="https://app.optimism.io/bridge" target="_blank" rel="noreferrer noopener">https://app.optimism.io/bridge ↗</Link>
+          After receiving testnet ETH, bridge some to Optimism (Goerli): <Link href="https://app.optimism.io/bridge" target="_blank" rel="noreferrer noopener">https://app.optimism.io/bridge ↗</Link>
         </Typography>
 
         <Typography variant="h4" mt={4} mb={4}>Create Hardhat Project</Typography>
