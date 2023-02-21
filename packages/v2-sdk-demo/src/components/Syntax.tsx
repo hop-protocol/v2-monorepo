@@ -5,9 +5,17 @@ import Box from '@mui/material/Box'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import Typography from '@mui/material/Typography'
 
-export function Syntax (props: { code: string }) {
-  const { code } = props
+type Props = {
+  code: string
+  language?: string
+}
+
+export function Syntax (props: Props) {
+  let { code, language } = props
   const [copied, setCopied] = useState(false)
+  if (!language) {
+    language = 'javascript'
+  }
 
   function handleCopy () {
     setCopied(true)
@@ -17,10 +25,10 @@ export function Syntax (props: { code: string }) {
   }
 
   return (
-    <Box width="100%" overflow="auto">
+    <Box>
       <Box display="flex" flexDirection="column">
         <SyntaxHighlighter
-          language="javascript"
+          language={language}
           style={theme}
           showLineNumbers={true}
           wrapLongLines={false}
