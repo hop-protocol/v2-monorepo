@@ -4,3 +4,7 @@ code {
   font-family: monospace;
   padding: 0 0.5rem;
 }
+pre > code > span.linenumber:first-child {
+  float: left;
+  padding-right: 0.5rem !important;
+}

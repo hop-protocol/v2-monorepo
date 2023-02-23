@@ -561,6 +561,10 @@ PingPong deployed to: ${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}
             <Typography variant="h5" mb={2}>Try It!</Typography>
             <LoadingButton loading={isDeployingTarget2} disabled={!!target2 || !target1} onClick={handleDeployPingPongOptimismClick} variant="contained">Deploy PingPong on Optimism (Goerli)</LoadingButton>
 
+            {!target1 && (
+              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Deploy Goerli contract first before trying to deploy on Optimism (Goerli)</em></Typography>
+            )}
+
             {!!target2 && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
                 <Alert severity="info">PingPong Optimism (Goerli) address: {target2}</Alert>
@@ -658,6 +662,10 @@ connector address: ${connectorAddress || '0x981df0d837f03a80031AE1ba60828283734b
             <Typography variant="h5" mb={2}>Try It!</Typography>
             <LoadingButton loading={isConnectingTargets} disabled={!(target1 && target2) || !!connectorAddress} onClick={handleConnectTargetsClick} variant="contained">Connect Targets</LoadingButton>
 
+            {!(target1 && target2) && (
+              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Goerli and Optimism (Goerli) contract must be deployed first in order to connect targets</em></Typography>
+            )}
+
             {!!connectorAddress && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
                 <Alert severity="info">Connector Goerli and Optimism (Goerli) address: {connectorAddress}</Alert>
@@ -729,7 +737,11 @@ tx: 0xe98147b2decd1b930732f0e0ab5b2ef032592d62d73670f9db6bbbf126478fc4
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
-            <LoadingButton loading={isSettingCounterpartGoerli} disabled={!(!!connectorAddress && !!target1 && !!target2) || !!counterpartGoerliTx} onClick={handleSetCounterpartGoerliClick} variant="contained">Set Counterpart on Goerli</LoadingButton>
+            <LoadingButton loading={isSettingCounterpartGoerli} disabled={!(connectorAddress && target1 && target2) || !!counterpartGoerliTx} onClick={handleSetCounterpartGoerliClick} variant="contained">Set Counterpart on Goerli</LoadingButton>
+
+            {!(connectorAddress && target1 && target2) && (
+              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Connect targets first to get connect address in order to set counterpart</em></Typography>
+            )}
 
             {!!counterpartGoerliTx && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
@@ -764,7 +776,11 @@ tx: 0xcb9024d0d94cc45c84b6aa5812590a8385a9d2e8fa99d34b1bdfa0d046d9dadd
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
-            <LoadingButton loading={isSettingCounterpartOptimism} disabled={!(!!connectorAddress && !!target1 && !!target2 && !!counterpartGoerliTx) || !!counterpartOptimismTx} onClick={handleSetCounterpartOptimismClick} variant="contained">Set Counterpart on Optimism (Goerli)</LoadingButton>
+            <LoadingButton loading={isSettingCounterpartOptimism} disabled={!(connectorAddress && target1 && target2 && counterpartGoerliTx) || !!counterpartOptimismTx} onClick={handleSetCounterpartOptimismClick} variant="contained">Set Counterpart on Optimism (Goerli)</LoadingButton>
+
+            {!(connectorAddress && target1 && target2 && counterpartGoerliTx) && (
+              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Set counterpart address on Goerli contract first before setting it on Optimism (Goerli) contract</em></Typography>
+            )}
 
             {!!counterpartOptimismTx && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
@@ -840,7 +856,11 @@ messagesReceived: 0
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
-            <LoadingButton loading={isSendingPingGoerli} disabled={!(!!connectorAddress && !!target1 && !!target2 && !!counterpartGoerliTx && !!counterpartOptimismTx)} onClick={handleSendPingGoerliClick} variant="contained">Send Ping on Goerli</LoadingButton>
+            <LoadingButton loading={isSendingPingGoerli} disabled={!(connectorAddress && target1 && target2 && counterpartGoerliTx && counterpartOptimismTx)} onClick={handleSendPingGoerliClick} variant="contained">Send Ping on Goerli</LoadingButton>
+
+            {!(connectorAddress && target1 && target2 && counterpartGoerliTx && counterpartOptimismTx) && (
+              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Set counterpart addresses first before sending ping messages</em></Typography>
+            )}
 
             {!!pingGoerliTx && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
@@ -858,9 +878,11 @@ messagesReceived: 0
           </Box>
         )}
 
-        <Box mt={4}>
-          <Button onClick={resetState} variant="contained">Reset tutorial</Button>
-        </Box>
+        {!!target1 && (
+          <Box mt={4}>
+            <Button onClick={resetState} variant="contained">Reset tutorial</Button>
+          </Box>
+        )}
       </Box>
     </SiteWrapper>
   )

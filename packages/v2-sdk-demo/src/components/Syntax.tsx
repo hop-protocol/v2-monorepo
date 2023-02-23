@@ -32,9 +32,7 @@ export function Syntax (props: Props) {
           style={theme}
           showLineNumbers={true}
           wrapLongLines={false}
-        >
-          {code}
-        </SyntaxHighlighter>
+        >{code}</SyntaxHighlighter>
       </Box>
       <Box display="flex" justifyContent="flex-end">
         <CopyToClipboard text={code}
