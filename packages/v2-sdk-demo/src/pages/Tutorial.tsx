@@ -25,6 +25,7 @@ export function Tutorial () {
   const [isSettingCounterpartGoerli, setIsSettingCounterpartGoerli] = useState(false)
   const [isSettingCounterpartOptimism, setIsSettingCounterpartOptimism] = useState(false)
   const [isSendingPingGoerli, setIsSendingPingGoerli] = useState(false)
+  const [isSendingPingOptimism, setIsSendingPingOptimism] = useState(false)
 
   const rpcUrls: any = {
     goerli: 'https://rpc.ankr.com/eth_goerli',
@@ -130,6 +131,60 @@ export function Tutorial () {
     } catch (err: any) {}
     return ''
   })
+
+  const [pingOptimismTx, setPingOptimismTx] = useState(() => {
+    try {
+      const cached = localStorage.getItem('tutorial:pingOptimismTx')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return ''
+  })
+
+  const { data: goerliContractStats } = useQuery(
+    [
+      `goerliContractStats:${target1}`,
+      address
+    ],
+    async () => {
+      const provider = new providers.StaticJsonRpcProvider(rpcUrls.goerli)
+      const { abi } = pingPongArtifact
+      const pingPong = new Contract(target1, abi, provider)
+      const messagesSent = await pingPong.messagesSent()
+      const messagesReceived = await pingPong.messagesReceived()
+      return {
+        messagesSent: messagesSent.toString(),
+        messagesReceived: messagesReceived.toString()
+      }
+    },
+    {
+      enabled: !!target1,
+      refetchInterval: 30 * 1000
+    }
+  )
+
+  const { data: optimismContractStats } = useQuery(
+    [
+      `optimismContractStats:${target2}`,
+      address
+    ],
+    async () => {
+      const provider = new providers.StaticJsonRpcProvider(rpcUrls.optimism)
+      const { abi } = pingPongArtifact
+      const pingPong = new Contract(target2, abi, provider)
+      const messagesSent = await pingPong.messagesSent()
+      const messagesReceived = await pingPong.messagesReceived()
+      return {
+        messagesSent: messagesSent.toString(),
+        messagesReceived: messagesReceived.toString()
+      }
+    },
+    {
+      enabled: !!target2,
+      refetchInterval: 30 * 1000
+    }
+  )
 
   useEffect(() => {
     try {
@@ -330,6 +385,21 @@ export function Tutorial () {
       setError(err.message)
     }
     setIsSendingPingGoerli(false)
+  }
+
+  async function handleSendPingOptimismClick (event: any) {
+    event.preventDefault()
+    try {
+      setIsSendingPingOptimism(true)
+      setError('')
+      const hash = await sendPing(420, target2)
+      if (hash) {
+        setPingOptimismTx(hash)
+      }
+    } catch (err: any) {
+      setError(err.message)
+    }
+    setIsSendingPingOptimism(false)
   }
 
   function resetState() {
@@ -912,6 +982,47 @@ messagesReceived: 0
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
                 <Alert severity="info">Ping on Goerli sent</Alert>
               </Box>
+            )}
+
+            {(!!target1 && !!goerliContractStats) && (
+              <>
+                <Typography mt={4} variant="body1">
+                  Messages Sent on Goerli: {goerliContractStats?.messagesSent}
+                </Typography>
+                <Typography variant="body1">
+                  Messages Received on Goerli: {goerliContractStats?.messagesReceived}
+                </Typography>
+              </>
+            )}
+          </Box>
+        </Card>
+
+        <Box mb={4}></Box>
+
+        <Card>
+          <Box p={2}>
+            <Typography variant="h5" mb={2}>Try It!</Typography>
+            <LoadingButton loading={isSendingPingOptimism} disabled={!(connectorAddress && target1 && target2 && counterpartGoerliTx && counterpartOptimismTx)} onClick={handleSendPingOptimismClick} variant="contained">Send Ping on Optimism</LoadingButton>
+
+            {!(connectorAddress && target1 && target2 && counterpartGoerliTx && counterpartOptimismTx) && (
+              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Set counterpart addresses first before sending ping messages</em></Typography>
+            )}
+
+            {!!pingOptimismTx && (
+              <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
+                <Alert severity="info">Ping on Optimism sent</Alert>
+              </Box>
+            )}
+
+            {(!!target2 && !!optimismContractStats) && (
+              <>
+                <Typography mt={2} variant="body1">
+                  Messages Sent on Optimism (Goerli): {optimismContractStats?.messagesSent}
+                </Typography>
+                <Typography variant="body1">
+                  Messages Received on Optimism (Goerli): {optimismContractStats?.messagesReceived}
+                </Typography>
+              </>
             )}
           </Box>
         </Card>
