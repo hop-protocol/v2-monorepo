@@ -175,9 +175,25 @@ export function useWeb3 () {
     }
   }
 
+  async function getWallet() {
+    const wallets = await onboard.connectWallet()
+    const ethersProvider = new providers.Web3Provider(
+      wallets[0].provider,
+      'any'
+    )
+    const signer = ethersProvider.getSigner()
+    if (signer) {
+      setWallet(signer)
+      const _address = await signer.getAddress()
+      setAddress(_address)
+    }
+    return signer
+  }
+
   return {
     onboard,
     wallet,
+    getWallet,
     address,
     error,
     connect,

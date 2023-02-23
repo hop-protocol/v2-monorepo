@@ -5,7 +5,7 @@ import Button from '@mui/material/Button'
 import LoadingButton from '@mui/lab/LoadingButton'
 import { SiteWrapper } from '../components/SiteWrapper'
 import { providers, Contract, ContractFactory } from 'ethers'
-import { getAddress } from 'ethers/lib/utils'
+import { getAddress, formatEther } from 'ethers/lib/utils'
 import { useWeb3 } from '../hooks/useWeb3'
 import pingPongArtifact from '../abi/PingPong.json'
 import hubConnectorFactoryArtifact from '../abi/HubERC5164ConnectorFactory.json'
@@ -13,10 +13,11 @@ import Alert from '@mui/material/Alert'
 import { Syntax } from '../components/Syntax'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
+import { useQuery } from 'react-query'
 import '../tutorial.css'
 
 export function Tutorial () {
-  const { onboard, wallet, address, connect, disconnect } = useWeb3()
+  const { onboard, wallet, getWallet, address, connect, disconnect } = useWeb3()
   const [error, setError] = useState('')
   const [isDeployingTarget1, setIsDeployingTarget1] = useState(false)
   const [isDeployingTarget2, setIsDeployingTarget2] = useState(false)
@@ -24,6 +25,51 @@ export function Tutorial () {
   const [isSettingCounterpartGoerli, setIsSettingCounterpartGoerli] = useState(false)
   const [isSettingCounterpartOptimism, setIsSettingCounterpartOptimism] = useState(false)
   const [isSendingPingGoerli, setIsSendingPingGoerli] = useState(false)
+
+  const rpcUrls: any = {
+    goerli: 'https://rpc.ankr.com/eth_goerli',
+    optimism: 'https://rpc.ankr.com/optimism_testnet',
+  }
+
+  const { data: goerliBalance } = useQuery(
+    [
+      `goerliBalance:${address}`,
+      address
+    ],
+    async () => {
+      const provider = new providers.StaticJsonRpcProvider(rpcUrls.goerli)
+      const balance = await provider.getBalance(address)
+      const formattedBalance = formatEther(balance.toString())
+      return {
+        balance,
+        formattedBalance
+      }
+    },
+    {
+      enabled: !!address,
+      refetchInterval: 60 * 1000
+    }
+  )
+
+  const { data: optimismBalance } = useQuery(
+    [
+      `optimismBalance:${address}`,
+      address
+    ],
+    async () => {
+      const provider = new providers.StaticJsonRpcProvider(rpcUrls.optimism)
+      const balance = await provider.getBalance(address)
+      const formattedBalance = formatEther(balance.toString())
+      return {
+        balance,
+        formattedBalance
+      }
+    },
+    {
+      enabled: !!address,
+      refetchInterval: 60 * 1000
+    }
+  )
 
   const [target1, setTarget1] = useState(() => {
     try {
@@ -135,13 +181,7 @@ export function Tutorial () {
 
   async function deployPingPong (chainId: number) {
     const { abi, bytecode } = pingPongArtifact
-    const wallets = await onboard.connectWallet()
-    const ethersProvider = new providers.Web3Provider(
-      wallets[0].provider,
-      'any'
-    )
-    const signer = ethersProvider.getSigner()
-
+    const signer = await getWallet()
     const success = await onboard.setChain({ chainId })
     if (!success) {
       return
@@ -184,13 +224,7 @@ export function Tutorial () {
   }
 
   async function connectTargets() {
-    const wallets = await onboard.connectWallet()
-    const ethersProvider = new providers.Web3Provider(
-      wallets[0].provider,
-      'any'
-    )
-    const signer = ethersProvider.getSigner()
-
+    const signer = await getWallet()
     const success = await onboard.setChain({ chainId: 5 })
     if (!success) {
       return
@@ -226,13 +260,7 @@ export function Tutorial () {
   }
 
   async function setCounterpart (chainId: number, target: string) {
-    const wallets = await onboard.connectWallet()
-    const ethersProvider = new providers.Web3Provider(
-      wallets[0].provider,
-      'any'
-    )
-    const signer = ethersProvider.getSigner()
-
+    const signer = await getWallet()
     const success = await onboard.setChain({ chainId })
     if (!success) {
       return
@@ -276,13 +304,7 @@ export function Tutorial () {
   }
 
   async function sendPing (chainId: number, target: string) {
-    const wallets = await onboard.connectWallet()
-    const ethersProvider = new providers.Web3Provider(
-      wallets[0].provider,
-      'any'
-    )
-    const signer = ethersProvider.getSigner()
-
+    const signer = await getWallet()
     const success = await onboard.setChain({ chainId })
     if (!success) {
       return
@@ -351,6 +373,30 @@ export function Tutorial () {
         <Typography variant="body1">
           After receiving testnet ETH, bridge some to Optimism (Goerli): <Link href="https://app.optimism.io/bridge" target="_blank" rel="noreferrer noopener">https://app.optimism.io/bridge ↗</Link>
         </Typography>
+
+        {!address && (
+          <Box mt={4}>
+            <LoadingButton loading={false} disabled={false} onClick={connect} variant="contained">Check balance</LoadingButton>
+          </Box>
+        )}
+
+        {!!address && (
+          <Typography mt={2} variant="body1">
+            Connected account: {address}
+          </Typography>
+        )}
+
+        {!!goerliBalance?.formattedBalance && (
+          <Typography mt={2} variant="body1">
+            Goerli ETH Balance: {goerliBalance.formattedBalance}
+          </Typography>
+        )}
+
+        {!!optimismBalance?.formattedBalance && (
+          <Typography mt={2} variant="body1">
+            Optimism ETH Balance: {optimismBalance.formattedBalance}
+          </Typography>
+        )}
 
         <Typography variant="h4" mt={4} mb={4}>Create Hardhat Project</Typography>
 

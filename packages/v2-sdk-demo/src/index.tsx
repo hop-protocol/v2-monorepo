@@ -5,11 +5,28 @@ import App from './App'
 import reportWebVitals from './reportWebVitals'
 import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { QueryClient, QueryClientProvider } from 'react-query'
 
 const theme = createTheme({
   palette: {
     primary: {
       main: '#d56ec6',
+    },
+  },
+})
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 20000,
+      cacheTime: 1000 * 60 * 60,
+      // By default, retries in React Query do not happen immediately after a request fails.
+      // As is standard, a back-off delay is gradually applied to each retry attempt.
+      // The default retryDelay is set to double (starting at 1000ms) with each attempt, but not exceed 30 seconds:
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+      onError: err => {
+        console.error('react-query error:', err)
+      },
     },
   },
 })
@@ -21,9 +38,11 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </QueryClientProvider>
     </ThemeProvider>
   </React.StrictMode>
 )
