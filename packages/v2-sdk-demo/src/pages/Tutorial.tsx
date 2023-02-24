@@ -367,7 +367,9 @@ export function Tutorial () {
 
     const { abi } = pingPongArtifact
     const pingPong = new Contract(target, abi, signer)
-    const tx = await pingPong.ping(0)
+    const tx = await pingPong.ping(0, {
+      value: chainId === 420 ? '1000000000' : '0'
+    })
     await tx.wait()
     return tx.hash
   }
@@ -951,11 +953,14 @@ async function main() {
   const target2 = '${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}' // optimism
 
   const target = hre.network.name === 'optimism' ? target2 : target1
+  const fee = hre.network.name === 'optimism' ? '1000000000' : '0'
   const PingPong = await hre.ethers.getContractFactory('PingPong')
   const pingPong = await PingPong.attach(target)
   await pingPong.deployed()
 
-  const tx = await pingPong.ping(0)
+  const tx = await pingPong.ping(0, {
+    value: fee
+  })
   console.log('tx:', tx.hash)
   const receipt = await tx.wait()
 
