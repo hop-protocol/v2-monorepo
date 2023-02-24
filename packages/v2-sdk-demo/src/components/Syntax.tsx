@@ -25,13 +25,20 @@ export function Syntax (props: Props) {
   }
 
   return (
-    <Box>
+    <Box width="100%">
       <Box display="flex" flexDirection="column">
         <SyntaxHighlighter
           language={language}
           style={theme}
           showLineNumbers={true}
-          wrapLongLines={false}
+          overflow="auto"
+          lineProps={{
+            style: {
+              wordBreak: 'break-all',
+              whiteSpace: 'pre-wrap'
+            }
+          }}
+          wrapLines={true}
         >{code}</SyntaxHighlighter>
       </Box>
       <Box display="flex" justifyContent="flex-end">

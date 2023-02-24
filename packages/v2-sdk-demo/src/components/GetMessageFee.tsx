@@ -139,7 +139,7 @@ main().catch(console.error)
             </Box>
           )}
         </Box>
-        <Box width="100%">
+        <Box width="100%" className={styles.syntaxContainer}>
           <Box mb={2}>
             <Typography variant="subtitle1">Code example</Typography>
           </Box>

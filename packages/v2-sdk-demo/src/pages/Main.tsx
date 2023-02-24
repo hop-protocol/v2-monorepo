@@ -24,6 +24,7 @@ import { GetMessageFee } from '../components/GetMessageFee'
 import { SetRpcProviders } from '../components/SetRpcProviders'
 import { Hop } from '@hop-protocol/v2-sdk'
 import Card from '@mui/material/Card'
+import { useStyles } from '../components/useStyles'
 
 const Buffer = require('buffer/').Buffer
 
@@ -67,6 +68,7 @@ if (!(window as any).Buffer) {
 
 export function Main () {
   // const { sdk, connected, safe } = useSafeAppsSDK()
+  const styles = useStyles()
   const { queryParams, updateQueryParams } = useQueryParams()
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -297,7 +299,7 @@ export function Main () {
               <Box mb={8} key={i}>
                 <Box maxWidth="1400px" m="0 auto">
                   <Card>
-                    <Box p={4} minWidth="400px">
+                    <Box p={4}>
                       {component}
                     </Box>
                   </Card>

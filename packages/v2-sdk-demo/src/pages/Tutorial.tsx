@@ -425,7 +425,7 @@ export function Tutorial () {
         </Box>
       )}
 
-      <Box maxWidth="800px">
+      <Box mb={8} maxWidth="800px" width="100%">
         <Typography variant="h2" mb={4}>Tutorial: Connector Demo</Typography>
 
         <Typography mb={4} variant="body1">This tutorial will walk you through deploying simple PingPong contracts on two different chains, connecting these contracts with messengers, and seamlessly sending messages from one contract to the other while verifying the counterparty.</Typography>

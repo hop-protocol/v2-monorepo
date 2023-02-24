@@ -51,7 +51,7 @@ export function Header () {
           <Box>
             <Typography variant="h4">
               <Box display="flex" justifyContent="center" alignItems="center">
-                <Box mr={1}><img width="32px" src="https://assets.hop.exchange/images/hop_logo.png" style={{ borderRadius: '50%' }}/></Box><Box style={{ whiteSpace: 'nowrap' }}>Hop v2 SDK Playground</Box>
+                <Box mr={1}><img width="32px" src="https://assets.hop.exchange/images/hop_logo.png" style={{ borderRadius: '50%' }}/></Box><Box>Hop v2 SDK Playground</Box>
               </Box>
             </Typography>
           </Box>

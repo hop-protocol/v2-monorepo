@@ -62,12 +62,14 @@ main().catch(console.error)
             </Box>
           </form>
           {!!output && (
-            <Box>
+            <Box width="100%">
               <Box mb={2}>
                 <Typography variant="body1">Output</Typography>
               </Box>
               <pre style={{
-                maxWidth: '500px',
+                width: '100%',
+                wordBreak: 'break-all',
+                whiteSpace: 'pre-wrap',
                 overflow: 'auto'
               }}>{output}</pre>
               <CopyToClipboard text={output}
@@ -79,7 +81,7 @@ main().catch(console.error)
             </Box>
           )}
         </Box>
-        <Box width="100%">
+        <Box width="100%" className={styles.syntaxContainer}>
           <Box mb={2}>
             <Typography variant="subtitle1">Code example</Typography>
           </Box>
