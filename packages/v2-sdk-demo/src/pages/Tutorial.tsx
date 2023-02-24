@@ -285,7 +285,7 @@ export function Tutorial () {
       return
     }
 
-    const factoryAddress = '0x34655508eb75469dd240A5C1b47594386a67C6b2'
+    const factoryAddress = '0xeA72163fb54A9bD84F49F2f08D7Cc9bc1b68A649'
     const { abi } = hubConnectorFactoryArtifact
     const factory = new Contract(factoryAddress, abi, signer)
     const chainId1 = 5
@@ -428,20 +428,22 @@ export function Tutorial () {
       <Box mb={8} maxWidth="800px" width="100%">
         <Typography variant="h2" mb={4}>Tutorial: Connector Demo</Typography>
 
-        <Typography mb={4} variant="body1">This tutorial will walk you through deploying simple PingPong contracts on two different chains, connecting these contracts with messengers, and seamlessly sending messages from one contract to the other while verifying the counterparty.</Typography>
+        <Typography mb={4} variant="body1">This tutorial will show you to easy it is to make any smart contract into a cross-chain smart contract by connecting the Hop messenger to it. It'll walk you through deploying simple contracts on two different chains, connecting these contracts with messengers, and seamlessly sending messages from one contract to the other while verifying the sender.</Typography>
+
+        <Typography mb={4} variant="body1">The demo <em>PingPong</em> contracts will be deployed to L1 Goerli and L2 Optimism (Goerli) and will show how to send a message (ping) from one chain to another, and have the destination chain send a message back to the source chain (pong). </Typography>
 
         <Typography mb={4} variant="h4">Faucet</Typography>
 
         <Typography mb={2} variant="body1">
-          To follow along the tutorial, you will need some testnet ETH.
+          To follow along the tutorial, you will need some testnet ETH on both Goerli and Optimism (Goerli).
         </Typography>
 
         <Typography mb={2} variant="body1">
-          Goerli ETH Faucet: <Link href="https://faucet.paradigm.xyz/" target="_blank" rel="noreferrer noopener">https://faucet.paradigm.xyz ↗</Link>
+          You can request Goerli ETH from this faucet: <Link href="https://faucet.paradigm.xyz/" target="_blank" rel="noreferrer noopener">https://faucet.paradigm.xyz ↗</Link>
         </Typography>
 
         <Typography variant="body1">
-          After receiving testnet ETH, bridge some to Optimism (Goerli): <Link href="https://app.optimism.io/bridge" target="_blank" rel="noreferrer noopener">https://app.optimism.io/bridge ↗</Link>
+          After receiving Goerli ETH, bridge some to Optimism (Goerli) using the native bridge: <Link href="https://app.optimism.io/bridge" target="_blank" rel="noreferrer noopener">https://app.optimism.io/bridge ↗</Link>
         </Typography>
 
         {!address && (
@@ -468,9 +470,13 @@ export function Tutorial () {
           </Typography>
         )}
 
+        <Typography mt={2} variant="body1">
+          Once you have ETH, let's continue to setup a Hardhat project in the next section.
+        </Typography>
+
         <Typography variant="h4" mt={4} mb={4}>Create Hardhat Project</Typography>
 
-        <Typography variant="body1">Initialize a new hardhat project with the following commands:</Typography>
+        <Typography variant="body1">Initialize a new <Link href="https://hardhat.org/" target="_blank" rel="noreferrer noopener">Hardhat</Link> project with the following commands:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -479,15 +485,23 @@ export function Tutorial () {
 mkdir demo
 cd demo/
 npx hardhat
-
 # Select "Create a basic sample project" when prompted.
-
-npm i dotenv --save
             `.trim()}
             />
         </Box>
 
-        <Typography variant="body1">Edit <code>hardhat.config.js</code> with the following:</Typography>
+        <Typography variant="body1">Also install the <code>dotenv</code> dependency since we'll be adding environment variables:</Typography>
+
+        <Box mb={2}>
+          <Syntax
+          language="bash"
+          code={`
+npm i dotenv --save-dev
+            `.trim()}
+            />
+        </Box>
+
+        <Typography variant="body1">Edit <code>hardhat.config.js</code> with the following to import the private key and set the Goerli and Optimism (Goerli) RPC config:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -519,7 +533,7 @@ module.exports = {
 
         <Typography mb={4} variant="h4">Set signing key</Typography>
 
-        <Typography variant="body1">Create a <code>.env</code> file with the following:</Typography>
+        <Typography variant="body1">Create a <code>.env</code> file with the following environment variable (replace with your private key string) that will be used for signing transactions. Make sure this account has testnet ETH on both Goerli and Optimism (Goerli):</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -534,10 +548,10 @@ PRIVATE_KEY=123...
         <Typography mb={4} variant="h4">Deploy Sender and Receiver Contracts</Typography>
 
         <Typography mb={2} variant="body1">
-        We're going to deploy a mock sender and receiver contract on two different chains; Goerli and Optimism (Goerli).
+        We're going to deploy simple sender and receiver contract on two different chains. These will be the PingPong contracts and will live on Goerli and Optimism (Goerli).
           </Typography>
 
-        <Typography variant="body1">Create <code>contracts/PingPing.sol</code> file with the following:</Typography>
+        <Typography variant="body1">Create <code>contracts/PingPing.sol</code> contract file with the following:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -627,7 +641,7 @@ npx hardhat run --network goerli scripts/deployPingPong.js
           />
         </Box>
 
-        <Typography variant="body1">The output should look like this:</Typography>
+        <Typography variant="body1">The output should print the deployed contract address on Goerli:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -642,11 +656,13 @@ PingPong deployed to: ${target1 || '0xf92201C1113f6164C47115976c1330b87273e476'}
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
+            <Typography variant="body1" mb={2}>You can follow along the tutorial using your MetaMask wallet.</Typography>
+            <Typography variant="body1" mb={2}>Deploy the PingPong contract on Goerli.</Typography>
             <LoadingButton loading={isDeployingTarget1} disabled={!!target1} onClick={handleDeployPingPongGoerliClick} variant="contained">Deploy PingPong on Goerli</LoadingButton>
 
             {!!target1 && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="info">PingPong Goerli address: {target1}</Alert>
+                <Alert severity="success">PingPong Goerli address: {target1}</Alert>
               </Box>
             )}
           </Box>
@@ -663,7 +679,7 @@ npx hardhat run --network optimism scripts/deployPingPong.js
           />
         </Box>
 
-        <Typography variant="body1">The output should look like this:</Typography>
+        <Typography variant="body1">The output should print the deployed PingPong contract address on Optimism (Goerli):</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -677,6 +693,8 @@ PingPong deployed to: ${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
+            <Typography variant="body1" mb={2}>Deploy the PingPong contract on Optimism (Goerli).</Typography>
+
             <LoadingButton loading={isDeployingTarget2} disabled={!!target2 || !target1} onClick={handleDeployPingPongOptimismClick} variant="contained">Deploy PingPong on Optimism (Goerli)</LoadingButton>
 
             {!target1 && (
@@ -685,7 +703,7 @@ PingPong deployed to: ${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}
 
             {!!target2 && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="info">PingPong Optimism (Goerli) address: {target2}</Alert>
+                <Alert severity="success">PingPong Optimism (Goerli) address: {target2}</Alert>
               </Box>
             )}
           </Box>
@@ -707,7 +725,9 @@ git clone https://github.com/hop-protocol/contracts-v2
 
         <Typography mt={4} mb={2} variant="body1">The next step is to connect the two PingPong contracts using the Hub Connector Factory and in return get the connector address.</Typography>
 
-        <Typography variant="body1">Create <code>scripts/connectTargets.js</code> with the following:</Typography>
+        <Typography mt={4} mb={2} variant="body1">On Goerli, the Hub Connector Factory is at <code>0x34655508eb75469dd240A5C1b47594386a67C6b2</code>.</Typography>
+
+        <Typography variant="body1">Create <code>scripts/connectTargets.js</code> with the following. Replace the <code>target1</code> and <code>target2</code> addresses with your Goerli and Optimism (Goerli) PingPong contract addresses respectively:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -715,14 +735,14 @@ git clone https://github.com/hop-protocol/contracts-v2
 const hre = require('hardhat')
 
 async function main() {
-  const connectorFactoryAddress = '0x34655508eb75469dd240A5C1b47594386a67C6b2'
-  const target1 = '${target1 || '0xf92201C1113f6164C47115976c1330b87273e476'}'
-  const target2 = '${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}'
+  const connectorFactory = '0x34655508eb75469dd240A5C1b47594386a67C6b2' // on goerli
+  const target1 = '${target1 || '0xf92201C1113f6164C47115976c1330b87273e476'}' // goerli
+  const target2 = '${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}' // optimism
   const hubChainId = 5
   const spokeChainId = 420
 
   const HubConnectorFactory = await hre.ethers.getContractFactory('HubERC5164ConnectorFactory')
-  const hubConnectorFactory = HubConnectorFactory.attach(connectorFactoryAddress)
+  const hubConnectorFactory = HubConnectorFactory.attach(connectorFactory)
 
   await hubConnectorFactory.deployed()
 
@@ -752,7 +772,7 @@ main()
           />
         </Box>
 
-        <Typography mt={4} variant="body1">Connect targets with the following command:</Typography>
+        <Typography mt={4} variant="body1">Connect the target addresses by running the script and it'll print the newly deployed connector address:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -775,9 +795,16 @@ connector address: ${connectorAddress || '0x981df0d837f03a80031AE1ba60828283734b
           />
         </Box>
 
+        <Typography mb={2} variant="body1">When connecting the targets, the hub contract on Goerli creates a new connector contract on Goerli, and then sends a message to Optimism (Goerli) to create a connector there. The new connector address will be the same address for both Goerli and Optimism (Goerli).</Typography>
+
+        <Typography mb={2} variant="body1">What the connector contract allows for is to be able to invoke contract calls on the connector address as if you're calling a regular method on the destination contract, except it'll forward that call cross-chain using the native bridge messenger.</Typography>
+
+        <Typography mb={2} variant="body1">The connector address is referred here at the <code>counterpart</code> in the PingPong contract; for example, if you recall the <code>{'PingPong(counterpart).pong{value: msg.value}(rallyCount);'}</code> line, this is actually sending a message over the bridge to invoke the <code>pong</code> on the target address!</Typography>
+
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
+            <Typography variant="body1" mb={2}>Create a new connectors for the PingPong contracts.</Typography>
             <LoadingButton loading={isConnectingTargets} disabled={!(target1 && target2) || !!connectorAddress} onClick={handleConnectTargetsClick} variant="contained">Connect Targets</LoadingButton>
 
             {!(target1 && target2) && (
@@ -786,19 +813,19 @@ connector address: ${connectorAddress || '0x981df0d837f03a80031AE1ba60828283734b
 
             {!!connectorAddress && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="info">Connector Goerli and Optimism (Goerli) address: {connectorAddress}</Alert>
+                <Alert severity="success">Connector Goerli and Optimism (Goerli) address: {connectorAddress}</Alert>
               </Box>
             )}
           </Box>
         </Card>
 
-        <Typography mt={4} mb={4} variant="body2">
+        <Typography mt={4} mb={4} variant="body1">
           Alternatively, you can use the <Link href="https://v2-connector-portal.hop.exchange/" target="_blank" rel="noreferrer noopener">Connector Portal ↗</Link> UI to connect targets.
         </Typography>
 
         <Typography mt={4} mb={4} variant="h4">Set Counterpart on Sender and Receiver contracts</Typography>
 
-        <Typography mt={4} variant="body1">Create <code>scripts/setCounterpart.js</code> with the following:</Typography>
+        <Typography mt={4} variant="body1">The next step is to make the PingPong contracts aware of the connector contracts to be able to forward messages cross-chain. Create <code>scripts/setCounterpart.js</code> with the following to set the connector address, known as <code>counterpart</code>, on each PingPong contract. Make sure to replace <code>connectorAddress</code>, <code>target1</code>, and <code>target2</code> with your own addresses from the previous steps:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -807,10 +834,10 @@ const hre = require('hardhat')
 
 async function main() {
   const connectorAddress = '${connectorAddress || '0x981df0d837f03a80031AE1ba60828283734b0efD'}'
-  let target = '${target1 || '0xf92201C1113f6164C47115976c1330b87273e476'}' // goerli
-  if (hre.network.name === 'optimism') {
-    target = '${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}'
-  }
+  const target1 = '${target1 || '0xf92201C1113f6164C47115976c1330b87273e476'}' // goerli
+  const target2 = '${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}' // optimism
+
+  const target = hre.network.name === 'optimism' ? target2 : target1
   const PingPong = await hre.ethers.getContractFactory('PingPong')
   const pingPong = await PingPong.attach(target)
   await pingPong.deployed()
@@ -841,7 +868,7 @@ npx hardhat run --network goerli scripts/setCounterpart.js
           />
         </Box>
 
-        <Typography variant="body1">The output should look like this:</Typography>
+        <Typography variant="body1">The output should print the Goerli transaction hash:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -855,6 +882,7 @@ tx: 0xe98147b2decd1b930732f0e0ab5b2ef032592d62d73670f9db6bbbf126478fc4
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
+            <Typography variant="body1" mb={2}>Set the connector address on Goerli PingPong contract.</Typography>
             <LoadingButton loading={isSettingCounterpartGoerli} disabled={!(connectorAddress && target1 && target2) || !!counterpartGoerliTx} onClick={handleSetCounterpartGoerliClick} variant="contained">Set Counterpart on Goerli</LoadingButton>
 
             {!(connectorAddress && target1 && target2) && (
@@ -863,7 +891,7 @@ tx: 0xe98147b2decd1b930732f0e0ab5b2ef032592d62d73670f9db6bbbf126478fc4
 
             {!!counterpartGoerliTx && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="info">Counterpart on Goerli set</Alert>
+                <Alert severity="success">Counterpart on Goerli set</Alert>
               </Box>
             )}
           </Box>
@@ -880,7 +908,7 @@ npx hardhat run --network optimism scripts/setCounterpart.js
           />
         </Box>
 
-        <Typography variant="body1">The output should look like this:</Typography>
+        <Typography variant="body1">The output should print the Optimism (Goerli) transaction hash:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -894,6 +922,7 @@ tx: 0xcb9024d0d94cc45c84b6aa5812590a8385a9d2e8fa99d34b1bdfa0d046d9dadd
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
+            <Typography variant="body1" mb={2}>Set the connector address on Optimism (Goerli) PingPong contract.</Typography>
             <LoadingButton loading={isSettingCounterpartOptimism} disabled={!(connectorAddress && target1 && target2 && counterpartGoerliTx) || !!counterpartOptimismTx} onClick={handleSetCounterpartOptimismClick} variant="contained">Set Counterpart on Optimism (Goerli)</LoadingButton>
 
             {!(connectorAddress && target1 && target2 && counterpartGoerliTx) && (
@@ -902,15 +931,15 @@ tx: 0xcb9024d0d94cc45c84b6aa5812590a8385a9d2e8fa99d34b1bdfa0d046d9dadd
 
             {!!counterpartOptimismTx && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="info">Counterpart on Optimism (Goerli) set</Alert>
+                <Alert severity="success">Counterpart on Optimism (Goerli) set</Alert>
               </Box>
             )}
           </Box>
         </Card>
 
-        <Typography mt={4} mb={4} variant="h4">Send Ping</Typography>
+        <Typography mt={4} mb={4} variant="h4">Send Ping, Receive Pong</Typography>
 
-        <Typography variant="body1">Create <code>scripts/sendPing.js</code> with the following:</Typography>
+        <Typography variant="body1">Now we can send a Ping message to the Goerli PingPong contract by calling <code>ping()</code> which should send a message cross-chain to the Optimism (Goerli) PingPong contract and call the <code>pong</code> method. Create <code>scripts/sendPing.js</code> with the following. Replace <code>target1</code>, and <code>target2</code> with your own addresses:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -918,10 +947,10 @@ tx: 0xcb9024d0d94cc45c84b6aa5812590a8385a9d2e8fa99d34b1bdfa0d046d9dadd
 const hre = require('hardhat')
 
 async function main() {
-  let target = '${target1 || '0xf92201C1113f6164C47115976c1330b87273e476'}' // goerli
-  if (hre.network.name === 'optimism') {
-    target = '${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}'
-  }
+  const target1 = '${target1 || '0xf92201C1113f6164C47115976c1330b87273e476'}' // goerli
+  const target2 = '${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}' // optimism
+
+  const target = hre.network.name === 'optimism' ? target2 : target1
   const PingPong = await hre.ethers.getContractFactory('PingPong')
   const pingPong = await PingPong.attach(target)
   await pingPong.deployed()
@@ -958,7 +987,7 @@ npx hardhat run --network goerli scripts/sendPing.js
           />
         </Box>
 
-        <Typography variant="body1">The output should look like this:</Typography>
+        <Typography variant="body1">The output should pring that it sent a message:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -974,6 +1003,7 @@ messagesReceived: 0
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
+            <Typography variant="body1" mb={2}>Send a ping message from Goerli to Optimism (Goerli).</Typography>
             <LoadingButton loading={isSendingPingGoerli} disabled={!(connectorAddress && target1 && target2 && counterpartGoerliTx && counterpartOptimismTx)} onClick={handleSendPingGoerliClick} variant="contained">Send Ping on Goerli</LoadingButton>
 
             {!(connectorAddress && target1 && target2 && counterpartGoerliTx && counterpartOptimismTx) && (
@@ -982,7 +1012,7 @@ messagesReceived: 0
 
             {!!pingGoerliTx && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="info">Ping on Goerli sent</Alert>
+                <Alert severity="success">Ping on Goerli sent</Alert>
               </Box>
             )}
 
@@ -1000,10 +1030,12 @@ messagesReceived: 0
         </Card>
 
         <Box mb={4}></Box>
+        <Typography mb={2} variant="body1">After sending a message from Goerli to Optimism (Goerli), you should see the <em>Messages Sent</em> count increase by 1 on the Goerli PingPong contract, and <em>Messages Received</em> count increase by 1 on the  Optimism (Goerli) PingPong contract after a few seconds.</Typography>
 
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
+            <Typography variant="body1" mb={2}>Send a ping message from Optimism (Goerli) to Goerli.</Typography>
             <LoadingButton loading={isSendingPingOptimism} disabled={!(connectorAddress && target1 && target2 && counterpartGoerliTx && counterpartOptimismTx)} onClick={handleSendPingOptimismClick} variant="contained">Send Ping on Optimism</LoadingButton>
 
             {!(connectorAddress && target1 && target2 && counterpartGoerliTx && counterpartOptimismTx) && (
@@ -1012,7 +1044,7 @@ messagesReceived: 0
 
             {!!pingOptimismTx && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="info">Ping on Optimism sent</Alert>
+                <Alert severity="success">Ping on Optimism sent</Alert>
               </Box>
             )}
 
@@ -1029,7 +1061,7 @@ messagesReceived: 0
           </Box>
         </Card>
 
-        <Typography mt={4} variant="body1">Congrats! This concludes the tutorial.</Typography>
+        <Typography mt={4} variant="body1">Congrats! This concludes the tutorial. We went over how to set up a simple PingPong contract and deployed them to two chains. We then deployed new connector contracts that that are responsible for fowarding messages to the target (PingPong) contracts. Afterwards, we made the PingPong contracts aware of the new connector contracts by configuring their counterparts. And finally, we sent a couple cross-chain messages back and forth.</Typography>
 
         {!!error && (
           <Box mt={2} mb={4} width="100%" style={{ wordBreak: 'break-word' }}>
@@ -1042,6 +1074,13 @@ messagesReceived: 0
             <Button onClick={resetState} variant="contained">Reset tutorial</Button>
           </Box>
         )}
+
+        <Typography mt={4} variant="h4">References</Typography>
+        <ul>
+          <li><Link href="https://v2-connector-portal.hop.exchange/" target="_blank" rel="noreferrer noopener">Connector Portal ↗</Link></li>
+          <li><Link href="https://github.com/hop-protocol/contracts-v2/blob/master/packages/connectors/contracts/test" target="_blank" rel="noreferrer noopener">PingPong Contracts↗</Link></li>
+          <li><Link href="https://github.com/hop-protocol/contracts-v2/tree/master/packages/connectors/contracts" target="_blank" rel="noreferrer noopener">Connector Contracts↗</Link></li>
+        </ul>
       </Box>
     </SiteWrapper>
   )

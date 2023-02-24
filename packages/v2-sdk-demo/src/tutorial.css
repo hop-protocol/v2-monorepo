@@ -4,7 +4,9 @@ code {
   font-family: monospace;
   padding: 0 0.5rem;
 }
-pre > code > span.linenumber:first-child {
+
+/* TODO: move to Syntax component */
+pre > code span:first-child .linenumber:first-child {
   float: left;
   padding-right: 0.5rem !important;
 }
