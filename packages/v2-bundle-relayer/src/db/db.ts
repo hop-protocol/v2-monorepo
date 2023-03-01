@@ -9,11 +9,12 @@ import { MessageBundledEventsDb } from './eventsDb/MessageBundledEventsDb'
 import { MessageRelayedEventsDb } from './eventsDb/MessageRelayedEventsDb'
 import { MessageRevertedEventsDb } from './eventsDb/MessageRevertedEventsDb'
 import { MessageSentEventsDb } from './eventsDb/MessageSentEventsDb'
+import { TokenSentEventsDb } from './nftEventsDb/TokenSentEventsDb'
 import { TxStateDb } from './txStateDb/TxStateDb'
 import { dbPath as _configDbPath } from '../config'
 
 let configDbPath = _configDbPath
-const instances: Record<string, EventsBaseDb<any> | TxStateDb | ExitableBundlesDb> = {}
+const instances: Record<string, EventsBaseDb<any> | TxStateDb | ExitableBundlesDb | TokenSentEventsDb> = {}
 
 function getDb (DbClass: any) {
   const dbName = DbClass.name
@@ -69,5 +70,10 @@ export const db = {
       _db.otherDbs = db
     }
     return _db
+  },
+  nft: {
+    getTokenSentEventsDb (): TokenSentEventsDb {
+      return getDb(TokenSentEventsDb)
+    }
   }
 }
