@@ -10,6 +10,8 @@ import { MessageRelayedEventsDb } from './eventsDb/MessageRelayedEventsDb'
 import { MessageRevertedEventsDb } from './eventsDb/MessageRevertedEventsDb'
 import { MessageSentEventsDb } from './eventsDb/MessageSentEventsDb'
 import { TokenSentEventsDb } from './nftEventsDb/TokenSentEventsDb'
+import { ConfirmationSentEventsDb } from './nftEventsDb/ConfirmationSentEventsDb'
+import { TokenConfirmedEventsDb } from './nftEventsDb/TokenConfirmedEventsDb'
 import { TxStateDb } from './txStateDb/TxStateDb'
 import { dbPath as _configDbPath } from '../config'
 
@@ -72,7 +74,13 @@ export const db = {
     return _db
   },
   nft: {
-    getTokenSentEventsDb (): TokenSentEventsDb {
+    confirmationSentEventsDb(): ConfirmationSentEventsDb {
+      return getDb(ConfirmationSentEventsDb)
+    },
+    tokenConfirmedEventsDb(): TokenConfirmedEventsDb {
+      return getDb(TokenConfirmedEventsDb)
+    },
+    tokenSentEventsDb (): TokenSentEventsDb {
       return getDb(TokenSentEventsDb)
     }
   }

@@ -35,7 +35,7 @@ export class Indexer {
   paused: boolean = false
   syncIndex: number = 0
   db = db
-  eventsToSync: Record<string, EventsBaseDb<any>>
+  eventsToSync: Record<string, any>
 
   constructor (options?: Options) {
     if (options?.pollIntervalSeconds) {
@@ -62,15 +62,9 @@ export class Indexer {
     }
 
     this.eventsToSync = {
-      BundleCommitted: this.db.bundleCommittedEventsDb,
-      BundleForwarded: this.db.bundleForwardedEventsDb, // hub
-      BundleReceived: this.db.bundleReceivedEventsDb, // hub
-      BundleSet: this.db.bundleSetEventsDb, // hub
-      FeesSentToHub: this.db.feesSentToHubEventsDb,
-      MessageBundled: this.db.messageBundledEventsDb,
-      MessageRelayed: this.db.messageRelayedEventsDb,
-      MessageReverted: this.db.messageRevertedEventsDb,
-      MessageSent: this.db.messageSentEventsDb
+      tokenSent: this.db.nft.tokenSentEventsDb,
+      confirmationSent: this.db.nft.confirmationSentEventsDb,
+      tokenConfirmed: this.db.nft.tokenConfirmedEventsDb,
     }
   }
 
@@ -98,32 +92,10 @@ export class Indexer {
   }
 
   async syncEvents (): Promise<any[]> {
-    const events: any[] = []
-
-    for (const eventName in this.eventsToSync) {
-      const _db = this.eventsToSync[eventName]
-      for (const _chainId in this.chainIds) {
-        const chainId = Number(_chainId)
-        // for debugging
-        if (eventName === 'BundleCommitted') {
-          // await _db.resetSyncState(chainId)
-        }
-
-        // for debugging
-        if (eventName === 'BundleSet') {
-          // await _db.resetSyncState(chainId)
-        }
-        const _events = await this.syncChainEvents(chainId, eventName, _db)
-        events.push(..._events)
-      }
-    }
-
-    return events
-  }
-
-  async syncEvents2 (): Promise<any[]> {
     const baseEvents = [
-      'TokenSent'
+      'TokenSent',
+      'TokenConfirmed',
+      'ConfirmationSent'
     ]
 
     const _events: any[] = []
@@ -171,7 +143,7 @@ export class Indexer {
   async poll () {
     console.log('poll start')
 
-    const events = await this.syncEvents2()
+    const events = await this.syncEvents()
     const exitableBundles: any = {}
 
     for (const event of events) {
@@ -196,45 +168,5 @@ export class Indexer {
 
     this.syncIndex++
     console.log('poll done')
-  }
-
-  async syncChainEvents (chainId: number, eventName: string, _db: EventsBaseDb<any>): Promise<any[]> {
-    const isL1 = this.getIsL1(chainId)
-    const hubEvents = ['BundleForwarded', 'BundleReceived', 'BundleSet']
-    if (hubEvents.includes(eventName)) {
-      if (!isL1) {
-        return []
-      }
-    } else {
-      if (isL1) {
-        return []
-      }
-    }
-
-    // await _db.resetSyncState(chainId)
-    const syncState = await _db.getSyncState(chainId)
-    console.log('syncState', eventName, syncState)
-
-    const provider = this.sdk.getRpcProvider(chainId)
-    let fromBlock = this.startBlocks[chainId]
-    let toBlock = await provider.getBlockNumber()
-    if (syncState?.toBlock) {
-      fromBlock = syncState.toBlock + 1
-      toBlock = await provider.getBlockNumber()
-    }
-
-    console.log('get', eventName, chainId, fromBlock, toBlock)
-    const events = await this.sdk.getEvents({ eventName, chainId, fromBlock, toBlock })
-    console.log('events', eventName, events.length)
-    for (const event of events) {
-      const key = _db.getKeyStringFromEvent(event)!
-      await _db.updateEvent(key, event)
-    }
-    await _db.putSyncState(chainId, { fromBlock, toBlock })
-    return events
-  }
-
-  getIsL1 (chainId: number) {
-    return chainId === 5 || chainId === 1
   }
 }

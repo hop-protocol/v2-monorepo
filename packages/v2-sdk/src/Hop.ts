@@ -4,6 +4,9 @@ import { BundleCommitted, BundleCommittedEventFetcher } from './events/BundleCom
 import { BundleForwarded, BundleForwardedEventFetcher } from './events/BundleForwarded'
 import { BundleReceived, BundleReceivedEventFetcher } from './events/BundleReceived'
 import { BundleSet, BundleSetEventFetcher } from './events/BundleSet'
+import { TokenSent, TokenSentEventFetcher } from './events/nft/TokenSent'
+import { ConfirmationSent, ConfirmationSentEventFetcher } from './events/nft/ConfirmationSent'
+import { TokenConfirmed, TokenConfirmedEventFetcher } from './events/nft/TokenConfirmed'
 import { DateTime } from 'luxon'
 import { EventFetcher } from './eventFetcher'
 import { ExitRelayer } from './exitRelayers/ExitRelayer'
@@ -563,6 +566,24 @@ export class Hop {
       } else if (eventName === 'MessageSent') {
         const address = this.getSpokeMessageBridgeContractAddress(chainId)
         const _eventFetcher = new MessageSentEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
+        filters.push(filter)
+        map[filter.topics[0] as string] = _eventFetcher
+      } else if (eventName === 'ConfirmationSent') { // nft
+        const address = this.getNftBridgeContractAddress(chainId)
+        const _eventFetcher = new ConfirmationSentEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
+        filters.push(filter)
+        map[filter.topics[0] as string] = _eventFetcher
+      } else if (eventName === 'TokenConfirmed') { // nft
+        const address = this.getNftBridgeContractAddress(chainId)
+        const _eventFetcher = new TokenConfirmedEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
+        filters.push(filter)
+        map[filter.topics[0] as string] = _eventFetcher
+      } else if (eventName === 'TokenSent') { // nft
+        const address = this.getNftBridgeContractAddress(chainId)
+        const _eventFetcher = new TokenSentEventFetcher(provider, chainId, this.batchBlocks, address)
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
         map[filter.topics[0] as string] = _eventFetcher
@@ -1245,5 +1266,76 @@ export class Hop {
 
     const chainIds = new Set(Object.keys(this.contractAddresses[this.network]).map((chainId: string) => Number(chainId)))
     return chainIds.has(chainId)
+  }
+
+  // nft
+  async getConfirmationSentEvents (input: GetEventsInput): Promise<ConfirmationSent[]> {
+    const { chainId, fromBlock, toBlock } = input
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    if (!fromBlock) {
+      throw new Error('fromBlock is required')
+    }
+    const provider = this.getRpcProvider(chainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${chainId}`)
+    }
+    const address = this.getNftBridgeContractAddress(chainId)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${chainId}`)
+    }
+    const eventFetcher = new ConfirmationSentEventFetcher(provider, chainId, this.batchBlocks, address)
+    return eventFetcher.getEvents(fromBlock, toBlock)
+  }
+
+  // nft
+  async getTokenConfirmedEvents (input: GetEventsInput): Promise<TokenConfirmed[]> {
+    const { chainId, fromBlock, toBlock } = input
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    if (!fromBlock) {
+      throw new Error('fromBlock is required')
+    }
+    const provider = this.getRpcProvider(chainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${chainId}`)
+    }
+    const address = this.getNftBridgeContractAddress(chainId)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${chainId}`)
+    }
+    const eventFetcher = new TokenConfirmedEventFetcher(provider, chainId, this.batchBlocks, address)
+    return eventFetcher.getEvents(fromBlock, toBlock)
+  }
+
+  // nft
+  async getTokenSentEvents (input: GetEventsInput): Promise<TokenSent[]> {
+    const { chainId, fromBlock, toBlock } = input
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    if (!fromBlock) {
+      throw new Error('fromBlock is required')
+    }
+    const provider = this.getRpcProvider(chainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${chainId}`)
+    }
+    const address = this.getNftBridgeContractAddress(chainId)
+    if (!address) {
+      throw new Error(`Contract address not found for chainId: ${chainId}`)
+    }
+    const eventFetcher = new TokenSentEventFetcher(provider, chainId, this.batchBlocks, address)
+    return eventFetcher.getEvents(fromBlock, toBlock)
+  }
+
+  getNftBridgeContractAddress (chainId: number): string {
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    const address = this.contractAddresses[this.network]?.[chainId]?.nftBridge
+    return address
   }
 }
