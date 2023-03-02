@@ -1,8 +1,8 @@
 import ERC721BridgeAbi from '@hop-protocol/v2-core/abi/generated/ERC721Bridge.json'
-import { BigNumber, ethers } from 'ethers'
+import { ERC721Bridge__factory } from '@hop-protocol/v2-core/contracts/factories/generated/ERC721Bridge__factory'
 import { Event } from '../Event'
 import { EventBase } from '../types'
-import { ERC721Bridge__factory } from '@hop-protocol/v2-core/contracts/factories/generated/ERC721Bridge__factory'
+import { ethers } from 'ethers'
 
 // event from ERC721Bridge
 export interface TokenSent extends EventBase {
