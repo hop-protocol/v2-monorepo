@@ -24,6 +24,16 @@ export class TokenSentEventsDb extends EventsBaseDb<TokenSent> {
     return data?.tokenId ?? null
   }
 
+  async getItems (): Promise<any[]> {
+    const kv = await this._getKeyValues({
+      gte: '',
+      lte: '~'
+    })
+
+    const items = kv.map((item: any) => item.value)
+    return items
+  }
+
   normalizeDataForGet (getData: Partial<TokenSent>): Partial<TokenSent> {
     if (!getData) {
       return getData

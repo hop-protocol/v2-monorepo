@@ -2,6 +2,7 @@ import { BundleCommittedEventsDb } from './eventsDb/BundleCommittedEventsDb'
 import { BundleForwardedEventsDb } from './eventsDb/BundleForwardedEventsDb'
 import { BundleReceivedEventsDb } from './eventsDb/BundleReceivedEventsDb'
 import { BundleSetEventsDb } from './eventsDb/BundleSetEventsDb'
+import { ConfirmationSentEventsDb } from './nftEventsDb/ConfirmationSentEventsDb'
 import { EventsBaseDb } from './eventsDb/EventsBaseDb'
 import { ExitableBundlesDb } from './exitableBundlesDb/ExitableBundlesDb'
 import { FeesSentToHubEventsDb } from './eventsDb/FeesSentToHubEventsDb'
@@ -9,9 +10,8 @@ import { MessageBundledEventsDb } from './eventsDb/MessageBundledEventsDb'
 import { MessageRelayedEventsDb } from './eventsDb/MessageRelayedEventsDb'
 import { MessageRevertedEventsDb } from './eventsDb/MessageRevertedEventsDb'
 import { MessageSentEventsDb } from './eventsDb/MessageSentEventsDb'
-import { TokenSentEventsDb } from './nftEventsDb/TokenSentEventsDb'
-import { ConfirmationSentEventsDb } from './nftEventsDb/ConfirmationSentEventsDb'
 import { TokenConfirmedEventsDb } from './nftEventsDb/TokenConfirmedEventsDb'
+import { TokenSentEventsDb } from './nftEventsDb/TokenSentEventsDb'
 import { TxStateDb } from './txStateDb/TxStateDb'
 import { dbPath as _configDbPath } from '../config'
 
@@ -74,13 +74,13 @@ export const db = {
     return _db
   },
   nft: {
-    confirmationSentEventsDb(): ConfirmationSentEventsDb {
+    get confirmationSentEventsDb (): ConfirmationSentEventsDb {
       return getDb(ConfirmationSentEventsDb)
     },
-    tokenConfirmedEventsDb(): TokenConfirmedEventsDb {
+    get tokenConfirmedEventsDb (): TokenConfirmedEventsDb {
       return getDb(TokenConfirmedEventsDb)
     },
-    tokenSentEventsDb (): TokenSentEventsDb {
+    get tokenSentEventsDb (): TokenSentEventsDb {
       return getDb(TokenSentEventsDb)
     }
   }

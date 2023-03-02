@@ -1,5 +1,4 @@
 import wait from 'wait'
-import { EventsBaseDb } from '../db/eventsDb/EventsBaseDb'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { db } from '../db'
 import { sdkContractAddresses } from 'src/config'
@@ -64,7 +63,7 @@ export class Indexer {
     this.eventsToSync = {
       tokenSent: this.db.nft.tokenSentEventsDb,
       confirmationSent: this.db.nft.confirmationSentEventsDb,
-      tokenConfirmed: this.db.nft.tokenConfirmedEventsDb,
+      tokenConfirmed: this.db.nft.tokenConfirmedEventsDb
     }
   }
 

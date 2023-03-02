@@ -7,7 +7,7 @@ export interface ConfirmationSent extends EventBase {
   toChainId: number
 }
 
-export class ConfirmationSentDb extends EventsBaseDb<ConfirmationSent> {
+export class ConfirmationSentEventsDb extends EventsBaseDb<ConfirmationSent> {
   constructor (dbPath: string) {
     super(dbPath, EventType.ConfirmationSent)
   }

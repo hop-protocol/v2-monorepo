@@ -6,7 +6,7 @@ export interface TokenConfirmed extends EventBase {
   tokenId: string
 }
 
-export class TokenConfirmedDb extends EventsBaseDb<TokenConfirmed> {
+export class TokenConfirmedEventsDb extends EventsBaseDb<TokenConfirmed> {
   constructor (dbPath: string) {
     super(dbPath, EventType.TokenConfirmed)
   }

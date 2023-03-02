@@ -4,6 +4,7 @@ import { program } from './shared'
 
 import './keystore'
 import './worker'
+import './nftWorker'
 
 program.version(packageJson.version)
 program.parse(process.argv)
