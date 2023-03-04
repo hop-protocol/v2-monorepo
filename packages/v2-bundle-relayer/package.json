@@ -36,8 +36,8 @@
   "license": "MIT",
   "dependencies": {
     "@ethersproject/hdnode": "5.0.9",
-    "@hop-protocol/v2-core": "0.0.0-beta.3",
-    "@hop-protocol/v2-sdk": "0.0.0-beta.15",
+    "@hop-protocol/v2-core": "0.0.0-beta.4",
+    "@hop-protocol/v2-sdk": "0.0.0-beta.18",
     "@slack/web-api": "6.7.2",
     "async-mutex": "0.3.2",
     "bip39": "3.0.4",

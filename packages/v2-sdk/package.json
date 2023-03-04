@@ -1,6 +1,6 @@
 {
   "name": "@hop-protocol/v2-sdk",
-  "version": "0.0.0-beta.15",
+  "version": "0.0.0-beta.18",
   "description": "The Hop Protocol v2 TypeScript SDK",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -38,7 +38,7 @@
     "@eth-optimism/sdk": "^1.8.0",
     "@fxportal/maticjs-fxportal": "1.1.1",
     "@hop-protocol/core": "0.0.1-beta.111",
-    "@hop-protocol/v2-core": "0.0.0-beta.3",
+    "@hop-protocol/v2-core": "0.0.0-beta.4",
     "@maticnetwork/maticjs": "3.2.0",
     "@maticnetwork/maticjs-ethers": "1.0.2",
     "dotenv": "^16.0.3",

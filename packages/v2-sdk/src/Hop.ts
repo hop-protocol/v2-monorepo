@@ -10,15 +10,12 @@ import { ERC721Bridge__factory } from '@hop-protocol/v2-core/contracts/factories
 import { EventFetcher } from './eventFetcher'
 import { ExitRelayer } from './exitRelayers/ExitRelayer'
 import { FeesSentToHub, FeesSentToHubEventFetcher } from './events/FeesSentToHub'
-import { GnosisChainRelayer } from './exitRelayers/GnosisChainRelayer'
 import { HubMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/HubMessageBridge__factory'
 import { MerkleTree } from './utils/MerkleTree'
 import { MessageBundled, MessageBundledEventFetcher } from './events/MessageBundled'
 import { MessageRelayed, MessageRelayedEventFetcher } from './events/MessageRelayed'
 import { MessageReverted, MessageRevertedEventFetcher } from './events/MessageReverted'
 import { MessageSent, MessageSentEventFetcher } from './events/MessageSent'
-import { OptimismRelayer } from './exitRelayers/OptimismRelayer'
-import { PolygonRelayer } from './exitRelayers/PolygonRelayer'
 import { SpokeMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/SpokeMessageBridge__factory'
 import { TokenConfirmed, TokenConfirmedEventFetcher } from './events/nft/TokenConfirmed'
 import { TokenSent, TokenSentEventFetcher } from './events/nft/TokenSent'
@@ -221,8 +218,8 @@ export type GetIsMessageIdRelayedInput = {
 
 export type GetNftMintPopulatedTxInput = {
   fromChainId: number,
-  toChainId: number,
   toAddress: string
+  tokenId: string
 }
 
 export type GetNftBurnPopulatedTxInput = {
@@ -747,14 +744,20 @@ export class Hop {
     const l2Provider = this.getRpcProvider(fromChainId)
     let exitRelayer : ExitRelayer
     if ([420, 10].includes(fromChainId)) {
+      const { OptimismRelayer } = await import('./exitRelayers/OptimismRelayer')
       exitRelayer = new OptimismRelayer(this.network, l1Provider, l2Provider)
     } else if ([421613, 42161, 42170].includes(fromChainId)) {
-      const { ArbitrumRelayer } = await import('./exitRelayers/ArbitrumRelayer')
-      exitRelayer = new ArbitrumRelayer(this.network, l1Provider, l2Provider)
+      // const { ArbitrumRelayer } = await import('./exitRelayers/ArbitrumRelayer')
+      // exitRelayer = new ArbitrumRelayer(this.network, l1Provider, l2Provider)
     } else if ([80001, 137].includes(fromChainId)) {
-      exitRelayer = new PolygonRelayer(this.network, l1Provider, l2Provider)
+      // const { PolygonRelayer } = await import('./exitRelayers/PolygonRelayer')
+      // exitRelayer = new PolygonRelayer(this.network, l1Provider, l2Provider)
     } else if ([100].includes(fromChainId)) {
-      exitRelayer = new GnosisChainRelayer(this.network, l1Provider, l2Provider)
+      // const { GnosisChainRelayer } = await import('./exitRelayers/GnosisChainRelayer')
+      // exitRelayer = new GnosisChainRelayer(this.network, l1Provider, l2Provider)
+    }
+    if (!exitRelayer) {
+      throw new Error(`Exit relayer not found for chainId "${fromChainId}"`)
     }
     const txData = await exitRelayer.getExitPopulatedTx(bundleCommittedTransactionHash)
 
@@ -1369,16 +1372,10 @@ export class Hop {
     return address
   }
 
-  async getNftMintPopulatedTx (input: any): Promise<any> {
-    const { fromChainId, toChainId, toAddress } = input
+  async getNftMintPopulatedTx (input: GetNftMintPopulatedTxInput): Promise<any> {
+    const { fromChainId, toAddress, tokenId } = input
     if (!this.isValidChainId(fromChainId)) {
       throw new Error(`Invalid fromChainId: ${fromChainId}`)
-    }
-    if (!this.isValidChainId(toChainId)) {
-      throw new Error(`Invalid toChainId: ${toChainId}`)
-    }
-    if (fromChainId === toChainId) {
-      throw new Error('fromChainId and toChainId must be different')
     }
     if (!toAddress) {
       throw new Error('toAddress is required')
@@ -1390,10 +1387,10 @@ export class Hop {
 
     const address = this.getNftBridgeContractAddress(fromChainId)
     if (!address) {
-      throw new Error(`Invalid address: ${fromChainId}`)
+      throw new Error(`Nft bridge address not found for chainId "${fromChainId}"`)
     }
     const nftBridge = ERC721Bridge__factory.connect(address, provider)
-    const txData = await nftBridge.populateTransaction.mint(toChainId, toAddress)
+    const txData = await nftBridge.populateTransaction.mint(toAddress, tokenId)
 
     return {
       ...txData,
@@ -1401,7 +1398,7 @@ export class Hop {
     }
   }
 
-  async getNftBurnPopulatedTx (input: any): Promise<any> {
+  async getNftBurnPopulatedTx (input: GetNftBurnPopulatedTxInput): Promise<any> {
     const { fromChainId, tokenId } = input
     if (!this.isValidChainId(fromChainId)) {
       throw new Error(`Invalid fromChainId: ${fromChainId}`)
