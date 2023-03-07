@@ -119,7 +119,7 @@ export class Indexer {
       }
       let toBlock = headBlock
       if (syncState?.toBlock) {
-        fromBlock = syncState.toBlock + 1
+        fromBlock = Number(syncState.toBlock) + 1
         toBlock = headBlock
       }
 

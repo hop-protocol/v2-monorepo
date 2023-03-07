@@ -76,14 +76,9 @@ export class Worker {
           lastAttemptedAtMs: Date.now()
         })
 
-        let txData: any
-        try {
-          console.log('getting getNftConfirmPopulatedTx')
-          txData = await this.sdk.getNftConfirmPopulatedTx({ fromChainId, tokenId })
-          console.log('txData', txData)
-        } catch (err: any) {
-          throw err
-        }
+        console.log('getting getNftConfirmPopulatedTx')
+        const txData = await this.sdk.getNftConfirmPopulatedTx({ fromChainId, tokenId })
+        console.log('txData', txData)
 
         const provider = this.sdk.getRpcProvider(toChainId)
         const signer = getSigner()

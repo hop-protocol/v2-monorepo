@@ -3,8 +3,8 @@ import packageJson from '../../package.json'
 import { program } from './shared'
 
 import './keystore'
-import './worker'
 import './nftWorker'
+import './worker'
 
 program.version(packageJson.version)
 program.parse(process.argv)
