@@ -1,6 +1,6 @@
 import wait from 'wait'
 import { Hop } from '@hop-protocol/v2-sdk'
-import { Indexer } from '../indexer'
+import { Indexer } from './indexer'
 import { db } from '../db'
 import { getSigner } from '../signer'
 import { goerliAddresses } from '@hop-protocol/v2-core/addresses'
