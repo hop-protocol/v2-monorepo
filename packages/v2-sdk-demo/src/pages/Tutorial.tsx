@@ -15,6 +15,7 @@ import { Syntax } from '../components/Syntax'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import { useQuery } from 'react-query'
+import { Hop } from '@hop-protocol/v2-sdk'
 import '../tutorial.css'
 
 export function Tutorial () {
@@ -29,6 +30,7 @@ export function Tutorial () {
   const [isSendingGreetingOnOptimism, setIsSendingGreetingOnOptimism] = useState(false)
   const [greetingMessageFromGoerli, setGreetingMessageFromGoerli] = useState('Hello from Goerli!')
   const [greetingMessageFromOptimism, setGreetingMessageFromOptimism] = useState('Hello from Optimism!')
+  const [isSendingMessageRelayOnGoerli, setIsSendingMessageRelayOnGoerli] = useState(false)
   const hubConnectorFactoryOnGoerliAddress = '0x3Ee9619e948c8E50eDBD6b123e1c24B278556b4a'
   const messageFee = '1000000000000'
 
@@ -147,6 +149,16 @@ export function Tutorial () {
     return ''
   })
 
+  const [messageRelayTxOnGoerli, setMessageRelayTxOnGoerli] = useState(() => {
+    try {
+      const cached = localStorage.getItem('tutorial:messageRelayTxOnGoerli')
+      if (cached) {
+        return cached
+      }
+    } catch (err: any) {}
+    return ''
+  })
+
   useEffect(() => {
     try {
       localStorage.setItem('tutorial:greeterAddressOnGoerli', greeterAddressOnGoerli)
@@ -194,6 +206,22 @@ export function Tutorial () {
       console.error(err)
     }
   }, [greetingTxOnGoerli])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('tutorial:greetingTxOnOptimism', greetingTxOnOptimism)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [greetingTxOnOptimism])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('tutorial:messageRelayTxOnGoerli', messageRelayTxOnGoerli)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [messageRelayTxOnGoerli])
 
   const { data: greetingMessageOnOptimism } = useQuery(
     [
@@ -411,6 +439,62 @@ export function Tutorial () {
       setError(err.message)
     }
     setIsSendingGreetingOnOptimism(false)
+  }
+
+  async function handleRelayMessageClick(event: any) {
+    event.preventDefault()
+
+    try {
+      setIsSendingMessageRelayOnGoerli(true)
+      const hash = await relayMessage()
+      if (hash) {
+        setMessageRelayTxOnGoerli(hash)
+      }
+    } catch (err: any) {
+      setError(err.message)
+    }
+    setIsSendingMessageRelayOnGoerli(false)
+  }
+
+  async function relayMessage() {
+    const signer = await getWallet()
+    const success = await onboard.setChain({ chainId: 5 })
+    if (!success) {
+      return
+    }
+
+    const sdk = new Hop('goerli')
+
+    const rpcProviders = {
+      5: 'https://goerli.rpc.hop.exchange',
+      420: 'https://optimism-goerli.rpc.hop.exchange'
+    }
+    sdk.setRpcProviders(rpcProviders)
+
+    const fromChainId = 420
+    const txHash = greetingTxOnOptimism
+    const messageId = await sdk.getMessageIdFromTransactionHash({ fromChainId, transactionHash: txHash })
+    console.log('messageId', messageId)
+    const event = await sdk.getMessageSentEventFromTransactionHash({ fromChainId, transactionHash: txHash })
+    console.log('event', event)
+    const bundleProof = await sdk.getBundleProofFromTransactionHash({ fromChainId, transactionHash: txHash })
+    console.log('bundleProof', bundleProof)
+    // const toCalldata = await sdk.getMessageCalldata({ fromChainId, messageId })
+    const toAddress = event.to
+    const fromAddress = event.from
+    const toCalldata = event.data
+    const toChainId = event.toChainId
+    const txData = await sdk.getRelayMessagePopulatedTx({ fromChainId, toChainId, fromAddress, toAddress, toCalldata, bundleProof })
+    if (!txData) {
+      throw new Error('expected txData')
+    }
+    console.log(txData)
+
+    txData.data = txData.data!.replace('0x7ad7be77', '0x306796df') // todo update in sdk
+    txData.to = '0x23E7046ac7e34DCFaCa85adD8ac72B59e3812E34' // hub message bridge
+    const tx = await signer.sendTransaction(txData)
+    console.log('tx', tx.hash)
+    return tx.hash
   }
 
   function resetState() {
@@ -1076,7 +1160,25 @@ tx: 0xf16e06d3e49e78ee2a368251a52e6fbcce14d0512a2cd2f23ede8283f0dd9e1c
         </Card>
 
         <Box mb={4}></Box>
-        {(!greetingMessageOnGoerli && greetingTxOnOptimism) && (
+        <Typography mb={2} variant="body1">The final step is to relay the message on Goerli to finalize the exit transaction from Optimism to Goerli-Optimism.</Typography>
+
+        <Card>
+          <Box p={2}>
+            <Typography variant="h5" mb={2}>Try It!</Typography>
+            <Typography variant="body1" mb={2}>You can follow along the tutorial using your MetaMask wallet.</Typography>
+            <Typography variant="body1" mb={2}>Relay the message on Goerli to finalize the exit transaction.</Typography>
+            <LoadingButton loading={isSendingMessageRelayOnGoerli} disabled={!greetingTxOnOptimism} onClick={handleRelayMessageClick} variant="contained">Relay Message on Goerli</LoadingButton>
+
+            {!!messageRelayTxOnGoerli && (
+              <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
+                <Alert severity="success">Message relay tx on Goerli sent</Alert>
+              </Box>
+            )}
+          </Box>
+        </Card>
+
+        <Box mb={4}></Box>
+        {(!greetingMessageOnGoerli && greetingTxOnOptimism && messageRelayTxOnGoerli) && (
           <Typography mb={2} variant="body1">Waiting for greeting message to arrive on Goerli...</Typography>
         )}
         {greetingMessageOnGoerli && (
