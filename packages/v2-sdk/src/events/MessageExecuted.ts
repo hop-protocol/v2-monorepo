@@ -1,53 +1,49 @@
 import SpokeMessageBridgeAbi from '@hop-protocol/v2-core/abi/generated/SpokeMessageBridge.json'
 import { Event } from './Event'
 import { EventBase } from './types'
-import { SpokeMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/SpokeMessageBridge__factory'
+import { SpokeMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/generated/SpokeMessageBridge__factory'
 import { ethers } from 'ethers'
 
-// event from SpokeMessageBridge (ICrossChainDestination)
-export interface MessageRelayed extends EventBase {
+// event from SpokeMessageBridge (MessageExecutor.sol)
+export interface MessageExecuted extends EventBase {
   messageId: string
   fromChainId: number
-  from: string
-  to: string
 }
 
-export class MessageRelayedEventFetcher extends Event {
-  eventName = 'MessageRelayed'
-
-  getMessageIdFilter (messageId: string) {
-    const spokeMessageBridge = SpokeMessageBridge__factory.connect(this.address, this.provider)
-    const filter = spokeMessageBridge.filters.MessageRelayed(messageId as any)
-    return filter
-  }
+export class MessageExecutedEventFetcher extends Event {
+  eventName = 'MessageExecuted'
 
   getFilter () {
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(this.address, this.provider)
-    const filter = spokeMessageBridge.filters.MessageRelayed()
+    const filter = spokeMessageBridge.filters.MessageExecuted()
     return filter
   }
 
-  async getEvents (startBlock: number, endBlock: number): Promise<MessageRelayed[]> {
+  getMessageIdFilter (messageId: string) {
+    const spokeMessageBridge = SpokeMessageBridge__factory.connect(this.address, this.provider)
+    // TODO: after it's indexed in contract
+    // const filter = spokeMessageBridge.filters.MessageExecuted(messageId)
+    const filter = spokeMessageBridge.filters.MessageExecuted()
+    return filter
+  }
+
+  async getEvents (startBlock: number, endBlock: number): Promise<MessageExecuted[]> {
     const filter = this.getFilter()
     return this._getEvents(filter, startBlock, endBlock)
   }
 
-  toTypedEvent (ethersEvent: any): MessageRelayed {
+  toTypedEvent (ethersEvent: any): MessageExecuted {
     const iface = new ethers.utils.Interface(SpokeMessageBridgeAbi)
     const decoded = iface.parseLog(ethersEvent)
 
     const messageId = decoded.args.messageId.toString()
     const fromChainId = Number(decoded.args.fromChainId.toString())
-    const from = decoded.args.from
-    const to = decoded.args.to
 
     return {
       eventName: this.eventName,
       eventLog: ethersEvent,
       messageId,
-      fromChainId,
-      from,
-      to
+      fromChainId
     }
   }
 }

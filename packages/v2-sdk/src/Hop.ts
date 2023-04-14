@@ -10,13 +10,12 @@ import { ERC721Bridge__factory } from '@hop-protocol/v2-core/contracts/factories
 import { EventFetcher } from './eventFetcher'
 import { ExitRelayer } from './exitRelayers/ExitRelayer'
 import { FeesSentToHub, FeesSentToHubEventFetcher } from './events/FeesSentToHub'
-import { HubMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/HubMessageBridge__factory'
+import { HubMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/generated/HubMessageBridge__factory'
 import { MerkleTree } from './utils/MerkleTree'
 import { MessageBundled, MessageBundledEventFetcher } from './events/MessageBundled'
-import { MessageRelayed, MessageRelayedEventFetcher } from './events/MessageRelayed'
-import { MessageReverted, MessageRevertedEventFetcher } from './events/MessageReverted'
+import { MessageExecuted, MessageExecutedEventFetcher } from './events/MessageExecuted'
 import { MessageSent, MessageSentEventFetcher } from './events/MessageSent'
-import { SpokeMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/SpokeMessageBridge__factory'
+import { SpokeMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/generated/SpokeMessageBridge__factory'
 import { TokenConfirmed, TokenConfirmedEventFetcher } from './events/nft/TokenConfirmed'
 import { TokenSent, TokenSentEventFetcher } from './events/nft/TokenSent'
 import { chainSlugMap } from './utils/chainSlugMap'
@@ -135,7 +134,7 @@ export type GetMessageSentEventFromMessageIdInput = {
   messageId: string
 }
 
-export type GetMessageRelayedEventFromMessageIdInput = {
+export type GetMessageExecutedEventFromMessageIdInput = {
   messageId: string
   fromChainId: number,
   toChainId: number,
@@ -441,7 +440,7 @@ export class Hop {
     return eventFetcher.getEvents(fromBlock, toBlock)
   }
 
-  async getMessageRelayedEvents (input: GetEventsInput): Promise<MessageRelayed[]> {
+  async getMessageExecutedEvents (input: GetEventsInput): Promise<MessageExecuted[]> {
     const { chainId, fromBlock, toBlock } = input
     if (!chainId) {
       throw new Error('chainId is required')
@@ -457,27 +456,7 @@ export class Hop {
     if (!address) {
       throw new Error(`Contract address not found for chainId: ${chainId}`)
     }
-    const eventFetcher = new MessageRelayedEventFetcher(provider, chainId, this.batchBlocks, address)
-    return eventFetcher.getEvents(fromBlock, toBlock)
-  }
-
-  async getMessageRevertedEvents (input: GetEventsInput): Promise<MessageReverted[]> {
-    const { chainId, fromBlock, toBlock } = input
-    if (!chainId) {
-      throw new Error('chainId is required')
-    }
-    if (!fromBlock) {
-      throw new Error('fromBlock is required')
-    }
-    const provider = this.getRpcProvider(chainId)
-    if (!provider) {
-      throw new Error(`Provider not found for chainId: ${chainId}`)
-    }
-    const address = this.getSpokeMessageBridgeContractAddress(chainId)
-    if (!address) {
-      throw new Error(`Contract address not found for chainId: ${chainId}`)
-    }
-    const eventFetcher = new MessageRevertedEventFetcher(provider, chainId, this.batchBlocks, address)
+    const eventFetcher = new MessageExecutedEventFetcher(provider, chainId, this.batchBlocks, address)
     return eventFetcher.getEvents(fromBlock, toBlock)
   }
 
@@ -579,15 +558,9 @@ export class Hop {
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
         map[filter.topics[0] as string] = _eventFetcher
-      } else if (eventName === 'MessageRelayed') {
+      } else if (eventName === 'MessageExecuted') {
         const address = this.getSpokeMessageBridgeContractAddress(chainId)
-        const _eventFetcher = new MessageRelayedEventFetcher(provider, chainId, this.batchBlocks, address)
-        const filter = _eventFetcher.getFilter()
-        filters.push(filter)
-        map[filter.topics[0] as string] = _eventFetcher
-      } else if (eventName === 'MessageReverted') {
-        const address = this.getSpokeMessageBridgeContractAddress(chainId)
-        const _eventFetcher = new MessageRevertedEventFetcher(provider, chainId, this.batchBlocks, address)
+        const _eventFetcher = new MessageExecutedEventFetcher(provider, chainId, this.batchBlocks, address)
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
         map[filter.topics[0] as string] = _eventFetcher
@@ -638,8 +611,7 @@ export class Hop {
       'BundleSet',
       'FeesSentToHub',
       'MessageBundled',
-      'MessageRelayed',
-      'MessageReverted',
+      'MessageExecuted',
       'MessageSent'
     ]
   }
@@ -794,7 +766,7 @@ export class Hop {
       throw new Error(`Invalid address: ${fromChainId}`)
     }
     const spokeMessageBridge = SpokeMessageBridge__factory.connect(address, provider)
-    const txData = await spokeMessageBridge.populateTransaction.sendMessage(toChainId, toAddress, toCalldata)
+    const txData = await spokeMessageBridge.populateTransaction.dispatchMessage(toChainId, toAddress, toCalldata)
     const value = await this.getMessageFee({ fromChainId, toChainId })
 
     return {
@@ -1001,7 +973,7 @@ export class Hop {
   }
 
   // note: this is broken because messageId is not indexed in event
-  async getMessageRelayedEventFromMessageId (input: GetMessageRelayedEventFromMessageIdInput) {
+  async getMessageExecutedEventFromMessageId (input: GetMessageExecutedEventFromMessageIdInput) {
     const { fromChainId, toChainId, messageId } = input
     if (!this.isValidChainId(fromChainId)) {
       throw new Error(`Invalid fromChainId: ${fromChainId}`)
@@ -1022,7 +994,7 @@ export class Hop {
       throw new Error(`Contract address not found for chainId: ${toChainId}`)
     }
 
-    const eventFetcher = new MessageRelayedEventFetcher(provider, toChainId, 1_000_000_000, address)
+    const eventFetcher = new MessageExecutedEventFetcher(provider, toChainId, 1_000_000_000, address)
     const filter = eventFetcher.getMessageIdFilter(messageId)
     const toBlock = await provider.getBlockNumber()
     const fromBlock = 0 // endBlock - 100_000
@@ -1238,7 +1210,7 @@ export class Hop {
     }
 
     const hubMessageBridge = HubMessageBridge__factory.connect(address, provider)
-    const txData = await hubMessageBridge.populateTransaction.relayMessage(
+    const txData = await hubMessageBridge.populateTransaction.executeMessage(
       fromChainId,
       fromAddress,
       toAddress,
@@ -1289,7 +1261,7 @@ export class Hop {
       throw new Error(`Invalid toChainId: ${toChainId}`)
     }
 
-    const event = await this.getMessageRelayedEventFromMessageId({ messageId, fromChainId, toChainId })
+    const event = await this.getMessageExecutedEventFromMessageId({ messageId, fromChainId, toChainId })
     return !!event
   }
 

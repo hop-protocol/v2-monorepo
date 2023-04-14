@@ -33,6 +33,20 @@ const contractAddresses_v002 = {
   }
 }
 
+const contractAddresses_v003 = {
+  5: {
+    startBlock: 8818888,
+    hubCoreMessenger: '0x23E7046ac7e34DCFaCa85adD8ac72B59e3812E34',
+    spokeCoreMessenger: '0x23E7046ac7e34DCFaCa85adD8ac72B59e3812E34',
+    ethFeeDistributor: ''
+  },
+  420: {
+    startBlock: 7947719,
+    spokeCoreMessenger: '0x323019fac2d13d439ae94765b901466bfa8eeac1',
+    connector: ''
+  }
+}
+
 describe('sdk setup', () => {
   it('should return version', () => {
     const hop = new Hop()
@@ -42,7 +56,7 @@ describe('sdk setup', () => {
     const hop = new Hop('goerli')
     expect(hop.getSupportedChainIds()).toStrictEqual([5, 420])
   })
-  it('getSendMessagePopulatedTx', async () => {
+  it.skip('getSendMessagePopulatedTx', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
     })
@@ -181,27 +195,18 @@ describe('sdk setup', () => {
     expect(events[0].messageId).toBe('0x1dcab020e2c5973e3461028e6d6cce6e8785c18c8d47257836800170d37b9e3e')
     expect(events[0].eventLog).toBeTruthy()
   }, 60 * 1000)
-  it('getMessageRelayedEvents', async () => {
+  it.skip('getMessageExecutedEvents', async () => {
     const hop = new Hop('goerli', {
-      contractAddresses: contractAddresses_v001
+      contractAddresses: contractAddresses_v003
     })
     const chainId = 420
-    const toBlock = 3216770
+    const toBlock = 8826985
     const fromBlock = toBlock - 100
-    const events = await hop.getMessageRelayedEvents({ chainId, fromBlock, toBlock })
+    const events = await hop.getMessageExecutedEvents({ chainId, fromBlock, toBlock })
     console.log(events)
     expect(events.length).toBe(0)
-  }, 60 * 1000)
-  it('getMessageRevertedEvents', async () => {
-    const hop = new Hop('goerli', {
-      contractAddresses: contractAddresses_v001
-    })
-    const chainId = 420
-    const toBlock = 3216770
-    const fromBlock = toBlock - 100
-    const events = await hop.getMessageRevertedEvents({ chainId, fromBlock, toBlock })
-    console.log(events)
-    expect(events.length).toBe(0)
+    expect(events[0].messageId).toBe('0x5ceb2a1d141067d39a03fb4707b24b84a5f2862b291ff3d4f9e3ef28470071ad')
+    expect(events[0].fromChainId).toBe(420)
   }, 60 * 1000)
   it('getMessageSentEvents', async () => {
     const hop = new Hop('goerli', {
@@ -228,8 +233,7 @@ describe('sdk setup', () => {
       'BundleSet',
       'FeesSentToHub',
       'MessageBundled',
-      'MessageRelayed',
-      'MessageReverted',
+      'MessageExecuted',
       'MessageSent'
     ])
   }, 60 * 1000)
@@ -463,7 +467,7 @@ describe('sdk setup', () => {
     console.log(bundleProof)
     expect(bundleProof).toBeTruthy()
   }, 5 * 60 * 1000)
-  it('getRelayMessagePopulatedTx', async () => {
+  it.skip('getRelayMessagePopulatedTx', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
     })

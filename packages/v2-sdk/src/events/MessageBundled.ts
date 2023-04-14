@@ -1,7 +1,7 @@
 import SpokeMessageBridgeAbi from '@hop-protocol/v2-core/abi/generated/SpokeMessageBridge.json'
 import { Event } from './Event'
 import { EventBase } from './types'
-import { SpokeMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/SpokeMessageBridge__factory'
+import { SpokeMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/generated/SpokeMessageBridge__factory'
 import { ethers } from 'ethers'
 
 // event from SpokeMessageBridge
