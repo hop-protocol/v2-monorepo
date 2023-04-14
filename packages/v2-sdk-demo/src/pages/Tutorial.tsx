@@ -3,11 +3,12 @@ import Box from '@mui/material/Box'
 import Link from '@mui/material/Link'
 import Button from '@mui/material/Button'
 import LoadingButton from '@mui/lab/LoadingButton'
+import TextField from '@mui/material/TextField'
 import { SiteWrapper } from '../components/SiteWrapper'
 import { providers, Contract, ContractFactory } from 'ethers'
 import { getAddress, formatEther } from 'ethers/lib/utils'
 import { useWeb3 } from '../hooks/useWeb3'
-import pingPongArtifact from '../abi/PingPong.json'
+import bidirectionalGreeterArtifact from '../abi/BidirectionalGreeter.json'
 import hubConnectorFactoryArtifact from '../abi/HubERC5164ConnectorFactory.json'
 import Alert from '@mui/material/Alert'
 import { Syntax } from '../components/Syntax'
@@ -19,13 +20,17 @@ import '../tutorial.css'
 export function Tutorial () {
   const { onboard, wallet, getWallet, address, connect, disconnect } = useWeb3()
   const [error, setError] = useState('')
-  const [isDeployingTarget1, setIsDeployingTarget1] = useState(false)
-  const [isDeployingTarget2, setIsDeployingTarget2] = useState(false)
+  const [isDeployingGreeterOnGoerli, setIsDeployingGreeterOnGoerli] = useState(false)
+  const [isDeployingGreeterOnOptimism, setIsDeployingGreeterOnOptimism] = useState(false)
   const [isConnectingTargets, setIsConnectingTargets] = useState(false)
-  const [isSettingCounterpartGoerli, setIsSettingCounterpartGoerli] = useState(false)
-  const [isSettingCounterpartOptimism, setIsSettingCounterpartOptimism] = useState(false)
-  const [isSendingPingGoerli, setIsSendingPingGoerli] = useState(false)
-  const [isSendingPingOptimism, setIsSendingPingOptimism] = useState(false)
+  const [isSettingConnectorOnGoerli, setIsSettingConnectorOnGoerli] = useState(false)
+  const [isSettingConnectorOnOptimism, setIsSettingConnectorOnOptimism] = useState(false)
+  const [isSendingGreetingOnGoerli, setIsSendingGreetingOnGoerli] = useState(false)
+  const [isSendingGreetingOnOptimism, setIsSendingGreetingOnOptimism] = useState(false)
+  const [greetingMessageFromGoerli, setGreetingMessageFromGoerli] = useState('Hello from Goerli!')
+  const [greetingMessageFromOptimism, setGreetingMessageFromOptimism] = useState('Hello from Optimism!')
+  const hubConnectorFactoryOnGoerliAddress = '0x3Ee9619e948c8E50eDBD6b123e1c24B278556b4a'
+  const messageFee = '1000000000000'
 
   const rpcUrls: any = {
     goerli: 'https://rpc.ankr.com/eth_goerli',
@@ -72,9 +77,9 @@ export function Tutorial () {
     }
   )
 
-  const [target1, setTarget1] = useState(() => {
+  const [greeterAddressOnGoerli, setGreeterAddressOnGoerli] = useState(() => {
     try {
-      const cached = localStorage.getItem('tutorial:target1')
+      const cached = localStorage.getItem('tutorial:greeterAddressOnGoerli')
       if (cached) {
         return cached
       }
@@ -82,9 +87,9 @@ export function Tutorial () {
     return ''
   })
 
-  const [target2, setTarget2] = useState(() => {
+  const [greeterAddressOnOptimism, setGreeterAddressOnOptimism] = useState(() => {
     try {
-      const cached = localStorage.getItem('tutorial:target2')
+      const cached = localStorage.getItem('tutorial:greeterAddressOnOptimism')
       if (cached) {
         return cached
       }
@@ -102,9 +107,9 @@ export function Tutorial () {
     return ''
   })
 
-  const [counterpartGoerliTx, setCounterpartGoerliTx] = useState(() => {
+  const [connectorTxOnGoerli, setConnectorTxOnGoerli] = useState(() => {
     try {
-      const cached = localStorage.getItem('tutorial:counterpartGoerliTx')
+      const cached = localStorage.getItem('tutorial:connectorTxOnGoerli')
       if (cached) {
         return cached
       }
@@ -112,9 +117,9 @@ export function Tutorial () {
     return ''
   })
 
-  const [counterpartOptimismTx, setCounterpartOptimismTx] = useState(() => {
+  const [connectorTxOnOptimism, setConnectorTxOnOptimism] = useState(() => {
     try {
-      const cached = localStorage.getItem('tutorial:counterpartOptimismTx')
+      const cached = localStorage.getItem('tutorial:connectorTxOnOptimism')
       if (cached) {
         return cached
       }
@@ -122,9 +127,9 @@ export function Tutorial () {
     return ''
   })
 
-  const [pingGoerliTx, setPingGoerliTx] = useState(() => {
+  const [greetingTxOnGoerli, setGreetingTxOnGoerli] = useState(() => {
     try {
-      const cached = localStorage.getItem('tutorial:pingGoerliTx')
+      const cached = localStorage.getItem('tutorial:greetingTxOnGoerli')
       if (cached) {
         return cached
       }
@@ -132,75 +137,31 @@ export function Tutorial () {
     return ''
   })
 
-  const [pingOptimismTx, setPingOptimismTx] = useState(() => {
+  const [greetingTxOnOptimism, setGreetingTxOnOptimism] = useState(() => {
     try {
-      const cached = localStorage.getItem('tutorial:pingOptimismTx')
+      const cached = localStorage.getItem('tutorial:greetingTxOnOptimism')
       if (cached) {
         return cached
       }
     } catch (err: any) {}
     return ''
   })
-
-  const { data: goerliContractStats } = useQuery(
-    [
-      `goerliContractStats:${target1}`,
-      address
-    ],
-    async () => {
-      const provider = new providers.StaticJsonRpcProvider(rpcUrls.goerli)
-      const { abi } = pingPongArtifact
-      const pingPong = new Contract(target1, abi, provider)
-      const messagesSent = await pingPong.messagesSent()
-      const messagesReceived = await pingPong.messagesReceived()
-      return {
-        messagesSent: messagesSent.toString(),
-        messagesReceived: messagesReceived.toString()
-      }
-    },
-    {
-      enabled: !!target1,
-      refetchInterval: 30 * 1000
-    }
-  )
-
-  const { data: optimismContractStats } = useQuery(
-    [
-      `optimismContractStats:${target2}`,
-      address
-    ],
-    async () => {
-      const provider = new providers.StaticJsonRpcProvider(rpcUrls.optimism)
-      const { abi } = pingPongArtifact
-      const pingPong = new Contract(target2, abi, provider)
-      const messagesSent = await pingPong.messagesSent()
-      const messagesReceived = await pingPong.messagesReceived()
-      return {
-        messagesSent: messagesSent.toString(),
-        messagesReceived: messagesReceived.toString()
-      }
-    },
-    {
-      enabled: !!target2,
-      refetchInterval: 30 * 1000
-    }
-  )
 
   useEffect(() => {
     try {
-      localStorage.setItem('tutorial:target1', target1)
+      localStorage.setItem('tutorial:greeterAddressOnGoerli', greeterAddressOnGoerli)
     } catch (err: any) {
       console.error(err)
     }
-  }, [target1])
+  }, [greeterAddressOnGoerli])
 
   useEffect(() => {
     try {
-      localStorage.setItem('tutorial:target2', target2)
+      localStorage.setItem('tutorial:greeterAddressOnOptimism', greeterAddressOnOptimism)
     } catch (err: any) {
       console.error(err)
     }
-  }, [target2])
+  }, [greeterAddressOnOptimism])
 
   useEffect(() => {
     try {
@@ -212,70 +173,110 @@ export function Tutorial () {
 
   useEffect(() => {
     try {
-      localStorage.setItem('tutorial:counterpartGoerliTx', counterpartGoerliTx)
+      localStorage.setItem('tutorial:connectorTxOnGoerli', connectorTxOnGoerli)
     } catch (err: any) {
       console.error(err)
     }
-  }, [counterpartGoerliTx])
+  }, [connectorTxOnGoerli])
 
   useEffect(() => {
     try {
-      localStorage.setItem('tutorial:counterpartOptimismTx', counterpartOptimismTx)
+      localStorage.setItem('tutorial:connectorTxOnOptimism', connectorTxOnOptimism)
     } catch (err: any) {
       console.error(err)
     }
-  }, [counterpartOptimismTx])
+  }, [connectorTxOnOptimism])
 
   useEffect(() => {
     try {
-      localStorage.setItem('tutorial:pingGoerliTx', pingGoerliTx)
+      localStorage.setItem('tutorial:greetingTxOnGoerli', greetingTxOnGoerli)
     } catch (err: any) {
       console.error(err)
     }
-  }, [pingGoerliTx])
+  }, [greetingTxOnGoerli])
 
-  async function deployPingPong (chainId: number) {
-    const { abi, bytecode } = pingPongArtifact
+  const { data: greetingMessageOnOptimism } = useQuery(
+    [
+      `optimismGreetingMessage:${greeterAddressOnOptimism}`,
+      address
+    ],
+    async () => {
+      if (!greeterAddressOnOptimism) {
+        return ''
+      }
+      const { abi } = bidirectionalGreeterArtifact
+      const provider = new providers.StaticJsonRpcProvider(rpcUrls.optimism)
+      const greeter = new Contract(greeterAddressOnOptimism, abi, provider)
+      return greeter.greeting()
+    },
+    {
+      enabled: !!greeterAddressOnOptimism,
+      refetchInterval: 10 * 1000
+    }
+  )
+
+  const { data: greetingMessageOnGoerli } = useQuery(
+    [
+      `goerliGreetingMessage:${greeterAddressOnGoerli}`,
+      address
+    ],
+    async () => {
+      if (!greeterAddressOnGoerli) {
+        return ''
+      }
+      const { abi } = bidirectionalGreeterArtifact
+      const provider = new providers.StaticJsonRpcProvider(rpcUrls.goerli)
+      const greeter = new Contract(greeterAddressOnGoerli, abi, provider)
+      return greeter.greeting()
+    },
+    {
+      enabled: !!greeterAddressOnGoerli,
+      refetchInterval: 10 * 1000
+    }
+  )
+
+  async function deployGreeter (chainId: number) {
+    const { abi, bytecode } = bidirectionalGreeterArtifact
     const signer = await getWallet()
     const success = await onboard.setChain({ chainId })
     if (!success) {
       return
     }
 
-    const PingPong = new ContractFactory(abi, bytecode, signer)
-    const pingPong = await PingPong.deploy()
-    const tx = pingPong.deployTransaction
+    const Greeter = new ContractFactory(abi, bytecode, signer)
+    const greeter = await Greeter.deploy()
+    const tx = greeter.deployTransaction
     await tx.wait()
-    return pingPong.address
+    return greeter.address
   }
 
-  async function handleDeployPingPongGoerliClick (event: any) {
+  async function handleDeployGreeterOnGoerliClick (event: any) {
     event.preventDefault()
     try {
-      setIsDeployingTarget1(true)
+      setIsDeployingGreeterOnGoerli(true)
       setError('')
-      const address = await deployPingPong(5)
+      const address = await deployGreeter(5)
       if (address) {
-        setTarget1(address)
+        setGreeterAddressOnGoerli(address)
       }
     } catch (err: any) {
       setError(err.message)
     }
-    setIsDeployingTarget1(false)
+    setIsDeployingGreeterOnGoerli(false)
   }
-  async function handleDeployPingPongOptimismClick (event: any) {
+  async function handleDeployGreeterOnOptimismClick (event: any) {
     event.preventDefault()
     try {
-      setIsDeployingTarget2(true)
+      setIsDeployingGreeterOnOptimism(true)
       setError('')
-      const address = await deployPingPong(420)
+      const address = await deployGreeter(420)
       if (address) {
-        setTarget2(address)
+        setGreeterAddressOnOptimism(address)
       }
     } catch (err: any) {
       setError(err.message)
     }
-    setIsDeployingTarget2(false)
+    setIsDeployingGreeterOnOptimism(false)
   }
 
   async function connectTargets() {
@@ -285,12 +286,11 @@ export function Tutorial () {
       return
     }
 
-    const factoryAddress = '0xeA72163fb54A9bD84F49F2f08D7Cc9bc1b68A649'
     const { abi } = hubConnectorFactoryArtifact
-    const factory = new Contract(factoryAddress, abi, signer)
+    const factory = new Contract(hubConnectorFactoryOnGoerliAddress, abi, signer)
     const chainId1 = 5
     const chainId2 = 420
-    const tx = await factory.connectTargets(chainId1, target1, chainId2, target2)
+    const tx = await factory.connectTargets(chainId1, greeterAddressOnGoerli, chainId2, greeterAddressOnOptimism)
     const receipt = await tx.wait()
     const event = receipt.events?.find(
       (event: any) => event.event === 'ConnectorDeployed'
@@ -314,109 +314,122 @@ export function Tutorial () {
     setIsConnectingTargets(false)
   }
 
-  async function setCounterpart (chainId: number, target: string) {
+  async function setConnector (chainId: number, target: string) {
     const signer = await getWallet()
     const success = await onboard.setChain({ chainId })
     if (!success) {
       return
     }
 
-    const { abi } = pingPongArtifact
-    const pingPong = new Contract(target, abi, signer)
-    const tx = await pingPong.setCounterpart(connectorAddress)
+    const { abi } = bidirectionalGreeterArtifact
+    const greeter = new Contract(target, abi, signer)
+    const tx = await greeter.setConnector(connectorAddress)
     await tx.wait()
     return tx.hash
   }
 
-  async function handleSetCounterpartGoerliClick (event: any) {
+  async function handleSetConnectorOnGoerliClick (event: any) {
     event.preventDefault()
     try {
-      setIsSettingCounterpartGoerli(true)
+      setIsSettingConnectorOnGoerli(true)
       setError('')
-      const hash = await setCounterpart(5, target1)
+      const chainId = 5
+      const hash = await setConnector(chainId, greeterAddressOnGoerli)
       if (hash) {
-        setCounterpartGoerliTx(hash)
+        setConnectorTxOnGoerli(hash)
       }
     } catch (err: any) {
       setError(err.message)
     }
-    setIsSettingCounterpartGoerli(false)
+    setIsSettingConnectorOnGoerli(false)
   }
 
-  async function handleSetCounterpartOptimismClick (event: any) {
+  async function handleSetConnectorOnOptimismClick (event: any) {
     event.preventDefault()
     try {
-      setIsSettingCounterpartOptimism(true)
+      setIsSettingConnectorOnOptimism(true)
       setError('')
-      const hash = await setCounterpart(420, target2)
+      const chainId = 420
+      const hash = await setConnector(chainId, greeterAddressOnOptimism)
       if (hash) {
-        setCounterpartOptimismTx(hash)
+        setConnectorTxOnOptimism(hash)
       }
     } catch (err: any) {
       setError(err.message)
     }
-    setIsSettingCounterpartOptimism(false)
+    setIsSettingConnectorOnOptimism(false)
   }
 
-  async function sendPing (chainId: number, target: string) {
+  async function sendGreeting (chainId: number, target: string, greetingMessage: string) {
     const signer = await getWallet()
     const success = await onboard.setChain({ chainId })
     if (!success) {
       return
     }
 
-    const { abi } = pingPongArtifact
-    const pingPong = new Contract(target, abi, signer)
-    const tx = await pingPong.ping(0, {
-      value: chainId === 420 ? '1000000000' : '0'
+    if (!greetingMessage) {
+      throw new Error('greeting message is required')
+    }
+
+    const { abi } = bidirectionalGreeterArtifact
+    const greeter = new Contract(target, abi, signer)
+    const tx = await greeter.sendGreeting(greetingMessage, {
+      // gasLimit: 300_000,
+      value: chainId === 420 ? messageFee : '0'
     })
     await tx.wait()
     return tx.hash
   }
 
-  async function handleSendPingGoerliClick (event: any) {
+  async function handleSendGreetingOnGoerliClick (event: any) {
     event.preventDefault()
     try {
-      setIsSendingPingGoerli(true)
+      setIsSendingGreetingOnGoerli(true)
       setError('')
-      const hash = await sendPing(5, target1)
+      const chainId = 5
+      const hash = await sendGreeting(chainId, greeterAddressOnGoerli, greetingMessageFromGoerli)
       if (hash) {
-        setPingGoerliTx(hash)
+        setGreetingTxOnGoerli(hash)
       }
     } catch (err: any) {
       setError(err.message)
     }
-    setIsSendingPingGoerli(false)
+    setIsSendingGreetingOnGoerli(false)
   }
 
-  async function handleSendPingOptimismClick (event: any) {
+  async function handleSendGreetingOnOptimismClick (event: any) {
     event.preventDefault()
     try {
-      setIsSendingPingOptimism(true)
+      setIsSendingGreetingOnOptimism(true)
       setError('')
-      const hash = await sendPing(420, target2)
+      const chainId = 420
+      const hash = await sendGreeting(chainId, greeterAddressOnOptimism, greetingMessageFromOptimism)
       if (hash) {
-        setPingOptimismTx(hash)
+        setGreetingTxOnOptimism(hash)
       }
     } catch (err: any) {
       setError(err.message)
     }
-    setIsSendingPingOptimism(false)
+    setIsSendingGreetingOnOptimism(false)
   }
 
   function resetState() {
-    localStorage.removeItem('tutorial:target1')
-    localStorage.removeItem('tutorial:target2')
+    localStorage.removeItem('tutorial:greeterAddressOnGoerli')
+    localStorage.removeItem('tutorial:greeterAddressOnOptimism')
     localStorage.removeItem('tutorial:connector')
-    localStorage.removeItem('tutorial:counterpartGoerliTx')
-    localStorage.removeItem('tutorial:counterpartOptimismTx')
-    localStorage.removeItem('tutorial:sentPingGoerliTx')
-    setTarget1('')
-    setTarget2('')
+    localStorage.removeItem('tutorial:connectorTxOnGoerli')
+    localStorage.removeItem('tutorial:connectorTxOnOptimism')
+    localStorage.removeItem('tutorial:greetingTxOnGoerli')
+    localStorage.removeItem('tutorial:greetingTxOnOptimism')
+    setError('')
+    setGreeterAddressOnGoerli('')
+    setGreeterAddressOnOptimism('')
     setConnectorAddress('')
-    setCounterpartGoerliTx('')
-    setCounterpartOptimismTx('')
-    setPingGoerliTx('')
+    setConnectorTxOnGoerli('')
+    setConnectorTxOnOptimism('')
+    setGreetingTxOnGoerli('')
+    setGreetingMessageFromGoerli('Hello from Goerli!')
+    setGreetingMessageFromOptimism('Hello from Optimism!')
   }
 
   return (
@@ -432,12 +445,12 @@ export function Tutorial () {
 
         <Typography mb={4} variant="body1">This tutorial will show you to easy it is to make any smart contract into a cross-chain smart contract by connecting the Hop messenger to it. It'll walk you through deploying simple contracts on two different chains, connecting these contracts with messengers, and seamlessly sending messages from one contract to the other while verifying the sender.</Typography>
 
-        <Typography mb={4} variant="body1">The demo <em>PingPong</em> contracts will be deployed to L1 Goerli and L2 Optimism (Goerli) and will show how to send a message (ping) from one chain to another, and have the destination chain send a message back to the source chain (pong). </Typography>
+        <Typography mb={4} variant="body1">The demo Bidirectional Greeter contracts will be deployed to L1 Goerli and L2 Optimism-Goerli and will show how to send a message (greeting) from Goerli to Optimism-Goerli and from Optimism to Goerli.</Typography>
 
         <Typography mb={4} variant="h4">Faucet</Typography>
 
         <Typography mb={2} variant="body1">
-          To follow along the tutorial, you will need some testnet ETH on both Goerli and Optimism (Goerli).
+          To follow along the tutorial, you will need some testnet ETH on both Goerli and Optimism-Goerli.
         </Typography>
 
         <Typography mb={2} variant="body1">
@@ -445,7 +458,7 @@ export function Tutorial () {
         </Typography>
 
         <Typography variant="body1">
-          After receiving Goerli ETH, bridge some to Optimism (Goerli) using the native bridge: <Link href="https://app.optimism.io/bridge" target="_blank" rel="noreferrer noopener">https://app.optimism.io/bridge ↗</Link>
+          After receiving Goerli ETH, bridge some to Optimism-Goerli using the Hop bridge: <Link href="https://goerli.hop.exchange" target="_blank" rel="noreferrer noopener">https://goerli.hop.exchange ↗</Link>
         </Typography>
 
         {!address && (
@@ -503,7 +516,7 @@ npm i dotenv --save-dev
             />
         </Box>
 
-        <Typography variant="body1">Edit <code>hardhat.config.js</code> with the following to import the private key and set the Goerli and Optimism (Goerli) RPC config:</Typography>
+        <Typography variant="body1">Edit <code>hardhat.config.js</code> with the following to import the private key and set the Goerli and Optimism-Goerli RPC config:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -535,7 +548,7 @@ module.exports = {
 
         <Typography mb={4} variant="h4">Set signing key</Typography>
 
-        <Typography variant="body1">Create a <code>.env</code> file with the following environment variable (replace with your private key string) that will be used for signing transactions. Make sure this account has testnet ETH on both Goerli and Optimism (Goerli):</Typography>
+        <Typography variant="body1">Create a <code>.env</code> file with the following environment variable (replace with your private key string) that will be used for signing transactions. Make sure this account has testnet ETH on both Goerli and Optimism-Goerli:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -550,10 +563,10 @@ PRIVATE_KEY=123...
         <Typography mb={4} variant="h4">Deploy Sender and Receiver Contracts</Typography>
 
         <Typography mb={2} variant="body1">
-        We're going to deploy simple sender and receiver contract on two different chains. These will be the PingPong contracts and will live on Goerli and Optimism (Goerli).
+        We're going to deploy simple sender and receiver contract on two different chains. These will be the Bidirectional Greeter contracts and will live on Goerli and Optimism-Goerli.
           </Typography>
 
-        <Typography variant="body1">Create <code>contracts/PingPing.sol</code> contract file with the following:</Typography>
+        <Typography variant="body1">Create <code>contracts/Greeter.sol</code> contract file with the following:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -562,51 +575,58 @@ PRIVATE_KEY=123...
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-contract PingPong {
-    address public counterpart;
-    uint256 public messagesSent = 0;
-    uint256 public messagesReceived = 0;
+/**
+ * @dev This interface wraps the connector for calls made to a cross-chain
+ * Greeter contract.
+ * @notice Functions called through connectors must be marked payable in this
+ * interface to ensure they can receive ETH for the message fee when the
+ * cross-chain call is initiated on the source chain.
+ */
+interface ICrossChainGreeter {
+    function setGreeting(string memory newGreeting) external payable;
+}
 
-    event Ping(uint256 rallyCount);
-    event Pong(uint256 rallyCount);
+/// @dev An example contract demonstrating a 1-to-1 crosschain relationship
+// using Hop Connectors.
+contract BidirectionalGreeter {
+    address public greeterConnector;
+    string public greeting;
 
-    // Uses standard access controls. No cross-chain logic required!
-    modifier onlyCounterpart() {
-        require(msg.sender == counterpart, "PingPong: only counterpart");
+    event GreetingSent(string newGreeting);
+    event GreetingSet(string newGreeting);
+
+    // 🔒 Use established security patterns like \`Ownable\`'s \`onlyOwner\` modifier 🔒
+    modifier onlyConnector() {
+        // Calls from the paired Greeter contract will come from the connector.
+        require(msg.sender == greeterConnector, "BidirectionalGreeter: Only connector");
         _;
     }
 
-    function setCounterpart(address _counterpart) external {
-        require(counterpart == address(0), "PingPong: counterpart already set");
-        require(_counterpart != address(0), "PingPong: counterpart cannot be zero address");
-        counterpart = _counterpart;
+    function setConnector(address connector) external {
+        require(greeterConnector == address(0), "Connector already set");
+        greeterConnector = connector;
     }
 
-    function ping(uint256 rallyCount) public payable {
-        // Track number of messages sent for demonstration purposes
-        messagesSent++;
-        emit Ping(rallyCount);
-
-        // The message fee (msg.value) is forwarded to the connector
-        PingPong(counterpart).pong{value: msg.value}(rallyCount);
+    // ✉️ Send a greeting to the paired cross-chain Greeter contract ✉️
+    function sendGreeting(string memory newGreeting) external payable {
+        // Connectors can be called with a modified interface of the cross-chain contract.
+        // It's as if it was on the same chain! No abi encoding required.
+        // The forwarded msg.value pays for the message fee.
+        ICrossChainGreeter(greeterConnector).setGreeting{value: msg.value}(newGreeting);
+        emit GreetingSent(newGreeting);
     }
 
-    function pong(uint256 rallyCount) external payable onlyCounterpart {
-        // Track number of messages received for demonstration purposes
-        messagesReceived++;
-        emit Pong(rallyCount);
-
-        // If rally is not over, send a ping back
-        if (rallyCount > 0) {
-            ping(rallyCount - 1);
-        }
+    // 📬 Receive a greeting from the paired cross-chain Greeter contract 📬
+    function setGreeting(string memory newGreeting) external onlyConnector {
+        greeting = newGreeting;
+        emit GreetingSet(newGreeting);
     }
 }
           `.trim()}
           />
         </Box>
 
-        <Typography variant="body1">Create deploy script <code>scripts/deployPingPong.js</code> with the following:</Typography>
+        <Typography variant="body1">Create deploy script <code>scripts/deployGreeter.js</code> with the following:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -614,12 +634,12 @@ contract PingPong {
 const hre = require('hardhat')
 
 async function main() {
-  const PingPong = await hre.ethers.getContractFactory('PingPong')
-  const pingPong = await PingPong.deploy()
+  const Greeter = await hre.ethers.getContractFactory('BidirectionalGreeter')
+  const greeter = await Greeter.deploy()
 
-  await pingPong.deployed()
+  await greeter.deployed()
 
-  console.log('PingPong deployed to:', pingPong.address)
+  console.log('Greeter deployed to:', greeter.address)
 }
 
 main()
@@ -632,13 +652,13 @@ main()
           />
         </Box>
 
-        <Typography variant="body1">Deploy PingPong contract to Goerli with the following command:</Typography>
+        <Typography variant="body1">Deploy Greeter contract to Goerli with the following command:</Typography>
 
         <Box mb={2}>
           <Syntax
           language="bash"
           code={`
-npx hardhat run --network goerli scripts/deployPingPong.js
+npx hardhat run --network goerli scripts/deployGreeter.js
           `.trim()}
           />
         </Box>
@@ -650,7 +670,7 @@ npx hardhat run --network goerli scripts/deployPingPong.js
           language="bash"
           code={`
 Compiled 3 Solidity files successfully
-PingPong deployed to: ${target1 || '0xf92201C1113f6164C47115976c1330b87273e476'}
+Greeter deployed to: ${greeterAddressOnGoerli || '0xfEA2d84759B0608Ed21DA5ceb46778669C0f8517'}
           `.trim()}
           />
         </Box>
@@ -659,35 +679,35 @@ PingPong deployed to: ${target1 || '0xf92201C1113f6164C47115976c1330b87273e476'}
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
             <Typography variant="body1" mb={2}>You can follow along the tutorial using your MetaMask wallet.</Typography>
-            <Typography variant="body1" mb={2}>Deploy the PingPong contract on Goerli.</Typography>
-            <LoadingButton loading={isDeployingTarget1} disabled={!!target1} onClick={handleDeployPingPongGoerliClick} variant="contained">Deploy PingPong on Goerli</LoadingButton>
+            <Typography variant="body1" mb={2}>Deploy the Greeter contract on Goerli.</Typography>
+            <LoadingButton loading={isDeployingGreeterOnGoerli} disabled={!!greeterAddressOnGoerli} onClick={handleDeployGreeterOnGoerliClick} variant="contained">Deploy Greeter on Goerli</LoadingButton>
 
-            {!!target1 && (
+            {!!greeterAddressOnGoerli && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="success">PingPong Goerli address: {target1}</Alert>
+                <Alert severity="success">Greeter Goerli address: {greeterAddressOnGoerli}</Alert>
               </Box>
             )}
           </Box>
         </Card>
 
-        <Typography mt={4} variant="body1">Deploy PingPong contract to Optimism (Goerli) with the following command:</Typography>
+        <Typography mt={4} variant="body1">Deploy Greeter contract to Optimism-Goerli with the following command:</Typography>
 
         <Box mb={2}>
           <Syntax
           language="bash"
           code={`
-npx hardhat run --network optimism scripts/deployPingPong.js
+npx hardhat run --network optimism scripts/deployGreeter.js
           `.trim()}
           />
         </Box>
 
-        <Typography variant="body1">The output should print the deployed PingPong contract address on Optimism (Goerli):</Typography>
+        <Typography variant="body1">The output should print the deployed Greeter contract address on Optimism-Goerli:</Typography>
 
         <Box mb={2}>
           <Syntax
           language="bash"
           code={`
-PingPong deployed to: ${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}
+Greeter deployed to: ${greeterAddressOnOptimism || '0xA5ba5Abb9DC1979631a55c581121AF718bfE8132'}
           `.trim()}
           />
         </Box>
@@ -695,17 +715,17 @@ PingPong deployed to: ${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
-            <Typography variant="body1" mb={2}>Deploy the PingPong contract on Optimism (Goerli).</Typography>
+            <Typography variant="body1" mb={2}>Deploy the Greeter contract on Optimism-Goerli.</Typography>
 
-            <LoadingButton loading={isDeployingTarget2} disabled={!!target2 || !target1} onClick={handleDeployPingPongOptimismClick} variant="contained">Deploy PingPong on Optimism (Goerli)</LoadingButton>
+            <LoadingButton loading={isDeployingGreeterOnOptimism} disabled={!!greeterAddressOnOptimism || !greeterAddressOnGoerli} onClick={handleDeployGreeterOnOptimismClick} variant="contained">Deploy Greeter on Optimism-Goerli</LoadingButton>
 
-            {!target1 && (
-              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Deploy Goerli contract first before trying to deploy on Optimism (Goerli)</em></Typography>
+            {!greeterAddressOnGoerli && (
+              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Deploy Goerli contract first before trying to deploy on Optimism-Goerli</em></Typography>
             )}
 
-            {!!target2 && (
+            {!!greeterAddressOnOptimism && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="success">PingPong Optimism (Goerli) address: {target2}</Alert>
+                <Alert severity="success">Greeter Optimism-Goerli address: {greeterAddressOnOptimism}</Alert>
               </Box>
             )}
           </Box>
@@ -725,11 +745,11 @@ git clone https://github.com/hop-protocol/contracts-v2
 
         <Typography mt={4} mb={4} variant="h4">Connect Targets</Typography>
 
-        <Typography mt={4} mb={2} variant="body1">The next step is to connect the two PingPong contracts using the Hub Connector Factory and in return get the connector address.</Typography>
+        <Typography mt={4} mb={2} variant="body1">The next step is to connect the two Greeter contracts using the Hub Connector Factory and in return get the connector address.</Typography>
 
-        <Typography mt={4} mb={2} variant="body1">On Goerli, the Hub Connector Factory is at <code>0x34655508eb75469dd240A5C1b47594386a67C6b2</code>.</Typography>
+        <Typography mt={4} mb={2} variant="body1">On Goerli, the Hub Connector Factory is at <code>{hubConnectorFactoryOnGoerliAddress}</code>.</Typography>
 
-        <Typography variant="body1">Create <code>scripts/connectTargets.js</code> with the following. Replace the <code>target1</code> and <code>target2</code> addresses with your Goerli and Optimism (Goerli) PingPong contract addresses respectively:</Typography>
+        <Typography variant="body1">Create <code>scripts/connectTargets.js</code> with the following. Replace the <code>greeterAddressOnGoerli</code> and <code>greeterAddressOnOptimism</code> addresses with your Goerli and Optimism-Goerli Greeter contract addresses respectively:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -737,9 +757,9 @@ git clone https://github.com/hop-protocol/contracts-v2
 const hre = require('hardhat')
 
 async function main() {
-  const connectorFactory = '0x34655508eb75469dd240A5C1b47594386a67C6b2' // on goerli
-  const target1 = '${target1 || '0xf92201C1113f6164C47115976c1330b87273e476'}' // goerli
-  const target2 = '${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}' // optimism
+  const connectorFactory = '${hubConnectorFactoryOnGoerliAddress}'
+  const greeterAddressOnGoerli = '${greeterAddressOnGoerli || '0xf92201C1113f6164C47115976c1330b87273e476'}'
+  const greeterAddressOnOptimism = '${greeterAddressOnOptimism || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}'
   const hubChainId = 5
   const spokeChainId = 420
 
@@ -750,9 +770,9 @@ async function main() {
 
   const tx = await hubConnectorFactory.connectTargets(
     hubChainId,
-    target1,
+    greeterAddressOnGoerli,
     spokeChainId,
-    target2
+    greeterAddressOnOptimism
   )
 
   console.log('tx:', tx.hash)
@@ -791,31 +811,31 @@ npx hardhat run --network goerli scripts/connectTargets.js
           <Syntax
           language="bash"
           code={`
-tx: 0x33b5980b0a29288cecf0a5fccfd0996c2b2383e99f42f7453c58e4d94eeb0e18
-connector address: ${connectorAddress || '0x981df0d837f03a80031AE1ba60828283734b0efD'}
+tx: 0x996f2154ec6f9a5137e7be00e2f1a351ec2d8481c547fdf90df65e6175d88146
+connector address: ${connectorAddress || '0x00a2a6b450176ebFf94Ec99a841107ce2567a942'}
           `.trim()}
           />
         </Box>
 
-        <Typography mb={2} variant="body1">When connecting the targets, the hub contract on Goerli creates a new connector contract on Goerli, and then sends a message to Optimism (Goerli) to create a connector there. The new connector address will be the same address for both Goerli and Optimism (Goerli).</Typography>
+        <Typography mb={2} variant="body1">When connecting the targets, the hub contract on Goerli creates a new connector contract on Goerli, and then sends a message to Optimism-Goerli to create a connector there. The new connector address will be the same address for both Goerli and Optimism-Goerli.</Typography>
 
         <Typography mb={2} variant="body1">What the connector contract allows for is to be able to invoke contract calls on the connector address as if you're calling a regular method on the destination contract, except it'll forward that call cross-chain using the native bridge messenger.</Typography>
 
-        <Typography mb={2} variant="body1">The connector address is referred here at the <code>counterpart</code> in the PingPong contract; for example, if you recall the <code>{'PingPong(counterpart).pong{value: msg.value}(rallyCount);'}</code> line, this is actually sending a message over the bridge to invoke the <code>pong</code> on the target address!</Typography>
+        <Typography mb={2} variant="body1">The connector address is referred here at the <em>counterpart</em> in the Greeter contract; for example, if you recall the <code>{'ICrossChainGreeter(greeterConnector).setGreeting{value: msg.value}(newGreeting);'}</code> line, this is actually sending a message over the bridge to invoke the <code>setGreeting</code> method on the target address!</Typography>
 
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
-            <Typography variant="body1" mb={2}>Create a new connectors for the PingPong contracts.</Typography>
-            <LoadingButton loading={isConnectingTargets} disabled={!(target1 && target2) || !!connectorAddress} onClick={handleConnectTargetsClick} variant="contained">Connect Targets</LoadingButton>
+            <Typography variant="body1" mb={2}>Create a new connectors for the Greeter contracts.</Typography>
+            <LoadingButton loading={isConnectingTargets} disabled={!(greeterAddressOnGoerli && greeterAddressOnOptimism) || !!connectorAddress} onClick={handleConnectTargetsClick} variant="contained">Connect Targets</LoadingButton>
 
-            {!(target1 && target2) && (
-              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Goerli and Optimism (Goerli) contract must be deployed first in order to connect targets</em></Typography>
+            {!(greeterAddressOnGoerli && greeterAddressOnOptimism) && (
+              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Goerli and Optimism-Goerli contract must be deployed first in order to connect targets</em></Typography>
             )}
 
             {!!connectorAddress && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="success">Connector Goerli and Optimism (Goerli) address: {connectorAddress}</Alert>
+                <Alert severity="success">Connector Goerli and Optimism-Goerli address: {connectorAddress}</Alert>
               </Box>
             )}
           </Box>
@@ -825,9 +845,9 @@ connector address: ${connectorAddress || '0x981df0d837f03a80031AE1ba60828283734b
           Alternatively, you can use the <Link href="https://v2-connector-portal.hop.exchange/" target="_blank" rel="noreferrer noopener">Connector Portal ↗</Link> UI to connect targets.
         </Typography>
 
-        <Typography mt={4} mb={4} variant="h4">Set Counterpart on Sender and Receiver contracts</Typography>
+        <Typography mt={4} mb={4} variant="h4">Set Connector on Sender and Receiver contracts</Typography>
 
-        <Typography mt={4} variant="body1">The next step is to make the PingPong contracts aware of the connector contracts to be able to forward messages cross-chain. Create <code>scripts/setCounterpart.js</code> with the following to set the connector address, known as <code>counterpart</code>, on each PingPong contract. Make sure to replace <code>connectorAddress</code>, <code>target1</code>, and <code>target2</code> with your own addresses from the previous steps:</Typography>
+        <Typography mt={4} variant="body1">The next step is to make the Greeter contracts aware of the connector contracts to be able to forward messages cross-chain. Create <code>scripts/setConnector.js</code> with the following to set the connector address, known as the <em>counterpart</em>, on each Greeter contract. Make sure to replace <code>connectorAddress</code>, <code>greeterAddressOnGoerli</code>, and <code>greeterAddressOnOptimism</code> with your own addresses from the previous steps:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -836,15 +856,15 @@ const hre = require('hardhat')
 
 async function main() {
   const connectorAddress = '${connectorAddress || '0x981df0d837f03a80031AE1ba60828283734b0efD'}'
-  const target1 = '${target1 || '0xf92201C1113f6164C47115976c1330b87273e476'}' // goerli
-  const target2 = '${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}' // optimism
+  const greeterAddressOnGoerli = '${greeterAddressOnGoerli || '0xf92201C1113f6164C47115976c1330b87273e476'}'
+  const greeterAddressOnOptimism = '${greeterAddressOnOptimism || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}'
 
-  const target = hre.network.name === 'optimism' ? target2 : target1
-  const PingPong = await hre.ethers.getContractFactory('PingPong')
-  const pingPong = await PingPong.attach(target)
-  await pingPong.deployed()
+  const target = hre.network.name === 'optimism' ? greeterAddressOnOptimism : greeterAddressOnGoerli
+  const Greeter = await hre.ethers.getContractFactory('Greeter')
+  const greeter = await Greeter.attach(target)
+  await greeter.deployed()
 
-  const tx = await pingPong.setCounterpart(connectorAddress)
+  const tx = await greeter.setConnector(connectorAddress)
   console.log('tx:', tx.hash)
   await tx.wait()
 }
@@ -859,13 +879,13 @@ main()
           />
         </Box>
 
-        <Typography mt={4} variant="body1">Set the PingPong counterpart on Goerli with the following command:</Typography>
+        <Typography mt={4} variant="body1">Set the Greeter connector on Goerli with the following command:</Typography>
 
         <Box mb={2}>
           <Syntax
           language="bash"
           code={`
-npx hardhat run --network goerli scripts/setCounterpart.js
+npx hardhat run --network goerli scripts/setConnector.js
           `.trim()}
           />
         </Box>
@@ -884,33 +904,33 @@ tx: 0xe98147b2decd1b930732f0e0ab5b2ef032592d62d73670f9db6bbbf126478fc4
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
-            <Typography variant="body1" mb={2}>Set the connector address on Goerli PingPong contract.</Typography>
-            <LoadingButton loading={isSettingCounterpartGoerli} disabled={!(connectorAddress && target1 && target2) || !!counterpartGoerliTx} onClick={handleSetCounterpartGoerliClick} variant="contained">Set Counterpart on Goerli</LoadingButton>
+            <Typography variant="body1" mb={2}>Set the connector address on Goerli Greeter contract.</Typography>
+            <LoadingButton loading={isSettingConnectorOnGoerli} disabled={!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism) || !!connectorTxOnGoerli} onClick={handleSetConnectorOnGoerliClick} variant="contained">Set Connector on Goerli</LoadingButton>
 
-            {!(connectorAddress && target1 && target2) && (
-              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Connect targets first to get connect address in order to set counterpart</em></Typography>
+            {!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism) && (
+              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Connect targets first to get connect address in order to set connector</em></Typography>
             )}
 
-            {!!counterpartGoerliTx && (
+            {!!connectorTxOnGoerli && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="success">Counterpart on Goerli set</Alert>
+                <Alert severity="success">Connector on Goerli set</Alert>
               </Box>
             )}
           </Box>
         </Card>
 
-        <Typography mt={4} variant="body1">Set the PingPong counterpart on Optimism (Goerli) with the following command:</Typography>
+        <Typography mt={4} variant="body1">Set the Greeter connector on Optimism-Goerli with the following command:</Typography>
 
         <Box mb={2}>
           <Syntax
           language="bash"
           code={`
-npx hardhat run --network optimism scripts/setCounterpart.js
+npx hardhat run --network optimism scripts/setConnector.js
           `.trim()}
           />
         </Box>
 
-        <Typography variant="body1">The output should print the Optimism (Goerli) transaction hash:</Typography>
+        <Typography variant="body1">The output should print the Optimism-Goerli transaction hash:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -924,24 +944,24 @@ tx: 0xcb9024d0d94cc45c84b6aa5812590a8385a9d2e8fa99d34b1bdfa0d046d9dadd
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
-            <Typography variant="body1" mb={2}>Set the connector address on Optimism (Goerli) PingPong contract.</Typography>
-            <LoadingButton loading={isSettingCounterpartOptimism} disabled={!(connectorAddress && target1 && target2 && counterpartGoerliTx) || !!counterpartOptimismTx} onClick={handleSetCounterpartOptimismClick} variant="contained">Set Counterpart on Optimism (Goerli)</LoadingButton>
+            <Typography variant="body1" mb={2}>Set the connector address on Optimism-Goerli Greeter contract.</Typography>
+            <LoadingButton loading={isSettingConnectorOnOptimism} disabled={!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli) || !!connectorTxOnOptimism} onClick={handleSetConnectorOnOptimismClick} variant="contained">Set Connector on Optimism-Goerli</LoadingButton>
 
-            {!(connectorAddress && target1 && target2 && counterpartGoerliTx) && (
-              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Set counterpart address on Goerli contract first before setting it on Optimism (Goerli) contract</em></Typography>
+            {!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli) && (
+              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Set connector address on Goerli contract first before setting it on Optimism-Goerli contract</em></Typography>
             )}
 
-            {!!counterpartOptimismTx && (
+            {!!connectorTxOnOptimism && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="success">Counterpart on Optimism (Goerli) set</Alert>
+                <Alert severity="success">Connector on Optimism-Goerli set</Alert>
               </Box>
             )}
           </Box>
         </Card>
 
-        <Typography mt={4} mb={4} variant="h4">Send Ping, Receive Pong</Typography>
+        <Typography mt={4} mb={4} variant="h4">Send Greeting</Typography>
 
-        <Typography variant="body1">Now we can send a Ping message to the Goerli PingPong contract by calling <code>ping()</code> which should send a message cross-chain to the Optimism (Goerli) PingPong contract and call the <code>pong</code> method. Create <code>scripts/sendPing.js</code> with the following. Replace <code>target1</code>, and <code>target2</code> with your own addresses:</Typography>
+        <Typography variant="body1">Now we can send a greeting message to the Goerli Greeter contract by calling <code>setGreeting</code> which should send a message cross-chain to the Optimism-Goerli Greeter contract and call the <code>setGreeting</code> method. Create <code>scripts/sendGreeting.js</code> with the following. Replace <code>greeterAddressOnGoerli</code>, and <code>greeterAddressOnOptimism</code> with your own addresses:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -949,26 +969,21 @@ tx: 0xcb9024d0d94cc45c84b6aa5812590a8385a9d2e8fa99d34b1bdfa0d046d9dadd
 const hre = require('hardhat')
 
 async function main() {
-  const target1 = '${target1 || '0xf92201C1113f6164C47115976c1330b87273e476'}' // goerli
-  const target2 = '${target2 || '0xE85e906473C7F5529dDDfA13d03901B5Ea672b88'}' // optimism
+  const greeterAddressOnGoerli = '${greeterAddressOnGoerli || '0xfEA2d84759B0608Ed21DA5ceb46778669C0f8517'}'
+  const greeterAddressOnOptimism = '${greeterAddressOnOptimism || '0xA5ba5Abb9DC1979631a55c581121AF718bfE8132'}'
 
-  const target = hre.network.name === 'optimism' ? target2 : target1
-  const fee = hre.network.name === 'optimism' ? '1000000000' : '0'
-  const PingPong = await hre.ethers.getContractFactory('PingPong')
-  const pingPong = await PingPong.attach(target)
-  await pingPong.deployed()
+  const target = hre.network.name === 'optimism' ? greeterAddressOnOptimism : greeterAddressOnGoerli
+  const fee = hre.network.name === 'optimism' ? '${messageFee}' : '0'
+  const Greeter = await hre.ethers.getContractFactory('Greeter')
+  const greeter = await Greeter.attach(target)
+  await greeter.deployed()
 
-  const tx = await pingPong.ping(0, {
+  const greeting = 'hello world'
+  const tx = await greeter.setGreeting(greeting, {
     value: fee
   })
   console.log('tx:', tx.hash)
   const receipt = await tx.wait()
-
-  const messagesSent = await pingPong.messagesSent()
-  console.log('messagesSent:', messagesSent.toString())
-
-  const messagesReceived = await pingPong.messagesReceived()
-  console.log('messagesReceived:', messagesReceived.toString())
 }
 
 main()
@@ -981,26 +996,24 @@ main()
           />
         </Box>
 
-        <Typography mt={4} variant="body1">Send the Ping message on Goerli with the following command:</Typography>
+        <Typography mt={4} variant="body1">Send the greeting message from Goerli with the following command:</Typography>
 
         <Box mb={2}>
           <Syntax
           language="bash"
           code={`
-npx hardhat run --network goerli scripts/sendPing.js
+npx hardhat run --network goerli scripts/sendGreeting.js
           `.trim()}
           />
         </Box>
 
-        <Typography variant="body1">The output should pring that it sent a message:</Typography>
+        <Typography variant="body1">Output:</Typography>
 
         <Box mb={2}>
           <Syntax
           language="bash"
           code={`
 tx: 0xf16e06d3e49e78ee2a368251a52e6fbcce14d0512a2cd2f23ede8283f0dd9e1c
-messagesSent: 1
-messagesReceived: 0
           `.trim()}
           />
         </Box>
@@ -1008,65 +1021,73 @@ messagesReceived: 0
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
-            <Typography variant="body1" mb={2}>Send a ping message from Goerli to Optimism (Goerli).</Typography>
-            <LoadingButton loading={isSendingPingGoerli} disabled={!(connectorAddress && target1 && target2 && counterpartGoerliTx && counterpartOptimismTx)} onClick={handleSendPingGoerliClick} variant="contained">Send Ping on Goerli</LoadingButton>
+            <Typography variant="body1" mb={2}>Send a greeting message from Goerli to Optimism-Goerli.</Typography>
+            <Box mb={2}>
+              <TextField value={greetingMessageFromGoerli} onChange={(event: any) => setGreetingMessageFromGoerli(event.target.value)} placeholder="Greeting messsage" />
+            </Box>
+            <LoadingButton loading={isSendingGreetingOnGoerli} disabled={!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli && connectorTxOnOptimism)} onClick={handleSendGreetingOnGoerliClick} variant="contained">Send Greeting from Goerli</LoadingButton>
 
-            {!(connectorAddress && target1 && target2 && counterpartGoerliTx && counterpartOptimismTx) && (
-              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Set counterpart addresses first before sending ping messages</em></Typography>
+            {!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli && connectorTxOnOptimism) && (
+              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Set connector addresses first before sending greeting messages</em></Typography>
             )}
 
-            {!!pingGoerliTx && (
+            {!!greetingTxOnGoerli && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="success">Ping on Goerli sent</Alert>
+                <Alert severity="success">Greeting from Goerli sent</Alert>
               </Box>
-            )}
-
-            {(!!target1 && !!goerliContractStats) && (
-              <>
-                <Typography mt={4} variant="body1">
-                  Messages Sent on Goerli: {goerliContractStats?.messagesSent}
-                </Typography>
-                <Typography variant="body1">
-                  Messages Received on Goerli: {goerliContractStats?.messagesReceived}
-                </Typography>
-              </>
             )}
           </Box>
         </Card>
 
         <Box mb={4}></Box>
-        <Typography mb={2} variant="body1">After sending a message from Goerli to Optimism (Goerli), you should see the <em>Messages Sent</em> count increase by 1 on the Goerli PingPong contract, and <em>Messages Received</em> count increase by 1 on the  Optimism (Goerli) PingPong contract after a few seconds.</Typography>
+        <Typography mb={2} variant="body1">After sending a message from Goerli to Optimism-Goerli, you should see the greeting message arrive on the Optimism-Goerli contract after a few seconds.</Typography>
+
+        <Box mb={4}></Box>
+        {(!greetingMessageOnOptimism && greetingTxOnGoerli) && (
+          <Typography mb={2} variant="body1">Waiting for greeting message to arrive on Optimism-Goerli...</Typography>
+        )}
+        {greetingMessageOnOptimism && (
+          <Alert severity="success">
+            <Typography mb={2} variant="body1">Greeting message on Optimism-Goerli: {greetingMessageOnOptimism ? <strong>{greetingMessageOnOptimism}</strong> : <em style={{ opacity: 0.2 }}>no message</em>}</Typography>
+          </Alert>
+        )}
+
+        <Box mb={4}></Box>
 
         <Card>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
-            <Typography variant="body1" mb={2}>Send a ping message from Optimism (Goerli) to Goerli.</Typography>
-            <LoadingButton loading={isSendingPingOptimism} disabled={!(connectorAddress && target1 && target2 && counterpartGoerliTx && counterpartOptimismTx)} onClick={handleSendPingOptimismClick} variant="contained">Send Ping on Optimism</LoadingButton>
+            <Typography variant="body1" mb={2}>Send a greeting message from Optimism-Goerli to Goerli.</Typography>
+            <Box mb={2}>
+              <TextField value={greetingMessageFromOptimism} onChange={(event: any) => setGreetingMessageFromOptimism(event.target.value)} placeholder="Greeting messsage" />
+            </Box>
+            <LoadingButton loading={isSendingGreetingOnOptimism} disabled={!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli && connectorTxOnOptimism)} onClick={handleSendGreetingOnOptimismClick} variant="contained">Send greeting on Optimism</LoadingButton>
 
-            {!(connectorAddress && target1 && target2 && counterpartGoerliTx && counterpartOptimismTx) && (
-              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Set counterpart addresses first before sending ping messages</em></Typography>
+            {!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli && connectorTxOnOptimism) && (
+              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Set connector addresses first before sending greeting messages</em></Typography>
             )}
 
-            {!!pingOptimismTx && (
+            {!!greetingTxOnOptimism && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
-                <Alert severity="success">Ping on Optimism sent</Alert>
+                <Alert severity="success">Greeting message on Optimism sent</Alert>
               </Box>
-            )}
-
-            {(!!target2 && !!optimismContractStats) && (
-              <>
-                <Typography mt={2} variant="body1">
-                  Messages Sent on Optimism (Goerli): {optimismContractStats?.messagesSent}
-                </Typography>
-                <Typography variant="body1">
-                  Messages Received on Optimism (Goerli): {optimismContractStats?.messagesReceived}
-                </Typography>
-              </>
             )}
           </Box>
         </Card>
 
-        <Typography mt={4} variant="body1">Congrats! This concludes the tutorial. We went over how to set up a simple PingPong contract and deployed them to two chains. We then deployed new connector contracts that that are responsible for fowarding messages to the target (PingPong) contracts. Afterwards, we made the PingPong contracts aware of the new connector contracts by configuring their counterparts. And finally, we sent a couple cross-chain messages back and forth.</Typography>
+        <Box mb={4}></Box>
+        {(!greetingMessageOnGoerli && greetingTxOnOptimism) && (
+          <Typography mb={2} variant="body1">Waiting for greeting message to arrive on Goerli...</Typography>
+        )}
+        {greetingMessageOnGoerli && (
+          <Alert severity="success">
+            <Typography mb={2} variant="body1">Greeting message on Goerli: {greetingMessageOnGoerli ? <strong>{greetingMessageOnGoerli}</strong> : <em style={{ opacity: 0.2 }}>no message</em>}</Typography>
+          </Alert>
+        )}
+
+        <Box mb={4}></Box>
+
+        <Typography mt={4} variant="body1">Congrats! This concludes the tutorial. We went over how to set up a simple Bidirectional Greeter contract and deployed them to two chains. We then deployed new connector contracts that that are responsible for fowarding messages to the target Greeter contracts. Afterwards, we made the Greeter contracts aware of the new connector contracts by configuring their counterparts. And finally, we sent a couple cross-chain messages back and forth.</Typography>
 
         {!!error && (
           <Box mt={2} mb={4} width="100%" style={{ wordBreak: 'break-word' }}>
@@ -1074,7 +1095,7 @@ messagesReceived: 0
           </Box>
         )}
 
-        {!!target1 && (
+        {!!greeterAddressOnGoerli && (
           <Box mt={4}>
             <Button onClick={resetState} variant="contained">Reset tutorial</Button>
           </Box>
@@ -1083,7 +1104,7 @@ messagesReceived: 0
         <Typography mt={4} variant="h4">References</Typography>
         <ul>
           <li><Link href="https://v2-connector-portal.hop.exchange/" target="_blank" rel="noreferrer noopener">Connector Portal ↗</Link></li>
-          <li><Link href="https://github.com/hop-protocol/contracts-v2/blob/master/packages/connectors/contracts/test" target="_blank" rel="noreferrer noopener">PingPong Contracts↗</Link></li>
+          <li><Link href="https://github.com/hop-protocol/contracts-v2/blob/master/packages/connectors/contracts/test" target="_blank" rel="noreferrer noopener">Greeter Contracts↗</Link></li>
           <li><Link href="https://github.com/hop-protocol/contracts-v2/tree/master/packages/connectors/contracts" target="_blank" rel="noreferrer noopener">Connector Contracts↗</Link></li>
         </ul>
       </Box>
