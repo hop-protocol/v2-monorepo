@@ -505,6 +505,7 @@ export function Tutorial () {
     localStorage.removeItem('tutorial:connectorTxOnOptimism')
     localStorage.removeItem('tutorial:greetingTxOnGoerli')
     localStorage.removeItem('tutorial:greetingTxOnOptimism')
+    localStorage.removeItem('tutorial:messageRelayTxOnGoerli')
     setError('')
     setGreeterAddressOnGoerli('')
     setGreeterAddressOnOptimism('')
@@ -512,6 +513,7 @@ export function Tutorial () {
     setConnectorTxOnGoerli('')
     setConnectorTxOnOptimism('')
     setGreetingTxOnGoerli('')
+    setMessageRelayTxOnGoerli('')
     setGreetingMessageFromGoerli('Hello from Goerli!')
     setGreetingMessageFromOptimism('Hello from Optimism!')
   }
@@ -1168,6 +1170,10 @@ tx: 0xf16e06d3e49e78ee2a368251a52e6fbcce14d0512a2cd2f23ede8283f0dd9e1c
             <Typography variant="body1" mb={2}>You can follow along the tutorial using your MetaMask wallet.</Typography>
             <Typography variant="body1" mb={2}>Relay the message on Goerli to finalize the exit transaction.</Typography>
             <LoadingButton loading={isSendingMessageRelayOnGoerli} disabled={!greetingTxOnOptimism} onClick={handleRelayMessageClick} variant="contained">Relay Message on Goerli</LoadingButton>
+
+            {!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli && connectorTxOnOptimism && greetingTxOnOptimism) && (
+              <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Send greeting message from Optimism-Goerli to Goerli first</em></Typography>
+            )}
 
             {!!messageRelayTxOnGoerli && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
