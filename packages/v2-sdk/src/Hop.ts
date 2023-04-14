@@ -1,5 +1,5 @@
 import pkg from '../package.json'
-import { BigNumber, providers } from 'ethers'
+import { BigNumber, Signer, providers } from 'ethers'
 import { BundleCommitted, BundleCommittedEventFetcher } from './events/BundleCommitted'
 import { BundleForwarded, BundleForwardedEventFetcher } from './events/BundleForwarded'
 import { BundleReceived, BundleReceivedEventFetcher } from './events/BundleReceived'
@@ -10,6 +10,7 @@ import { ERC721Bridge__factory } from '@hop-protocol/v2-core/contracts/factories
 import { EventFetcher } from './eventFetcher'
 import { ExitRelayer } from './exitRelayers/ExitRelayer'
 import { FeesSentToHub, FeesSentToHubEventFetcher } from './events/FeesSentToHub'
+import { HubERC5164ConnectorFactory__factory } from '@hop-protocol/v2-core/contracts/factories/generated/HubERC5164ConnectorFactory__factory'
 import { HubMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/generated/HubMessageBridge__factory'
 import { MerkleTree } from './utils/MerkleTree'
 import { MessageBundled, MessageBundledEventFetcher } from './events/MessageBundled'
@@ -19,7 +20,7 @@ import { SpokeMessageBridge__factory } from '@hop-protocol/v2-core/contracts/fac
 import { TokenConfirmed, TokenConfirmedEventFetcher } from './events/nft/TokenConfirmed'
 import { TokenSent, TokenSentEventFetcher } from './events/nft/TokenSent'
 import { chainSlugMap } from './utils/chainSlugMap'
-import { formatEther, formatUnits } from 'ethers/lib/utils'
+import { formatEther, formatUnits, getAddress } from 'ethers/lib/utils'
 import { getProvider } from './utils/getProvider'
 import { goerliAddresses } from '@hop-protocol/v2-core/addresses'
 
@@ -27,7 +28,7 @@ const cache : Record<string, any> = {}
 
 export type Options = {
   batchBlocks?: number,
-  contractAddresses?: Record<string, any>
+  contractAddresses?: Record<string, any> // TODO: types
 }
 
 export type BundleProof = {
@@ -195,6 +196,11 @@ export type GetBundleProofFromTransactionHashInput = {
   transactionHash: string
 }
 
+export type GetRelayMessageDataFromTransactionHashInput = {
+  fromChainId: number,
+  transactionHash: string
+}
+
 export type GetRelayMessagePopulatedTxInput = {
   fromChainId: number,
   toChainId: number,
@@ -243,6 +249,14 @@ export type GetNftMintAndSendPopulatedTxInput = {
 export type GetNftConfirmPopulatedTxInput = {
   fromChainId: number,
   tokenId: string
+}
+
+export type ConnectTargetsInput = {
+  hubChainId: number
+  spokeChainId: number
+  target1: string
+  target2: string
+  signer: Signer
 }
 
 export class Hop {
@@ -1191,6 +1205,26 @@ export class Hop {
     }
   }
 
+  async getRelayMessageDataFromTransactionHash (input: GetRelayMessageDataFromTransactionHashInput) {
+    const { fromChainId, transactionHash } = input
+
+    const event = await this.getMessageSentEventFromTransactionHash({ fromChainId, transactionHash })
+    const toAddress = event.to
+    const fromAddress = event.from
+    const toCalldata = event.data
+    const toChainId = event.toChainId
+    const bundleProof = await this.getBundleProofFromTransactionHash({ fromChainId, transactionHash })
+
+    return {
+      fromChainId,
+      toAddress,
+      fromAddress,
+      toCalldata,
+      toChainId,
+      bundleProof
+    }
+  }
+
   async getRelayMessagePopulatedTx (input: GetRelayMessagePopulatedTxInput) {
     const { fromChainId, toChainId, fromAddress, toAddress, toCalldata, bundleProof } = input
     if (!this.isValidChainId(fromChainId)) {
@@ -1274,7 +1308,27 @@ export class Hop {
     return chainIds.has(chainId)
   }
 
-  // nft /////////////////////////////////////////////////////////////////////
+  async connectTargets (input: ConnectTargetsInput): Promise<any> {
+    const { hubChainId, spokeChainId, target1, target2, signer } = input
+    const provider = this.getRpcProvider(hubChainId)
+    if (!provider) {
+      throw new Error(`Provider not found for chainId: ${hubChainId}`)
+    }
+    const address = this.contractAddresses[this.network]?.[hubChainId]?.hubConnectorFactory
+    if (!address) {
+      throw new Error('address not found for hub connector factory')
+    }
+    const factory = HubERC5164ConnectorFactory__factory.connect(address, provider)
+    const tx = await factory.connectTargets(hubChainId, target1, spokeChainId, target2)
+    const receipt = await tx.wait()
+    const event = receipt.events?.find(
+      (event: any) => event.event === 'ConnectorDeployed'
+    )
+    const connectorAddress = getAddress(event?.args?.connector)
+    return { connectorAddress }
+  }
+
+  // nft start ////////////////////////////////////////////////////////////////
 
   async getNftConfirmationSentEvents (input: GetEventsInput): Promise<ConfirmationSent[]> {
     const { chainId, fromBlock, toBlock } = input
@@ -1492,5 +1546,5 @@ export class Hop {
     }
   }
 
-  // nft end ////////////////////////////////////////////////////////////////
+  // nft end //////////////////////////////////////////////////////////////////
 }

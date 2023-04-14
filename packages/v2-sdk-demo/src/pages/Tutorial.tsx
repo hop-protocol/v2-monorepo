@@ -314,16 +314,22 @@ export function Tutorial () {
       return
     }
 
-    const { abi } = hubConnectorFactoryArtifact
-    const factory = new Contract(hubConnectorFactoryOnGoerliAddress, abi, signer)
-    const chainId1 = 5
-    const chainId2 = 420
-    const tx = await factory.connectTargets(chainId1, greeterAddressOnGoerli, chainId2, greeterAddressOnOptimism)
-    const receipt = await tx.wait()
-    const event = receipt.events?.find(
-      (event: any) => event.event === 'ConnectorDeployed'
-    )
-    const connectorAddress = getAddress(event?.args?.connector)
+    const sdk = new Hop('goerli', {
+      contractAddresses: {
+        5: {
+          hubConnectorFactory: hubConnectorFactoryOnGoerliAddress
+        }
+      }
+    })
+
+    const { connectorAddress } = await sdk.connectTargets({
+      hubChainId: 5,
+      spokeChainId: 420,
+      target1: greeterAddressOnGoerli,
+      target2: greeterAddressOnOptimism,
+      signer
+    })
+
     return connectorAddress
   }
 
@@ -399,6 +405,28 @@ export function Tutorial () {
       throw new Error('greeting message is required')
     }
 
+    const sdk = new Hop('goerli', {
+      contractAddresses: {
+        5: {
+          startBlock: 8818888,
+          hubCoreMessenger: '0x23E7046ac7e34DCFaCa85adD8ac72B59e3812E34',
+          spokeCoreMessenger: '0x23E7046ac7e34DCFaCa85adD8ac72B59e3812E34',
+          ethFeeDistributor: ''
+        },
+        420: {
+          startBlock: 7947719,
+          spokeCoreMessenger: '0x323019fac2d13d439ae94765b901466bfa8eeac1',
+          connector: ''
+        }
+      }
+    })
+
+    const messageFee1 = await sdk.getMessageFee({
+      fromChainId: chainId,
+      toChainId: chainId === 5 ? 420 : 5
+    })
+    console.log('fee', messageFee1.toString())
+
     const { abi } = bidirectionalGreeterArtifact
     const greeter = new Contract(target, abi, signer)
     const tx = await greeter.sendGreeting(greetingMessage, {
@@ -472,26 +500,23 @@ export function Tutorial () {
     sdk.setRpcProviders(rpcProviders)
 
     const fromChainId = 420
-    const txHash = greetingTxOnOptimism
-    const messageId = await sdk.getMessageIdFromTransactionHash({ fromChainId, transactionHash: txHash })
-    console.log('messageId', messageId)
-    const event = await sdk.getMessageSentEventFromTransactionHash({ fromChainId, transactionHash: txHash })
-    console.log('event', event)
-    const bundleProof = await sdk.getBundleProofFromTransactionHash({ fromChainId, transactionHash: txHash })
-    console.log('bundleProof', bundleProof)
-    // const toCalldata = await sdk.getMessageCalldata({ fromChainId, messageId })
-    const toAddress = event.to
-    const fromAddress = event.from
-    const toCalldata = event.data
-    const toChainId = event.toChainId
+
+    const {
+      bundleProof,
+      toAddress,
+      fromAddress,
+      toCalldata,
+      toChainId
+    } = await sdk.getRelayMessageDataFromTransactionHash({ fromChainId, transactionHash: greetingTxOnOptimism })
+
     const txData = await sdk.getRelayMessagePopulatedTx({ fromChainId, toChainId, fromAddress, toAddress, toCalldata, bundleProof })
     if (!txData) {
       throw new Error('expected txData')
     }
-    console.log(txData)
+    console.log('txData:', txData)
 
-    txData.data = txData.data!.replace('0x7ad7be77', '0x306796df') // todo update in sdk
-    txData.to = '0x23E7046ac7e34DCFaCa85adD8ac72B59e3812E34' // hub message bridge
+    // txData.data = txData.data!.replace('0x7ad7be77', '0x306796df') // todo update in sdk
+    // txData.to = '0x23E7046ac7e34DCFaCa85adD8ac72B59e3812E34' // hub message bridge
     const tx = await signer.sendTransaction(txData)
     console.log('tx', tx.hash)
     return tx.hash
