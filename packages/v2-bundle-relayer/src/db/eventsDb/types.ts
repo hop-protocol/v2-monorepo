@@ -1,4 +1,3 @@
-
 export enum EventType {
   BundleReceived = 'BundleReceived', // event from HubMessageBridge
   BundleForwarded = 'BundleForwarded', // event from HubMessageBridge
@@ -7,8 +6,7 @@ export enum EventType {
   FeesSentToHub = 'FeesSentToHub', // event from SpokeMessageBridge
   MessageBundled = 'MessageBundled', // event from SpokeMessageBridge
   MessageSent = 'MessageSent', // event from SpokeMessageBridge (ICrossChainSource)
-  MessageRelayed = 'MessageRelayed', // event from SpokeMessageBridge (ICrossChainDestination)
-  MessageReverted = 'MessageReverted' // event from SpokeMessageBridge (ICrossChainDestination)
+  MessageExecuted = 'MessageExecuted', // event from SpokeMessageBridge (ICrossChainDestination)
 }
 
 export type EventContext = {

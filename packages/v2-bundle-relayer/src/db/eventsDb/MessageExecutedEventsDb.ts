@@ -1,23 +1,21 @@
 import { EventBase, EventType } from './types'
 import { EventsBaseDb } from './EventsBaseDb'
 
-export interface MessageRelayed extends EventBase {
+export interface MessageExecuted extends EventBase {
   messageId: string
   fromChainId: number
-  from: string
-  to: string
 }
 
-export class MessageRelayedEventsDb extends EventsBaseDb<MessageRelayed> {
+export class MessageExecutedEventsDb extends EventsBaseDb<MessageExecuted> {
   constructor (dbPath: string) {
-    super(dbPath, EventType.MessageRelayed)
+    super(dbPath, EventType.MessageExecuted)
   }
 
   getPrimaryKeyProperty (): string {
     return 'messageId'
   }
 
-  getKeyStringFromEvent (data: Partial<MessageRelayed>): string | null {
+  getKeyStringFromEvent (data: Partial<MessageExecuted>): string | null {
     return data?.messageId ?? null
   }
 }

@@ -32,8 +32,7 @@ export class Controller {
       BundleSet: this.db.bundleSetEventsDb, // hub
       FeesSentToHub: this.db.feesSentToHubEventsDb,
       MessageBundled: this.db.messageBundledEventsDb,
-      MessageRelayed: this.db.messageRelayedEventsDb,
-      MessageReverted: this.db.messageRevertedEventsDb,
+      MessageExecuted: this.db.messageExecutedEventsDb,
       MessageSent: this.db.messageSentEventsDb
     }
   }
@@ -205,15 +204,15 @@ export class Controller {
 
     const promises = items.map(async (item: any) => {
       const { messageId } = item
-      const messageRelayedEvent = await this.getEventsForApi({
-        eventName: 'MessageRelayed',
+      const messageExecutedEvent = await this.getEventsForApi({
+        eventName: 'MessageExecuted',
         filter: {
           messageId
         }
       })
-      item.messageRelayedEvent = null
-      if (messageRelayedEvent.items.length > 0) {
-        item.messageRelayedEvent = messageRelayedEvent.items[0]
+      item.messageExecutedEvent = null
+      if (messageExecutedEvent.items.length > 0) {
+        item.messageExecutedEvent = messageExecutedEvent.items[0]
       }
       return item
     })
@@ -240,7 +239,7 @@ export class Controller {
     const eventsDb = this.events[eventName]
 
     if (filter.messageId) {
-      if (['MessageSent', 'MessageRelayed', 'MessageReverted', 'MessageBundled'].includes(eventName)) {
+      if (['MessageSent', 'MessageExecuted', 'MessageBundled'].includes(eventName)) {
         return eventsDb.getEventByPropertyIndex('messageId', filter.messageId)
       }
     } else if (filter.bundleId) {

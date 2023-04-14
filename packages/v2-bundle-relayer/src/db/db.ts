@@ -7,8 +7,7 @@ import { EventsBaseDb } from './eventsDb/EventsBaseDb'
 import { ExitableBundlesDb } from './exitableBundlesDb/ExitableBundlesDb'
 import { FeesSentToHubEventsDb } from './eventsDb/FeesSentToHubEventsDb'
 import { MessageBundledEventsDb } from './eventsDb/MessageBundledEventsDb'
-import { MessageRelayedEventsDb } from './eventsDb/MessageRelayedEventsDb'
-import { MessageRevertedEventsDb } from './eventsDb/MessageRevertedEventsDb'
+import { MessageExecutedEventsDb } from './eventsDb/MessageExecutedEventsDb'
 import { MessageSentEventsDb } from './eventsDb/MessageSentEventsDb'
 import { TokenConfirmedEventsDb } from './nftEventsDb/TokenConfirmedEventsDb'
 import { TokenSentEventsDb } from './nftEventsDb/TokenSentEventsDb'
@@ -54,11 +53,8 @@ export const db = {
   get messageBundledEventsDb (): MessageBundledEventsDb {
     return getDb(MessageBundledEventsDb)
   },
-  get messageRelayedEventsDb (): MessageRelayedEventsDb {
-    return getDb(MessageRelayedEventsDb)
-  },
-  get messageRevertedEventsDb (): MessageRevertedEventsDb {
-    return getDb(MessageRevertedEventsDb)
+  get messageExecutedEventsDb (): MessageExecutedEventsDb {
+    return getDb(MessageExecutedEventsDb)
   },
   get messageSentEventsDb (): MessageSentEventsDb {
     return getDb(MessageSentEventsDb)

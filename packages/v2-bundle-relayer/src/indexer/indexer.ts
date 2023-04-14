@@ -68,8 +68,7 @@ export class Indexer {
       BundleSet: this.db.bundleSetEventsDb, // hub
       FeesSentToHub: this.db.feesSentToHubEventsDb,
       MessageBundled: this.db.messageBundledEventsDb,
-      MessageRelayed: this.db.messageRelayedEventsDb,
-      MessageReverted: this.db.messageRevertedEventsDb,
+      MessageExecuted: this.db.messageExecutedEventsDb,
       MessageSent: this.db.messageSentEventsDb
     }
   }
@@ -128,8 +127,7 @@ export class Indexer {
       'BundleCommitted',
       'FeesSentToHub',
       'MessageBundled',
-      'MessageRelayed',
-      'MessageReverted',
+      'MessageExecuted',
       'MessageSent'
     ]
 
