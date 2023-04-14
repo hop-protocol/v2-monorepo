@@ -37,10 +37,15 @@ export const workerProgram = root
     'The number of seconds to wait between exit bundle retries',
     parseNumber
   )
+  .option(
+    '--demo-relayer [boolean]',
+    'Run the demo exit relayer',
+    parseNumber
+  )
   .action(actionHandler(main))
 
 async function main (source: any) {
-  const { dry: dryMode, server, indexerPollSeconds, exitBundlePollSeconds, exitBundleRetryDelaySeconds } = source
+  const { dry: dryMode, server, indexerPollSeconds, exitBundlePollSeconds, exitBundleRetryDelaySeconds, demoRelayer } = source
   const keystoreFilePath = defaultKeystoreFilePath
 
   console.log('starting worker')
@@ -49,6 +54,7 @@ async function main (source: any) {
   console.log('indexerPollSeconds:', indexerPollSeconds || 'default')
   console.log('exitBundlePollSeconds:', exitBundlePollSeconds || 'default')
   console.log('exitBundleRetryDelaySeconds:', exitBundleRetryDelaySeconds || 'default')
+  console.log('demoRelayer:', !!demoRelayer)
 
   const exists = fs.existsSync(keystoreFilePath)
   if (exists) {
@@ -60,6 +66,10 @@ async function main (source: any) {
 
   if (server) {
     require('../server')
+  }
+
+  if (demoRelayer) {
+    require('../demoRelayer')
   }
 
   const worker = new Worker({
