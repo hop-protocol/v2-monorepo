@@ -552,7 +552,33 @@ export function Tutorial () {
       )}
 
       <Box mb={8} maxWidth="800px" width="100%">
-        <Typography variant="h2" mb={4}>Tutorial: Connector Demo</Typography>
+        <Typography variant="h2" mb={4}>Getting Started with Hop Connectors</Typography>
+
+        <Typography mb={4} variant="h3">What’s a Connector?</Typography>
+
+        <Typography mb={4} variant="body1">
+        Connectors are contracts deployed in pairs on separate chains that establish a cross-chain connection for their two target contracts. Connectors allow you to build powerful cross-chain applications without any cross-chain logic.
+        </Typography>
+
+        <pre>
+{`
+Arbitrum               |   Optimism
+                       |
+Target1 <> Connector <-|-> Connector <> Target2
+                       |
+ `}       </pre>
+
+        <Typography mb={4} variant="body1">
+        When a Connector is called by it’s target contract, it encodes the call and passes the message to it's cross-chain counterpart Connector. The Connector at the destination then executes the message by calling it's target with the same calldata received by the Connector on the chain the message was sent from (the "source chain").
+        </Typography>
+
+        <Typography mb={4} variant="h3">What’s the catch?</Typography>
+
+        <Typography mb={4} variant="body1">
+Connectors are a great way to establish a cross-chain connection between two contracts without introducing cross-chain logic. For more complex cross-chain applications that deal with many-to-many relationships it’s recommended to connect to the Hop messenger directly. <Link href="https://v2-connector-portal.hop.exchange/" target="_blank" rel="noreferrer noopener">Connector Portal ↗</Link>
+        </Typography>
+
+        <Typography mb={4} variant="h3">Let's try it out!</Typography>
 
         <Typography mb={4} variant="body1">This tutorial will show you to easy it is to make any smart contract into a cross-chain smart contract by connecting the Hop messenger to it. It'll walk you through deploying simple contracts on two different chains, connecting these contracts with messengers, and seamlessly sending messages from one contract to the other while verifying the sender.</Typography>
 
