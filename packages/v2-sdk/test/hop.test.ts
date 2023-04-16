@@ -337,7 +337,7 @@ describe('sdk setup', () => {
     })
     const addresses = hop.getContractAddresses()
     expect(addresses['5'].hubCoreMessenger).toBe('0x9827315F7D2B1AAd0aa4705c06dafEE6cAEBF920')
-  })
+  }, 60 * 1000)
   it('isBundleSet - false', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
@@ -347,7 +347,7 @@ describe('sdk setup', () => {
     const toChainId = 5
     const isSet = await hop.getIsBundleSet({ fromChainId, toChainId, bundleId })
     expect(isSet).toBe(false)
-  })
+  }, 60 * 1000)
   it('isBundleSet - true', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
@@ -357,7 +357,7 @@ describe('sdk setup', () => {
     const toChainId = 5
     const isSet = await hop.getIsBundleSet({ fromChainId, toChainId, bundleId })
     expect(isSet).toBe(true)
-  })
+  }, 60 * 1000)
   it('getMessageSentEventFromTransactionHash', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
@@ -367,7 +367,7 @@ describe('sdk setup', () => {
     const event = await hop.getMessageSentEventFromTransactionHash({ fromChainId, transactionHash })
     console.log(event)
     expect(event).toBeTruthy()
-  })
+  }, 60 * 1000)
   it('getMessageBundledEventFromTransactionHash', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
@@ -377,7 +377,7 @@ describe('sdk setup', () => {
     const event = await hop.getMessageBundledEventFromTransactionHash({ fromChainId, transactionHash })
     console.log(event)
     expect(event).toBeTruthy()
-  })
+  }, 60 * 1000)
   it('getMessageBundleIdFromTransactionHash', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
@@ -387,7 +387,7 @@ describe('sdk setup', () => {
     const bundleId = await hop.getMessageBundleIdFromTransactionHash({ fromChainId, transactionHash })
     console.log(bundleId)
     expect(bundleId).toBe('0x5e26c4282d410e7e0c892561566ce0a6522f4762de1fc59d9bfba068890d9f7a')
-  })
+  }, 60 * 1000)
   it('getMessageTreeIndexFromTransactionHash', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
@@ -397,7 +397,7 @@ describe('sdk setup', () => {
     const treeIndex = await hop.getMessageTreeIndexFromTransactionHash({ fromChainId, transactionHash })
     console.log(treeIndex)
     expect(treeIndex).toBe(7)
-  })
+  }, 60 * 1000)
   it('getMessageIdFromTransactionHash', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
@@ -407,7 +407,7 @@ describe('sdk setup', () => {
     const messageId = await hop.getMessageIdFromTransactionHash({ fromChainId, transactionHash })
     console.log(messageId)
     expect(messageId).toBe('0xf0d21b61d0b49b40caf94be6bef72760e5a7b154d59f7ce7b06036718f55fecf')
-  })
+  }, 60 * 1000)
   it('getMessageBundledEventsForBundleId', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
@@ -512,7 +512,7 @@ describe('sdk setup', () => {
     }
     hop.setRpcProviders(rpcProviders)
     expect(hop.getRpcProvider(5).connection.url).toBe('https://rpc.ankr.com/eth_goerli')
-  })
+  }, 60 * 1000)
   it('getMessageCalldata', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
@@ -522,7 +522,7 @@ describe('sdk setup', () => {
     const calldata = await hop.getMessageCalldata({ fromChainId, messageId })
     console.log(calldata)
     expect(calldata.length > 10).toBe(true)
-  })
+  }, 60 * 1000)
   it.skip('getIsMessageIdRelayed - true', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
@@ -533,7 +533,7 @@ describe('sdk setup', () => {
     const isRelayed = await hop.getIsMessageIdRelayed({ fromChainId, toChainId, messageId })
     console.log(isRelayed)
     expect(isRelayed).toBe(true)
-  })
+  }, 60 * 1000)
   it.skip('getIsMessageIdRelayed - false', async () => {
     const hop = new Hop('goerli', {
       contractAddresses: contractAddresses_v002
@@ -544,5 +544,5 @@ describe('sdk setup', () => {
     const isRelayed = await hop.getIsMessageIdRelayed({ fromChainId, toChainId, messageId })
     console.log(isRelayed)
     expect(isRelayed).toBe(false)
-  })
+  }, 60 * 1000)
 })

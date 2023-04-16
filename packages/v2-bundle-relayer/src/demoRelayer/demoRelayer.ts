@@ -12,6 +12,7 @@ async function main () {
   while (true) {
     try {
       const l1Provider = new ethers.providers.StaticJsonRpcProvider('https://goerli.rpc.hop.exchange')
+      // const l1Provider = new ethers.providers.StaticJsonRpcProvider('https://rpc.ankr.com/eth_goerli')
       const l2Provider = new ethers.providers.StaticJsonRpcProvider('https://rpc.ankr.com/optimism_testnet')
 
       const eventFetcher = new EventFetcher({
@@ -57,6 +58,7 @@ async function main () {
         })
 
         let messageStatus = await csm.getMessageStatus(l2TxHash)
+        console.log('messageStatus:', messageStatus)
         if (messageStatus === MessageStatus.STATE_ROOT_NOT_PUBLISHED) {
           console.log('waiting for state root to be published')
           // wait a max of 240 seconds for state root to be published on L1
@@ -64,6 +66,7 @@ async function main () {
         }
 
         messageStatus = await csm.getMessageStatus(l2TxHash)
+        console.log('messageStatus:', messageStatus)
         if (messageStatus === MessageStatus.READY_TO_PROVE) {
           console.log('message ready to prove')
           console.log('sending proveMessage tx')
@@ -77,6 +80,7 @@ async function main () {
         }
 
         messageStatus = await csm.getMessageStatus(l2TxHash)
+        console.log('messageStatus:', messageStatus)
         if (messageStatus === MessageStatus.IN_CHALLENGE_PERIOD) {
           console.log('message is in challenge period')
           // challenge period is a few seconds on goerli, 7 days in production

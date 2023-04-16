@@ -38,7 +38,7 @@
     "@eth-optimism/sdk": "^2.0.2",
     "@ethersproject/hdnode": "5.0.9",
     "@hop-protocol/v2-core": "0.0.0-beta.5",
-    "@hop-protocol/v2-sdk": "0.0.0-beta.20",
+    "@hop-protocol/v2-sdk": "0.0.0-beta.21",
     "@slack/web-api": "6.7.2",
     "async-mutex": "0.3.2",
     "bip39": "3.0.4",

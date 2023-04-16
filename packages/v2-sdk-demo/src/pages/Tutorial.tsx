@@ -159,6 +159,28 @@ export function Tutorial () {
     return ''
   })
 
+  const { data: isL2TxHashExited } = useQuery(
+    [
+      `isl2TxHashExited:${greetingTxOnOptimism}`,
+      greetingTxOnOptimism
+    ],
+    async () => {
+      if (!greetingTxOnOptimism) {
+        return false
+      }
+      const sdk = new Hop('goerli')
+      const isExited = await sdk.getIsL2TxHashExited({
+        transactionHash: greetingTxOnOptimism,
+        fromChainId: 420
+      })
+      return isExited
+    },
+    {
+      enabled: !!greetingTxOnOptimism,
+      refetchInterval: 10 * 1000
+    }
+  )
+
   useEffect(() => {
     try {
       localStorage.setItem('tutorial:greeterAddressOnGoerli', greeterAddressOnGoerli)
@@ -491,7 +513,21 @@ export function Tutorial () {
       return
     }
 
-    const sdk = new Hop('goerli')
+    const sdk = new Hop('goerli', {
+      contractAddresses: {
+        5: {
+          startBlock: 8818888,
+          hubCoreMessenger: '0x23E7046ac7e34DCFaCa85adD8ac72B59e3812E34',
+          spokeCoreMessenger: '0x23E7046ac7e34DCFaCa85adD8ac72B59e3812E34',
+          ethFeeDistributor: ''
+        },
+        420: {
+          startBlock: 7947719,
+          spokeCoreMessenger: '0x323019fac2d13d439ae94765b901466bfa8eeac1',
+          connector: ''
+        }
+      }
+    })
 
     const rpcProviders = {
       5: 'https://goerli.rpc.hop.exchange',
@@ -538,6 +574,7 @@ export function Tutorial () {
     setConnectorTxOnGoerli('')
     setConnectorTxOnOptimism('')
     setGreetingTxOnGoerli('')
+    setGreetingTxOnOptimism('')
     setMessageRelayTxOnGoerli('')
     setGreetingMessageFromGoerli('Hello from Goerli!')
     setGreetingMessageFromOptimism('Hello from Optimism!')
@@ -1213,6 +1250,11 @@ tx: 0xf16e06d3e49e78ee2a368251a52e6fbcce14d0512a2cd2f23ede8283f0dd9e1c
         </Card>
 
         <Box mb={4}></Box>
+        {typeof isL2TxHashExited === 'boolean' && (
+          <Typography mb={2} variant="body1">{isL2TxHashExited ? 'Bundle exited successfully' : 'Waiting for bundle to be exited...'}</Typography>
+        )}
+
+        <Box mb={4}></Box>
         <Typography mb={2} variant="body1">The final step is to relay the message on Goerli to finalize the exit transaction from Optimism to Goerli-Optimism.</Typography>
 
         <Card>
@@ -1220,7 +1262,7 @@ tx: 0xf16e06d3e49e78ee2a368251a52e6fbcce14d0512a2cd2f23ede8283f0dd9e1c
             <Typography variant="h5" mb={2}>Try It!</Typography>
             <Typography variant="body1" mb={2}>You can follow along the tutorial using your MetaMask wallet.</Typography>
             <Typography variant="body1" mb={2}>Relay the message on Goerli to finalize the exit transaction.</Typography>
-            <LoadingButton loading={isSendingMessageRelayOnGoerli} disabled={!greetingTxOnOptimism} onClick={handleRelayMessageClick} variant="contained">Relay Message on Goerli</LoadingButton>
+            <LoadingButton loading={isSendingMessageRelayOnGoerli} disabled={!isL2TxHashExited} onClick={handleRelayMessageClick} variant="contained">Relay Message on Goerli</LoadingButton>
 
             {!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli && connectorTxOnOptimism && greetingTxOnOptimism) && (
               <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Send greeting message from Optimism-Goerli to Goerli first</em></Typography>

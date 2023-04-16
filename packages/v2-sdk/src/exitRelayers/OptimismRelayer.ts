@@ -1,102 +1,96 @@
-import { Contract, providers } from 'ethers'
-// import { Watcher } from '@eth-optimism/core-utils'
-// import { CrossChainMessenger, MessageStatus } from '@eth-optimism/sdk'
-import { getContractFactory, predeploys } from '@eth-optimism/contracts'
-import { getMessagesAndProofsForL2Transaction } from '@eth-optimism/message-relayer'
-
-const contractAddresses: Record<string, any> = {
-  // https://github.com/ethereum-optimism/optimism/tree/develop/packages/contracts/deployments/mainnet
-  mainnet: {
-    sccAddress: '0xBe5dAb4A2e9cd0F27300dB4aB94BeE3A233AEB19',
-    l1MessengerAddress: '0x25ace71c97B33Cc4729CF772ae268934F7ab5fA1',
-    l2MessengerAddress: '0x4200000000000000000000000000000000000007'
-  },
-  // https://github.com/ethereum-optimism/optimism/tree/develop/packages/contracts/deployments/goerli#readme
-  goerli: {
-    sccAddress: '0x9c945aC97Baf48cB784AbBB61399beB71aF7A378',
-    l1MessengerAddress: '0x5086d1eEF304eb5284A0f6720f79403b4e9bE294',
-    l2MessengerAddress: '0x4200000000000000000000000000000000000007'
-  }
-}
+import wait from 'wait'
+import { CrossChainMessenger, MessageStatus, hashLowLevelMessage } from '@eth-optimism/sdk'
+import { Signer, providers } from 'ethers'
 
 export class OptimismRelayer {
   network: string
   l1Provider: any
   l2Provider: any
-  l1Messenger: Contract
-  scc: Contract
-  // csm: CrossChainMessenger
+  csm: CrossChainMessenger
 
-  constructor (network: string = 'goerli', l1Provider: providers.Provider, l2Provider: providers.Provider) {
+  constructor (network: string = 'goerli', l1Provider: providers.Provider | Signer, l2Provider: providers.Provider) {
     this.network = network
     this.l1Provider = l1Provider
     this.l2Provider = l2Provider
-    const sccAddress = contractAddresses[this.network].sccAddress
-    const l1MessengerAddress = contractAddresses[this.network].l1MessengerAddress
 
-    this.l1Messenger = getContractFactory('IL1CrossDomainMessenger')
-      .attach(l1MessengerAddress)
-      .connect(this.l1Provider)
-    this.scc = getContractFactory('IStateCommitmentChain')
-      .attach(sccAddress)
-      .connect(this.l1Provider)
-
-    /*
     this.csm = new CrossChainMessenger({
+      bedrock: true,
       l1ChainId: 5,
       l2ChainId: 420,
       l1SignerOrProvider: l1Provider,
       l2SignerOrProvider: l2Provider
     })
-    */
   }
 
-  /*
   async getExitPopulatedTx (l2TxHash: string) {
-    const messageStatus = await this.csm.getMessageStatus(l2TxHash)
+    throw new Error('not implemented')
+  }
 
+  async getIsL2TxHashExited (l2TxHash: string) {
+    const messageStatus = await this.csm.getMessageStatus(l2TxHash)
+    if (messageStatus === MessageStatus.RELAYED) {
+      return true
+    }
+
+    return false
+  }
+
+  async exitTx (l2TxHash: string) {
+    let messageStatus = await this.csm.getMessageStatus(l2TxHash)
+    if (messageStatus === MessageStatus.STATE_ROOT_NOT_PUBLISHED) {
+      console.log('waiting for state root to be published')
+      // wait a max of 240 seconds for state root to be published on L1
+      await wait(240 * 1000)
+    }
+
+    messageStatus = await this.csm.getMessageStatus(l2TxHash)
+    if (messageStatus === MessageStatus.READY_TO_PROVE) {
+      console.log('message ready to prove')
+      const resolved = await this.csm.toCrossChainMessage(l2TxHash)
+      console.log('sending proveMessage tx')
+      const tx = await this.csm.proveMessage(resolved)
+      console.log('proveMessage tx:', tx?.hash)
+      await tx.wait()
+      console.log('waiting challenge period')
+      const challengePeriod = await this.csm.getChallengePeriodSeconds()
+      await wait(challengePeriod * 1000)
+    }
+
+    messageStatus = await this.csm.getMessageStatus(l2TxHash)
+    if (messageStatus === MessageStatus.IN_CHALLENGE_PERIOD) {
+      console.log('message is in challenge period')
+      // challenge period is a few seconds on goerli, 7 days in production
+      const challengePeriod = await this.csm.getChallengePeriodSeconds()
+      const latestBlock = await this.csm.l1Provider.getBlock('latest')
+      const resolved = await this.csm.toCrossChainMessage(l2TxHash)
+      const withdrawal = await this.csm.toLowLevelMessage(resolved)
+      const provenWithdrawal =
+        await this.csm.contracts.l1.OptimismPortal.provenWithdrawals(
+          hashLowLevelMessage(withdrawal)
+        )
+      const timestamp = Number(provenWithdrawal.timestamp.toString())
+      const bufferSeconds = 10
+      const secondsLeft = (timestamp + challengePeriod + bufferSeconds) - Number(latestBlock.timestamp.toString())
+      console.log('seconds left:', secondsLeft)
+      await wait(secondsLeft * 1000)
+    }
+
+    messageStatus = await this.csm.getMessageStatus(l2TxHash)
     if (messageStatus === MessageStatus.READY_FOR_RELAY) {
       console.log('ready for relay')
-    } else {
-      console.log('status', messageStatus)
-      // throw new Error('not ready for relay')
+      console.log('sending finalizeMessage tx')
+      const tx = await this.csm.finalizeMessage(l2TxHash)
+      console.log('finalizeMessage tx:', tx.hash)
+      return tx
     }
 
-    const txData = await this.csm.populateTransaction.finalizeMessage(l2TxHash)
-    return txData
-  }
-  */
-
-  async getExitPopulatedTx (l2TxHash: string): Promise<any> {
-    const messagePairs = await getMessagesAndProofsForL2Transaction(
-      this.l1Provider,
-      this.l2Provider,
-      this.scc.address,
-      predeploys.L2CrossDomainMessenger,
-      l2TxHash
-    )
-
-    if (!messagePairs) {
-      throw new Error('messagePairs not found')
+    if (messageStatus === MessageStatus.RELAYED) {
+      console.log('message already relayed')
+      return
     }
 
-    console.log('messagePairs', messagePairs.length)
-
-    const { message, proof } = messagePairs[0]
-    const inChallengeWindow = await this.scc.insideFraudProofWindow(proof.stateRootBatchHeader)
-    if (inChallengeWindow) {
-      throw new Error('exit within challenge window')
-    }
-
-    return this.l1Messenger
-      .populateTransaction
-      .relayMessage(
-        message.target,
-        message.sender,
-        message.message,
-        message.messageNonce,
-        proof
-      ).catch(err => this.formatError(err))
+    console.log(MessageStatus)
+    console.log(`not ready for relay. statusCode: ${messageStatus}`)
   }
 
   formatError (err: Error) {

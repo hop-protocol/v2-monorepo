@@ -82,6 +82,18 @@ export type GetBundleExitPopulatedTxInput = {
   bundleCommittedTransactionHash?: string
 }
 
+export type ExitBundleInput = {
+  fromChainId: number,
+  bundleCommittedEvent?: BundleCommitted
+  bundleCommittedTransactionHash?: string
+  signer: Signer
+}
+
+type GetIsL2TxHashExitedInput = {
+  fromChainId: number
+  transactionHash: string
+}
+
 export type GetSendMessagePopulatedTxInput = {
   fromChainId: number,
   toChainId: number,
@@ -753,6 +765,64 @@ export class Hop {
     }
   }
 
+  async exitBundle (input: ExitBundleInput): Promise<any> {
+    let { fromChainId, bundleCommittedEvent, bundleCommittedTransactionHash, signer } = input
+    if (!this.isValidChainId(fromChainId)) {
+      throw new Error(`Invalid fromChainId: ${fromChainId}`)
+    }
+    if (bundleCommittedTransactionHash) {
+      if (!this.isValidTxHash(bundleCommittedTransactionHash)) {
+        throw new Error(`Invalid transaction hash: ${bundleCommittedTransactionHash}`)
+      }
+    } else if (bundleCommittedEvent) {
+      const { eventLog, context } = bundleCommittedEvent
+      bundleCommittedTransactionHash = eventLog.transactionHash ?? context?.transactionHash
+    }
+    if (!bundleCommittedTransactionHash) {
+      throw new Error('expected bundle comitted transaction hash')
+    }
+
+    const l1Provider = this.getRpcProvider(this.l1ChainId)
+    const l2Provider = this.getRpcProvider(fromChainId)
+    let exitRelayer : ExitRelayer
+    if ([420, 10].includes(fromChainId)) {
+      const { OptimismRelayer } = await import('./exitRelayers/OptimismRelayer')
+      exitRelayer = new OptimismRelayer(this.network, signer, l2Provider)
+    } else if ([421613, 42161, 42170].includes(fromChainId)) {
+      // const { ArbitrumRelayer } = await import('./exitRelayers/ArbitrumRelayer')
+      // exitRelayer = new ArbitrumRelayer(this.network, l1Provider, l2Provider)
+    } else if ([80001, 137].includes(fromChainId)) {
+      // const { PolygonRelayer } = await import('./exitRelayers/PolygonRelayer')
+      // exitRelayer = new PolygonRelayer(this.network, l1Provider, l2Provider)
+    } else if ([100].includes(fromChainId)) {
+      // const { GnosisChainRelayer } = await import('./exitRelayers/GnosisChainRelayer')
+      // exitRelayer = new GnosisChainRelayer(this.network, l1Provider, l2Provider)
+    }
+    if (!exitRelayer) {
+      throw new Error(`Exit relayer not found for chainId "${fromChainId}"`)
+    }
+    const tx = await exitRelayer.exitTx(bundleCommittedTransactionHash)
+    return tx
+  }
+
+  async getIsL2TxHashExited (input: GetIsL2TxHashExitedInput): Promise<any> {
+    const { fromChainId, transactionHash } = input
+
+    const l1Provider = this.getRpcProvider(this.l1ChainId)
+    const l2Provider = this.getRpcProvider(fromChainId)
+    let exitRelayer : ExitRelayer
+    if ([420, 10].includes(fromChainId)) {
+      const { OptimismRelayer } = await import('./exitRelayers/OptimismRelayer')
+      exitRelayer = new OptimismRelayer(this.network, l1Provider, l2Provider)
+    }
+
+    if (!exitRelayer) {
+      throw new Error(`Exit relayer not found for chainId "${fromChainId}"`)
+    }
+
+    return exitRelayer.getIsL2TxHashExited(transactionHash)
+  }
+
   async getSendMessagePopulatedTx (input: GetSendMessagePopulatedTxInput): Promise<any> {
     let { fromChainId, toChainId, toAddress, toCalldata = '0x' } = input
     if (!this.isValidChainId(fromChainId)) {
@@ -1318,7 +1388,7 @@ export class Hop {
     if (!address) {
       throw new Error('address not found for hub connector factory')
     }
-    const factory = HubERC5164ConnectorFactory__factory.connect(address, provider)
+    const factory = HubERC5164ConnectorFactory__factory.connect(address, signer)
     const tx = await factory.connectTargets(hubChainId, target1, spokeChainId, target2)
     const receipt = await tx.wait()
     const event = receipt.events?.find(
