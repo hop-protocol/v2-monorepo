@@ -529,12 +529,6 @@ export function Tutorial () {
       }
     })
 
-    const rpcProviders = {
-      5: 'https://goerli.rpc.hop.exchange',
-      420: 'https://optimism-goerli.rpc.hop.exchange'
-    }
-    sdk.setRpcProviders(rpcProviders)
-
     const fromChainId = 420
 
     const {
@@ -551,8 +545,6 @@ export function Tutorial () {
     }
     console.log('txData:', txData)
 
-    // txData.data = txData.data!.replace('0x7ad7be77', '0x306796df') // todo update in sdk
-    // txData.to = '0x23E7046ac7e34DCFaCa85adD8ac72B59e3812E34' // hub message bridge
     const tx = await signer.sendTransaction(txData)
     console.log('tx', tx.hash)
     return tx.hash
@@ -617,11 +609,9 @@ Connectors are a great way to establish a cross-chain connection between two con
 
         <Typography mb={4} variant="h3">Let's try it out!</Typography>
 
-        <Typography mb={4} variant="body1">This tutorial will show you to easy it is to make any smart contract into a cross-chain smart contract by connecting the Hop messenger to it. It'll walk you through deploying simple contracts on two different chains, connecting these contracts with messengers, and seamlessly sending messages from one contract to the other while verifying the sender.</Typography>
+        <Typography mb={4} variant="body1">For this demo, we’ll deploy a <code>BidirectionalGreeter</code> contract on Goerli and Optimism-Goerli and establish a cross-chain connection with Connectors. On either Greeter contract, sendGreeting can be called which will send a message to the other Greeter and update it’s greeting state. You can follow along with this tutorial using just your MetaMask wallet.</Typography>
 
-        <Typography mb={4} variant="body1">The demo Bidirectional Greeter contracts will be deployed to L1 Goerli and L2 Optimism-Goerli and will show how to send a message (greeting) from Goerli to Optimism-Goerli and from Optimism to Goerli.</Typography>
-
-        <Typography mb={4} variant="h4">Faucet</Typography>
+        <Typography mb={4} variant="h5">Faucet</Typography>
 
         <Typography mb={2} variant="body1">
           To follow along the tutorial, you will need some testnet ETH on both Goerli and Optimism-Goerli.
@@ -663,7 +653,7 @@ Connectors are a great way to establish a cross-chain connection between two con
           Once you have ETH, let's continue to setup a Hardhat project in the next section.
         </Typography>
 
-        <Typography variant="h4" mt={4} mb={4}>Create Hardhat Project</Typography>
+        <Typography variant="h5" mt={4} mb={4}>Create Hardhat Project</Typography>
 
         <Typography variant="body1">Initialize a new <Link href="https://hardhat.org/" target="_blank" rel="noreferrer noopener">Hardhat</Link> project with the following commands:</Typography>
 
@@ -720,7 +710,7 @@ module.exports = {
           />
         </Box>
 
-        <Typography mb={4} variant="h4">Set signing key</Typography>
+        <Typography mb={4} variant="h6">Set signing key</Typography>
 
         <Typography variant="body1">Create a <code>.env</code> file with the following environment variable (replace with your private key string) that will be used for signing transactions. Make sure this account has testnet ETH on both Goerli and Optimism-Goerli:</Typography>
 
@@ -734,13 +724,13 @@ PRIVATE_KEY=123...
           />
         </Box>
 
-        <Typography mb={4} variant="h4">Deploy Sender and Receiver Contracts</Typography>
+        <Typography mb={4} variant="h4">Deploy your cross-chain application</Typography>
 
         <Typography mb={2} variant="body1">
         We're going to deploy simple sender and receiver contract on two different chains. These will be the Bidirectional Greeter contracts and will live on Goerli and Optimism-Goerli.
           </Typography>
 
-        <Typography variant="body1">Create <code>contracts/Greeter.sol</code> contract file with the following:</Typography>
+        <Typography variant="body1">Create <code>contracts/Greeter.sol</code> contract file with the following code for the Bidirectional Greeter:</Typography>
 
         <Box mb={2}>
           <Syntax
@@ -917,11 +907,18 @@ git clone https://github.com/hop-protocol/contracts-v2
         </Box>
         */}
 
-        <Typography mt={4} mb={4} variant="h4">Connect Targets</Typography>
+        <Typography mt={4} mb={4} variant="h4">Deploy your Connectors</Typography>
 
-        <Typography mt={4} mb={2} variant="body1">The next step is to connect the two Greeter contracts using the Hub Connector Factory and in return get the connector address.</Typography>
+        <Typography mt={4} mb={2} variant="body1">Next, we’ll connect our two Greeter contracts with Connectors. A pair of Connectors can be deployed by navigating to the <Link href="https://v2-connector-portal.hop.exchange/" target="_blank" rel="noreferrer noopener">Connector Portal ↗</Link> and submitting your two target addresses (your Greeter contracts) and their respective chainId's (<code>5</code> for Goerli and <code>420</code> for Optimism-Goerli).</Typography>
 
-        <Typography mt={4} mb={2} variant="body1">On Goerli, the Hub Connector Factory is at <code>{hubConnectorFactoryOnGoerliAddress}</code>.</Typography>
+        <Box mb={4}>
+          <Link href="https://v2-connector-portal.hop.exchange/" target="_blank" rel="noreferrer noopener">Connector Portal ↗</Link>
+        </Box>
+
+        <Typography mt={4} mb={2} variant="body1">✨With a bit of create2 magic, paired connectors are deployed to the same address on their respective chains. ✨</Typography>
+
+
+        <Typography mt={4} mb={2} variant="body1">Alternatively, you can call the <code>ConnectorFactory</code> on Goerli directly. On Goerli, the Hub Connector Factory is at <code>{hubConnectorFactoryOnGoerliAddress}</code>.</Typography>
 
         <Typography variant="body1">Create <code>scripts/connectTargets.js</code> with the following. Replace the <code>greeterAddressOnGoerli</code> and <code>greeterAddressOnOptimism</code> addresses with your Goerli and Optimism-Goerli Greeter contract addresses respectively:</Typography>
 
@@ -1015,11 +1012,9 @@ connector address: ${connectorAddress || '0x00a2a6b450176ebFf94Ec99a841107ce2567
           </Box>
         </Card>
 
-        <Typography mt={4} mb={4} variant="body1">
-          Alternatively, you can use the <Link href="https://v2-connector-portal.hop.exchange/" target="_blank" rel="noreferrer noopener">Connector Portal ↗</Link> UI to connect targets.
-        </Typography>
+        <Typography mt={4} mb={4} variant="h4">Complete your cross-chain connection</Typography>
 
-        <Typography mt={4} mb={4} variant="h4">Set Connector on Sender and Receiver contracts</Typography>
+        <Typography mt={4} variant="body1">Now that you’re Connectors are deployed, let’s complete your cross-chain connection by setting the connector address for each of your Greeter contracts.</Typography>
 
         <Typography mt={4} variant="body1">The next step is to make the Greeter contracts aware of the connector contracts to be able to forward messages cross-chain. Create <code>scripts/setConnector.js</code> with the following to set the connector address, known as the <em>counterpart</em>, on each Greeter contract. Make sure to replace <code>connectorAddress</code>, <code>greeterAddressOnGoerli</code>, and <code>greeterAddressOnOptimism</code> with your own addresses from the previous steps:</Typography>
 
@@ -1133,7 +1128,13 @@ tx: 0xcb9024d0d94cc45c84b6aa5812590a8385a9d2e8fa99d34b1bdfa0d046d9dadd
           </Box>
         </Card>
 
-        <Typography mt={4} mb={4} variant="h4">Send Greeting</Typography>
+        {connectorTxOnOptimism && (
+          <Box mt={4} mb={4}>
+            <img width="300px" src="https://user-images.githubusercontent.com/168240/232550112-774f155e-074a-42d2-996a-9770def474b0.png" alt="" />
+          </Box>
+        )}
+
+        <Typography mt={4} mb={4} variant="h4">Send a cross-chain greeting from L1</Typography>
 
         <Typography variant="body1">Now we can send a greeting message to the Goerli Greeter contract by calling <code>setGreeting</code> which should send a message cross-chain to the Optimism-Goerli Greeter contract and call the <code>setGreeting</code> method. Create <code>scripts/sendGreeting.js</code> with the following. Replace <code>greeterAddressOnGoerli</code>, and <code>greeterAddressOnOptimism</code> with your own addresses:</Typography>
 
@@ -1214,7 +1215,7 @@ tx: 0xf16e06d3e49e78ee2a368251a52e6fbcce14d0512a2cd2f23ede8283f0dd9e1c
         </Card>
 
         <Box mb={4}></Box>
-        <Typography mb={2} variant="body1">After sending a message from Goerli to Optimism-Goerli, you should see the greeting message arrive on the Optimism-Goerli contract after a few seconds.</Typography>
+        <Typography mb={2} variant="body1">Cross-chain messages from Goerli to Optimism-Goerli  are executed automatically. This usually takes about 20 minutes. After some time, check if your Optimism-Goerli Greeter state has updated.</Typography>
 
         <Box mb={4}></Box>
         {(!greetingMessageOnOptimism && greetingTxOnGoerli) && (
@@ -1226,7 +1227,7 @@ tx: 0xf16e06d3e49e78ee2a368251a52e6fbcce14d0512a2cd2f23ede8283f0dd9e1c
           </Alert>
         )}
 
-        <Box mb={4}></Box>
+        <Typography mt={4} mb={4} variant="h4">Send a cross-chain greeting from L2</Typography>
 
         <Card>
           <Box p={2}>
@@ -1249,13 +1250,70 @@ tx: 0xf16e06d3e49e78ee2a368251a52e6fbcce14d0512a2cd2f23ede8283f0dd9e1c
           </Box>
         </Card>
 
+        <Typography mt={4} mb={2} variant="body1">The message from Optimism-Goerli to Goerli can only be exited after the bundle reaches the destination (Goerli). This will take a few minutes.</Typography>
+
         <Box mb={4}></Box>
         {typeof isL2TxHashExited === 'boolean' && (
-          <Typography mb={2} variant="body1">{isL2TxHashExited ? 'Bundle exited successfully' : 'Waiting for bundle to be exited...'}</Typography>
+          <Typography mb={2} variant="body1">{isL2TxHashExited ? (
+              <Alert severity="success">
+              Bundle exited successfully
+              </Alert>
+          )
+          : '⌛Waiting for bundle to be exited...'}</Typography>
         )}
 
         <Box mb={4}></Box>
-        <Typography mb={2} variant="body1">The final step is to relay the message on Goerli to finalize the exit transaction from Optimism to Goerli-Optimism.</Typography>
+        <Typography mb={2} variant="body1">The final step is to relay the message on Goerli to finalize the exit transaction from Optimism to Goerli-Optimism. Once your message is ready to be executed, you can execute the cross-chain message using the Hop SDK.</Typography>
+
+        <Box mb={2}>
+          <Syntax
+          code={`
+const hre = require("hardhat");
+const { Hop } = require('@hop-protocol/v2-sdk')
+
+async function main() {
+  const sdk = new Hop('goerli', {
+    contractAddresses: {
+      5: {
+        hubCoreMessenger: '0x23E7046ac7e34DCFaCa85adD8ac72B59e3812E34',
+        spokeCoreMessenger: '0x23E7046ac7e34DCFaCa85adD8ac72B59e3812E34',
+      },
+      420: {
+        startBlock: 7947719,
+        spokeCoreMessenger: '0x323019fac2d13d439ae94765b901466bfa8eeac1',
+      }
+    }
+  })
+
+  const fromChainId = 420
+  const transactionHash = '${greetingTxOnOptimism || '0x...'}'
+
+  const {
+    bundleProof,
+    toAddress,
+    fromAddress,
+    toCalldata,
+    toChainId
+  } = await sdk.getRelayMessageDataFromTransactionHash({ fromChainId, transactionHash })
+
+  const txData = await sdk.getRelayMessagePopulatedTx({ fromChainId, toChainId, fromAddress, toAddress, toCalldata, bundleProof })
+  if (!txData) {
+    throw new Error('expected txData')
+  }
+
+  const tx = await signer.sendTransaction(txData)
+  console.log('tx:', tx.hash)
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+          `.trim()}
+          />
+        </Box>
 
         <Card>
           <Box p={2}>
@@ -1288,7 +1346,11 @@ tx: 0xf16e06d3e49e78ee2a368251a52e6fbcce14d0512a2cd2f23ede8283f0dd9e1c
 
         <Box mb={4}></Box>
 
-        <Typography mt={4} variant="body1">Congrats! This concludes the tutorial. We went over how to set up a simple Bidirectional Greeter contract and deployed them to two chains. We then deployed new connector contracts that that are responsible for fowarding messages to the target Greeter contracts. Afterwards, we made the Greeter contracts aware of the new connector contracts by configuring their counterparts. And finally, we sent a couple cross-chain messages back and forth.</Typography>
+        <Typography mt={4} mb={4} variant="h4">Great work!</Typography>
+
+        <Typography mt={4} variant="body1">You’ve now deployed and connected your cross-chain application and sent messages between your connected pair of contracts. Hop Connectors handled all of the cross-chain logic keeping your application simple and secure. 💪</Typography>
+
+        {/*<Typography mt={4} variant="body1">For building more complex cross-chain applications, try sending and receiving messages directly from the Hop Core Messenger. ↗[Needs link]</Typography>*/}
 
         {!!error && (
           <Box mt={2} mb={4} width="100%" style={{ wordBreak: 'break-word' }}>
