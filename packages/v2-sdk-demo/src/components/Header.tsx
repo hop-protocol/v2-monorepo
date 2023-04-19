@@ -30,7 +30,8 @@ export function Header () {
   const currentTab = useMemo(() => {
     const routes: any = {
       '/': 'home',
-      '/tutorial': 'tutorial'
+      '/tutorial': 'tutorial',
+      '/hardhat-tutorial': 'hardhat-tutorial'
     }
 
     return routes[location.pathname]
@@ -39,7 +40,8 @@ export function Header () {
   function handleTabChange (event: any, newValue: number) {
     const routes: any = {
       home: '/',
-      tutorial: '/tutorial'
+      tutorial: '/tutorial',
+      'hardhat-tutorial': '/hardhat-tutorial',
     }
     history.push(routes[newValue])
   }
@@ -64,7 +66,8 @@ export function Header () {
         <Box ml={4} className={styles.tabs}>
           <Tabs value={currentTab} onChange={handleTabChange}>
             <Tab label="Home" value="home" />
-            <Tab label="Tutorial" value="tutorial" />
+            <Tab label="Connector Demo" value="tutorial" />
+            <Tab label="Connector Hardhat Tutorial" value="hardhat-tutorial" />
           </Tabs>
         </Box>
       </Box>
