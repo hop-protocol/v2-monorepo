@@ -9,6 +9,7 @@ src/package.json
 *.env
 !docs/*
 !docs/README.md
+docs-ui
 /hop.js
 .prettierrc
 notes.txt
