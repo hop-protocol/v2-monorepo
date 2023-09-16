@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import Box from '@mui/material/Box'
 import { HighlightedButton } from './HighlightedButton'
-import TextField from '@mui/material/TextField'
+import { CustomTextField } from './CustomTextField'
 import Typography from '@mui/material/Typography'
 import Alert from '@mui/material/Alert'
 import { Hop } from '@hop-protocol/v2-sdk'
@@ -196,20 +196,20 @@ main().catch(console.error)
                 <Box mb={1}>
                   <label>Chain ID <small><em>(number)</em></small></label>
                 </Box>
-                {/*<TextField fullWidth placeholder="420" value={chainId} onChange={event => setChainId(event.target.value)} />*/}
+                {/*<CustomTextField fullWidth placeholder="420" value={chainId} onChange={event => setChainId(event.target.value)} />*/}
                 <ChainSelect value={chainId} chains={['420', '5']} onChange={value => setChainId(value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
                   <label>From Block <small><em>(number)</em></small> <small><em>You can use negative value for number of blocks back of toBlock</em></small></label>
                 </Box>
-                <TextField fullWidth placeholder="0" value={startBlock} onChange={event => setStartBlock(event.target.value)} />
+                <CustomTextField fullWidth placeholder="0" value={startBlock} onChange={event => setStartBlock(event.target.value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
                   <label>To Block <small><em>(number)</em></small> <small><em>Leave blank to use head block</em></small></label>
                 </Box>
-                <TextField fullWidth placeholder="0" value={endBlock} onChange={event => setEndBlock(event.target.value)} />
+                <CustomTextField fullWidth placeholder="0" value={endBlock} onChange={event => setEndBlock(event.target.value)} />
               </Box>
               <Box mb={2} display="flex" justifyContent="center">
                 <HighlightedButton loading={loading} fullWidth type="submit" variant="contained" size="large">Get events</HighlightedButton>

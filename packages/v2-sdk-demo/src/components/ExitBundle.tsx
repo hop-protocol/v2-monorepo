@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Signer, providers } from 'ethers'
 import Box from '@mui/material/Box'
 import { HighlightedButton } from './HighlightedButton'
-import TextField from '@mui/material/TextField'
+import { CustomTextField } from './CustomTextField'
 import Checkbox from '@mui/material/Checkbox'
 import Alert from '@mui/material/Alert'
 import Typography from '@mui/material/Typography'
@@ -155,14 +155,14 @@ main().catch(console.error)
               <Box mb={1}>
                 <label>From Chain ID <small><em>(number)</em></small> <small><em>This is the origin chain of the message route</em></small></label>
               </Box>
-              {/*<TextField fullWidth placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />*/}
+              {/*<CustomTextField fullWidth placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />*/}
               <ChainSelect value={fromChainId} chains={['420', '5']} onChange={value => setFromChainId(value)} />
             </Box>
             <Box mb={2}>
               <Box mb={1}>
                 <label>From Chain Bundle Committed Tx Hash <small><em>(hex string)</em></small> <small><em>This is tx hash that contains the <code>BundleComitted</code> event for the Bundle ID</em></small></label>
               </Box>
-              <TextField fullWidth placeholder="0x" value={bundleCommittedTxHash} onChange={event => setBundleCommittedTxHash(event.target.value)} />
+              <CustomTextField fullWidth placeholder="0x" value={bundleCommittedTxHash} onChange={event => setBundleCommittedTxHash(event.target.value)} />
             </Box>
             <Box mb={2}>
               <Box mb={1}>

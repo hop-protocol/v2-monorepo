@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { Signer, providers } from 'ethers'
 import Box from '@mui/material/Box'
 import { HighlightedButton } from './HighlightedButton'
-import TextField from '@mui/material/TextField'
+import { CustomTextField } from './CustomTextField'
+import { CustomTextArea } from './CustomTextArea'
 import Checkbox from '@mui/material/Checkbox'
-import Textarea from '@mui/material/TextareaAutosize'
 import Alert from '@mui/material/Alert'
 import Typography from '@mui/material/Typography'
 import { Hop } from '@hop-protocol/v2-sdk'
@@ -97,7 +97,7 @@ main().catch(console.error)
               <Box mb={1}>
                 <label>RPC Providers Config <small><em>(JSON)</em></small> <small><em>JSON Object with RPC providers config</em></small></label>
               </Box>
-              <Textarea minRows={5} maxRows={5} placeholder="{}" value={configString} onChange={(event: any) => setConfigString(event.target.value)} style={{ width: '100%' }} />
+              <CustomTextArea minRows={5} maxRows={5} placeholder="{}" value={configString} onChange={(event: any) => setConfigString(event.target.value)} style={{ width: '100%' }} />
             </Box>
             <Box mb={2} display="flex" justifyContent="center">
               <HighlightedButton loading={loading} fullWidth type="submit" variant="contained" size="large">Set</HighlightedButton>

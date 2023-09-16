@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
 import { HighlightedButton } from './HighlightedButton'
-import TextField from '@mui/material/TextField'
+import { CustomTextField } from './CustomTextField'
 import Typography from '@mui/material/Typography'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
@@ -140,21 +140,21 @@ main().catch(console.error)
                 <Box mb={1}>
                   <label>From Chain ID <small><em>(number)</em></small> <small><em>This is the origin chain the message was sent from</em></small></label>
                 </Box>
-                {/*<TextField fullWidth placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />*/}
+                {/*<CustomTextField fullWidth placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />*/}
                 <ChainSelect value={fromChainId} chains={['420', '5']} onChange={value => setFromChainId(value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
                   <label>To Chain ID <small><em>(number)</em></small> <small><em>This is the destination chain specified for the message</em></small></label>
                 </Box>
-                {/*<TextField fullWidth placeholder="5" value={toChainId} onChange={event => setToChainId(event.target.value)} />*/}
+                {/*<CustomTextField fullWidth placeholder="5" value={toChainId} onChange={event => setToChainId(event.target.value)} />*/}
                 <ChainSelect value={toChainId} chains={['420', '5']} onChange={value => setToChainId(value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
                   <label>Message ID <small><em>(hex)</em></small> <small><em>The Message ID is emitted as an event when sending message</em></small></label>
                 </Box>
-                <TextField fullWidth placeholder="0x" value={messageId} onChange={event => setMessageId(event.target.value)} />
+                <CustomTextField fullWidth placeholder="0x" value={messageId} onChange={event => setMessageId(event.target.value)} />
               </Box>
               <Box mb={2} display="flex" justifyContent="center">
                 <HighlightedButton loading={loading} fullWidth type="submit" variant="contained" size="large">Get Bundle Proof</HighlightedButton>

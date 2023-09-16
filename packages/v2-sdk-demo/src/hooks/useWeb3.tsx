@@ -31,6 +31,12 @@ const chains = [
     token: 'ETH',
     label: 'Optimism Goerli',
     rpcUrl: 'https://goerli.optimism.io'
+  },
+  {
+    id: '0x14A33',
+    token: 'ETH',
+    label: 'Base Goerli',
+    rpcUrl: 'https://goerli.base.org'
   }
 ]
 

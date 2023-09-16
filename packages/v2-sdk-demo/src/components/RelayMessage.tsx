@@ -3,8 +3,8 @@ import { Signer, providers } from 'ethers'
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
 import { HighlightedButton } from './HighlightedButton'
-import TextField from '@mui/material/TextField'
-import Textarea from '@mui/material/TextareaAutosize'
+import { CustomTextField } from './CustomTextField'
+import { CustomTextArea } from './CustomTextArea'
 import Checkbox from '@mui/material/Checkbox'
 import Typography from '@mui/material/Typography'
 import { Hop } from '@hop-protocol/v2-sdk'
@@ -249,39 +249,39 @@ main().catch(console.error)
                 <Box mb={1}>
                   <label>From Chain ID <small><em>(number)</em></small> <small><em>This is the origin chain the message was sent from</em></small></label>
                 </Box>
-                {/*<TextField fullWidth placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />*/}
+                {/*<CustomTextField fullWidth placeholder="420" value={fromChainId} onChange={event => setFromChainId(event.target.value)} />*/}
                 <ChainSelect value={fromChainId} chains={['420', '5']} onChange={value => setFromChainId(value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
                   <label>To Chain ID <small><em>(number)</em></small> <small><em>This is the destination chain specified for the message</em></small></label>
                 </Box>
-                {/*<TextField fullWidth placeholder="5" value={toChainId} onChange={event => setToChainId(event.target.value)} />*/}
+                {/*<CustomTextField fullWidth placeholder="5" value={toChainId} onChange={event => setToChainId(event.target.value)} />*/}
                 <ChainSelect value={toChainId} chains={['420', '5']} onChange={value => setToChainId(value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
                   <label>From <small><em>(address)</em></small> <small><em>This is the sender address that sent the message</em></small></label>
                 </Box>
-                <TextField fullWidth placeholder="0x" value={fromAddress} onChange={event => setFromAddress(event.target.value)} />
+                <CustomTextField fullWidth placeholder="0x" value={fromAddress} onChange={event => setFromAddress(event.target.value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
                   <label>To <small><em>(address)</em></small> <small><em>This is the destination address specified when sending the message</em></small></label>
                 </Box>
-                <TextField fullWidth placeholder="0x" value={toAddress} onChange={event => setToAddress(event.target.value)} />
+                <CustomTextField fullWidth placeholder="0x" value={toAddress} onChange={event => setToAddress(event.target.value)} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
                   <label>Calldata <small><em>(hex string)</em></small> <small><em>This is the destination calldata specified when sending the message</em></small></label>
                 </Box>
-                <Textarea minRows={5} placeholder="0x" value={toCalldata} onChange={event => setToCalldata(event.target.value)} style={{ width: '100%' }} />
+                <CustomTextArea minRows={5} placeholder="0x" value={toCalldata} onChange={event => setToCalldata(event.target.value)} style={{ width: '100%' }} />
               </Box>
               <Box mb={2}>
                 <Box mb={1}>
                   <label>Bundle Proof <small><em>(JSON)</em></small> <small><em>This is the bundle proof JSON which can be generated given the message ID in form above</em></small></label>
                 </Box>
-                <Textarea minRows={5} placeholder={`
+                <CustomTextArea minRows={5} placeholder={`
 {
   "bundleId": "",
   "treeIndex": 0,
