@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { Signer, providers } from 'ethers'
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
-import LoadingButton from '@mui/lab/LoadingButton'
+import { HighlightedButton } from './HighlightedButton'
 import TextField from '@mui/material/TextField'
 import Textarea from '@mui/material/TextareaAutosize'
 import Checkbox from '@mui/material/Checkbox'
@@ -305,7 +305,7 @@ main().catch(console.error)
                 </Box>
               </Box>
               <Box mb={2} display="flex" justifyContent="center">
-                <LoadingButton loading={loading} fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</LoadingButton>
+                <HighlightedButton loading={loading} fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</HighlightedButton>
               </Box>
             </form>
           </Box>

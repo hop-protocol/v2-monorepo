@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Signer, providers } from 'ethers'
 import Box from '@mui/material/Box'
-import LoadingButton from '@mui/lab/LoadingButton'
+import { HighlightedButton } from './HighlightedButton'
 import TextField from '@mui/material/TextField'
 import Checkbox from '@mui/material/Checkbox'
 import Textarea from '@mui/material/TextareaAutosize'
@@ -100,7 +100,7 @@ main().catch(console.error)
               <Textarea minRows={5} maxRows={5} placeholder="{}" value={configString} onChange={(event: any) => setConfigString(event.target.value)} style={{ width: '100%' }} />
             </Box>
             <Box mb={2} display="flex" justifyContent="center">
-              <LoadingButton loading={loading} fullWidth type="submit" variant="contained" size="large">Set</LoadingButton>
+              <HighlightedButton loading={loading} fullWidth type="submit" variant="contained" size="large">Set</HighlightedButton>
             </Box>
           </form>
           {!!error && (

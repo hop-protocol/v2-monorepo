@@ -4,16 +4,8 @@ import './index.css'
 import App from './App'
 import reportWebVitals from './reportWebVitals'
 import { BrowserRouter } from 'react-router-dom'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { CustomThemeProvider } from './themev5'
 import { QueryClient, QueryClientProvider } from 'react-query'
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#d56ec6',
-    },
-  },
-})
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,13 +29,13 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
+    <CustomThemeProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <App />
         </BrowserRouter>
       </QueryClientProvider>
-    </ThemeProvider>
+    </CustomThemeProvider>
   </React.StrictMode>
 )
 

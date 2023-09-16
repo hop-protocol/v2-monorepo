@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { Signer, providers } from 'ethers'
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
-import LoadingButton from '@mui/lab/LoadingButton'
-import TextField from '@mui/material/TextField'
-import Textarea from '@mui/material/TextareaAutosize'
+import { HighlightedButton } from './HighlightedButton'
+import { CustomTextField } from './CustomTextField'
+import { CustomTextArea } from './CustomTextArea'
 import Checkbox from '@mui/material/Checkbox'
 import Typography from '@mui/material/Typography'
 import { Hop } from '@hop-protocol/v2-sdk'
@@ -310,7 +310,7 @@ main().catch(console.error)
                 <Box mb={1}>
                   <label>To <small><em>(address)</em></small> <small><em>Address to call at the destination</em></small></label>
                 </Box>
-                <TextField fullWidth placeholder="0x" value={toAddress} onChange={(event: any) => setToAddress(event.target.value)} />
+                <CustomTextField fullWidth placeholder="0x" value={toAddress} onChange={(event: any) => setToAddress(event.target.value)} />
               </Box>
 
               <Box mb={2}>
@@ -326,7 +326,7 @@ main().catch(console.error)
                     <Box mb={1}>
                       <label>ABI <small><em>(JSON)</em></small> <small><em>This is the ABI JSON artifact that is generated when compiling contracts (e.g. ERC20.json)</em></small></label>
                     </Box>
-                    <Textarea minRows={5} maxRows={5} placeholder="[]" value={abiString} onChange={(event: any) => setAbiString(event.target.value)} style={{ width: '100%' }} />
+                    <CustomTextArea minRows={5} maxRows={5} placeholder="[]" value={abiString} onChange={(event: any) => setAbiString(event.target.value)} style={{ width: '100%' }} />
                   </Box>
                   {abiOptions?.length > 0 && (
                     <Box mb={2}>
@@ -360,7 +360,7 @@ main().catch(console.error)
                 <Box mb={1}>
                   <label>Calldata <small><em>(hex string)</em></small> <small><em>{showAbiHelper ? 'This is the abi encoder calldata output which is the calldata to execute at the destination' : 'Calldata to execute at the destination'}</em></small></label>
                 </Box>
-                <Textarea disabled={showAbiHelper} minRows={5} maxRows={5} placeholder="0x" value={toCalldata} onChange={(event: any) => setToCalldata(event.target.value)} style={{ width: '100%' }} />
+                <CustomTextArea disabled={showAbiHelper} minRows={5} maxRows={5} placeholder="0x" value={toCalldata} onChange={(event: any) => setToCalldata(event.target.value)} style={{ width: '100%' }} />
               </Box>
 
               <Box mb={2}>
@@ -370,7 +370,7 @@ main().catch(console.error)
                 </Box>
               </Box>
               <Box mb={2} display="flex" justifyContent="center">
-                <LoadingButton loading={loading} fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</LoadingButton>
+                <HighlightedButton loading={loading} fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</HighlightedButton>
               </Box>
             </form>
           </Box>

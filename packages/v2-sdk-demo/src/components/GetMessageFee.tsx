@@ -5,7 +5,7 @@ import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
 import { useStyles } from './useStyles'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
-import LoadingButton from '@mui/lab/LoadingButton'
+import { HighlightedButton } from './HighlightedButton'
 import { ChainSelect } from './ChainSelect'
 
 type Props = {
@@ -118,7 +118,7 @@ main().catch(console.error)
               <ChainSelect value={toChainId} chains={['420', '5']} onChange={value => setToChainId(value)} />
             </Box>
             <Box mb={2} display="flex" justifyContent="center">
-              <LoadingButton fullWidth type="submit" variant="contained" size="large">Get</LoadingButton>
+              <HighlightedButton fullWidth type="submit" variant="contained" size="large">Get</HighlightedButton>
             </Box>
           </form>
           {!!output && (

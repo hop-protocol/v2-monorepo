@@ -5,7 +5,7 @@ import { Hop } from '@hop-protocol/v2-sdk'
 import { Syntax } from './Syntax'
 import { useStyles } from './useStyles'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
-import LoadingButton from '@mui/lab/LoadingButton'
+import { HighlightedButton } from './HighlightedButton'
 
 type Props = {
   sdk: Hop
@@ -58,7 +58,7 @@ main().catch(console.error)
         <Box mr={4} className={styles.formContainer}>
           <form onSubmit={handleSubmit}>
             <Box mb={2} display="flex" justifyContent="center">
-              <LoadingButton fullWidth type="submit" variant="contained" size="large">Get</LoadingButton>
+              <HighlightedButton fullWidth type="submit" variant="contained" size="large">Get</HighlightedButton>
             </Box>
           </form>
           {!!output && (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
-import LoadingButton from '@mui/lab/LoadingButton'
+import { HighlightedButton } from './HighlightedButton'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { Hop } from '@hop-protocol/v2-sdk'
@@ -157,7 +157,7 @@ main().catch(console.error)
                 <TextField fullWidth placeholder="0x" value={messageId} onChange={event => setMessageId(event.target.value)} />
               </Box>
               <Box mb={2} display="flex" justifyContent="center">
-                <LoadingButton loading={loading} fullWidth type="submit" variant="contained" size="large">Get Bundle Proof</LoadingButton>
+                <HighlightedButton loading={loading} fullWidth type="submit" variant="contained" size="large">Get Bundle Proof</HighlightedButton>
               </Box>
             </form>
           </Box>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { tomorrow as theme } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { oneDark as theme } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import Box from '@mui/material/Box'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import Typography from '@mui/material/Typography'

@@ -1,6 +1,6 @@
 import React from 'react'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
+import { CustomSelect } from './CustomSelect'
+import { CustomMenuItem } from './CustomMenuItem'
 
 export type Chain = {
   chainId: string
@@ -27,13 +27,13 @@ export function ChainSelect(props: Props) {
   }
 
   return (
-    <Select
+    <CustomSelect
       fullWidth
       value={value}
       onChange={handleChange}>
       {chains.map((chainId: string, i: number) => (
-        <MenuItem key={i} value={chainId}>{chainId} - {labels[chainId]}</MenuItem>
+        <CustomMenuItem key={i} value={chainId}>{chainId} - {labels[chainId]}</CustomMenuItem>
       ))}
-    </Select>
+    </CustomSelect>
   )
 }

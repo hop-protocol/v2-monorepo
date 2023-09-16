@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Link from '@mui/material/Link'
 import Button from '@mui/material/Button'
-import LoadingButton from '@mui/lab/LoadingButton'
-import TextField from '@mui/material/TextField'
+import { HighlightedButton } from '../components/HighlightedButton'
+import { CustomTextField } from '../components/CustomTextField'
 import { SiteWrapper } from '../components/SiteWrapper'
 import { providers, Contract, ContractFactory } from 'ethers'
 import { formatEther } from 'ethers/lib/utils'
@@ -12,7 +12,7 @@ import bidirectionalGreeterArtifact from '../abi/BidirectionalGreeter.json'
 import Alert from '@mui/material/Alert'
 import { Syntax } from '../components/Syntax'
 import Typography from '@mui/material/Typography'
-import Card from '@mui/material/Card'
+import { CustomPaper } from '../components/CustomPaper'
 import { useQuery } from 'react-query'
 import { Hop } from '@hop-protocol/v2-sdk'
 import '../tutorial.css'
@@ -626,7 +626,7 @@ Connectors are a great way to establish a cross-chain connection between two con
 
         {!address && (
           <Box mt={4}>
-            <LoadingButton loading={false} disabled={false} onClick={connect} variant="contained">Check balance</LoadingButton>
+            <HighlightedButton loading={false} disabled={false} onClick={connect} variant="contained">Check balance</HighlightedButton>
           </Box>
         )}
 
@@ -838,12 +838,12 @@ Greeter deployed to: ${greeterAddressOnGoerli || '0xfEA2d84759B0608Ed21DA5ceb467
           />
         </Box>
 
-        <Card>
+        <CustomPaper>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
             <Typography variant="body1" mb={2}>You can follow along the tutorial using your MetaMask wallet.</Typography>
             <Typography variant="body1" mb={2}>Deploy the Greeter contract on Goerli.</Typography>
-            <LoadingButton loading={isDeployingGreeterOnGoerli} disabled={!!greeterAddressOnGoerli} onClick={handleDeployGreeterOnGoerliClick} variant="contained">Deploy Greeter on Goerli</LoadingButton>
+            <HighlightedButton loading={isDeployingGreeterOnGoerli} disabled={!!greeterAddressOnGoerli} onClick={handleDeployGreeterOnGoerliClick} variant="contained">Deploy Greeter on Goerli</HighlightedButton>
 
             {!!greeterAddressOnGoerli && (
               <Box mt={2} width="100%" style={{ wordBreak: 'break-word' }}>
@@ -851,7 +851,7 @@ Greeter deployed to: ${greeterAddressOnGoerli || '0xfEA2d84759B0608Ed21DA5ceb467
               </Box>
             )}
           </Box>
-        </Card>
+        </CustomPaper>
 
         <Typography mt={4} variant="body1">Deploy Greeter contract to Optimism-Goerli with the following command:</Typography>
 
@@ -875,12 +875,12 @@ Greeter deployed to: ${greeterAddressOnOptimism || '0xA5ba5Abb9DC1979631a55c5811
           />
         </Box>
 
-        <Card>
+        <CustomPaper>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
             <Typography variant="body1" mb={2}>Deploy the Greeter contract on Optimism-Goerli.</Typography>
 
-            <LoadingButton loading={isDeployingGreeterOnOptimism} disabled={!!greeterAddressOnOptimism || !greeterAddressOnGoerli} onClick={handleDeployGreeterOnOptimismClick} variant="contained">Deploy Greeter on Optimism-Goerli</LoadingButton>
+            <HighlightedButton loading={isDeployingGreeterOnOptimism} disabled={!!greeterAddressOnOptimism || !greeterAddressOnGoerli} onClick={handleDeployGreeterOnOptimismClick} variant="contained">Deploy Greeter on Optimism-Goerli</HighlightedButton>
 
             {!greeterAddressOnGoerli && (
               <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Deploy Goerli contract first before trying to deploy on Optimism-Goerli</em></Typography>
@@ -892,7 +892,7 @@ Greeter deployed to: ${greeterAddressOnOptimism || '0xA5ba5Abb9DC1979631a55c5811
               </Box>
             )}
           </Box>
-        </Card>
+        </CustomPaper>
 
         {/*
         <Box mb={2}>
@@ -993,11 +993,11 @@ connector address: ${connectorAddress || '0x00a2a6b450176ebFf94Ec99a841107ce2567
 
         <Typography mb={2} variant="body1">The connector address is referred here at the <em>counterpart</em> in the Greeter contract; for example, if you recall the <code>{'ICrossChainGreeter(greeterConnector).setGreeting{value: msg.value}(newGreeting);'}</code> line, this is actually sending a message over the bridge to invoke the <code>setGreeting</code> method on the target address!</Typography>
 
-        <Card>
+        <CustomPaper>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
             <Typography variant="body1" mb={2}>Create a new connectors for the Greeter contracts.</Typography>
-            <LoadingButton loading={isConnectingTargets} disabled={!(greeterAddressOnGoerli && greeterAddressOnOptimism) || !!connectorAddress} onClick={handleConnectTargetsClick} variant="contained">Connect Targets</LoadingButton>
+            <HighlightedButton loading={isConnectingTargets} disabled={!(greeterAddressOnGoerli && greeterAddressOnOptimism) || !!connectorAddress} onClick={handleConnectTargetsClick} variant="contained">Connect Targets</HighlightedButton>
 
             {!(greeterAddressOnGoerli && greeterAddressOnOptimism) && (
               <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Goerli and Optimism-Goerli contract must be deployed first in order to connect targets</em></Typography>
@@ -1009,7 +1009,7 @@ connector address: ${connectorAddress || '0x00a2a6b450176ebFf94Ec99a841107ce2567
               </Box>
             )}
           </Box>
-        </Card>
+        </CustomPaper>
 
         <Typography mt={4} mb={4} variant="h4">Complete your cross-chain connection</Typography>
 
@@ -1069,11 +1069,11 @@ tx: 0xe98147b2decd1b930732f0e0ab5b2ef032592d62d73670f9db6bbbf126478fc4
           />
         </Box>
 
-        <Card>
+        <CustomPaper>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
             <Typography variant="body1" mb={2}>Set the connector address on Goerli Greeter contract.</Typography>
-            <LoadingButton loading={isSettingConnectorOnGoerli} disabled={!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism) || !!connectorTxOnGoerli} onClick={handleSetConnectorOnGoerliClick} variant="contained">Set Connector on Goerli</LoadingButton>
+            <HighlightedButton loading={isSettingConnectorOnGoerli} disabled={!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism) || !!connectorTxOnGoerli} onClick={handleSetConnectorOnGoerliClick} variant="contained">Set Connector on Goerli</HighlightedButton>
 
             {!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism) && (
               <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Connect targets first to get connect address in order to set connector</em></Typography>
@@ -1085,7 +1085,7 @@ tx: 0xe98147b2decd1b930732f0e0ab5b2ef032592d62d73670f9db6bbbf126478fc4
               </Box>
             )}
           </Box>
-        </Card>
+        </CustomPaper>
 
         <Typography mt={4} variant="body1">Set the Greeter connector on Optimism-Goerli with the following command:</Typography>
 
@@ -1109,11 +1109,11 @@ tx: 0xcb9024d0d94cc45c84b6aa5812590a8385a9d2e8fa99d34b1bdfa0d046d9dadd
           />
         </Box>
 
-        <Card>
+        <CustomPaper>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
             <Typography variant="body1" mb={2}>Set the connector address on Optimism-Goerli Greeter contract.</Typography>
-            <LoadingButton loading={isSettingConnectorOnOptimism} disabled={!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli) || !!connectorTxOnOptimism} onClick={handleSetConnectorOnOptimismClick} variant="contained">Set Connector on Optimism-Goerli</LoadingButton>
+            <HighlightedButton loading={isSettingConnectorOnOptimism} disabled={!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli) || !!connectorTxOnOptimism} onClick={handleSetConnectorOnOptimismClick} variant="contained">Set Connector on Optimism-Goerli</HighlightedButton>
 
             {!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli) && (
               <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Set connector address on Goerli contract first before setting it on Optimism-Goerli contract</em></Typography>
@@ -1125,7 +1125,7 @@ tx: 0xcb9024d0d94cc45c84b6aa5812590a8385a9d2e8fa99d34b1bdfa0d046d9dadd
               </Box>
             )}
           </Box>
-        </Card>
+        </CustomPaper>
 
         {connectorTxOnOptimism && (
           <Box mt={4} mb={4}>
@@ -1192,14 +1192,14 @@ tx: 0xf16e06d3e49e78ee2a368251a52e6fbcce14d0512a2cd2f23ede8283f0dd9e1c
           />
         </Box>
 
-        <Card>
+        <CustomPaper>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
             <Typography variant="body1" mb={2}>Send a greeting message from Goerli to Optimism-Goerli.</Typography>
             <Box mb={2}>
-              <TextField value={greetingMessageFromGoerli} onChange={(event: any) => setGreetingMessageFromGoerli(event.target.value)} placeholder="Greeting messsage" />
+              <CustomTextField value={greetingMessageFromGoerli} onChange={(event: any) => setGreetingMessageFromGoerli(event.target.value)} placeholder="Greeting messsage" />
             </Box>
-            <LoadingButton loading={isSendingGreetingOnGoerli} disabled={!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli && connectorTxOnOptimism)} onClick={handleSendGreetingOnGoerliClick} variant="contained">Send Greeting from Goerli</LoadingButton>
+            <HighlightedButton loading={isSendingGreetingOnGoerli} disabled={!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli && connectorTxOnOptimism)} onClick={handleSendGreetingOnGoerliClick} variant="contained">Send Greeting from Goerli</HighlightedButton>
 
             {!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli && connectorTxOnOptimism) && (
               <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Set connector addresses first before sending greeting messages</em></Typography>
@@ -1211,7 +1211,7 @@ tx: 0xf16e06d3e49e78ee2a368251a52e6fbcce14d0512a2cd2f23ede8283f0dd9e1c
               </Box>
             )}
           </Box>
-        </Card>
+        </CustomPaper>
 
         <Box mb={4}></Box>
         <Typography mb={2} variant="body1">Cross-chain messages from Goerli to Optimism-Goerli  are executed automatically. This usually takes about 20 minutes. After some time, check if your Optimism-Goerli Greeter state has updated.</Typography>
@@ -1228,14 +1228,14 @@ tx: 0xf16e06d3e49e78ee2a368251a52e6fbcce14d0512a2cd2f23ede8283f0dd9e1c
 
         <Typography mt={4} mb={4} variant="h4">Send a cross-chain greeting from L2</Typography>
 
-        <Card>
+        <CustomPaper>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
             <Typography variant="body1" mb={2}>Send a greeting message from Optimism-Goerli to Goerli.</Typography>
             <Box mb={2}>
-              <TextField value={greetingMessageFromOptimism} onChange={(event: any) => setGreetingMessageFromOptimism(event.target.value)} placeholder="Greeting messsage" />
+              <CustomTextField value={greetingMessageFromOptimism} onChange={(event: any) => setGreetingMessageFromOptimism(event.target.value)} placeholder="Greeting messsage" />
             </Box>
-            <LoadingButton loading={isSendingGreetingOnOptimism} disabled={!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli && connectorTxOnOptimism)} onClick={handleSendGreetingOnOptimismClick} variant="contained">Send greeting on Optimism</LoadingButton>
+            <HighlightedButton loading={isSendingGreetingOnOptimism} disabled={!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli && connectorTxOnOptimism)} onClick={handleSendGreetingOnOptimismClick} variant="contained">Send greeting on Optimism</HighlightedButton>
 
             {!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli && connectorTxOnOptimism) && (
               <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Set connector addresses first before sending greeting messages</em></Typography>
@@ -1247,7 +1247,7 @@ tx: 0xf16e06d3e49e78ee2a368251a52e6fbcce14d0512a2cd2f23ede8283f0dd9e1c
               </Box>
             )}
           </Box>
-        </Card>
+        </CustomPaper>
 
         <Typography mt={4} mb={2} variant="body1">The message from Optimism-Goerli to Goerli can only be exited after the bundle reaches the destination (Goerli). This will take a few minutes.</Typography>
 
@@ -1314,12 +1314,12 @@ main()
           />
         </Box>
 
-        <Card>
+        <CustomPaper>
           <Box p={2}>
             <Typography variant="h5" mb={2}>Try It!</Typography>
             <Typography variant="body1" mb={2}>You can follow along the tutorial using your MetaMask wallet.</Typography>
             <Typography variant="body1" mb={2}>Relay the message on Goerli to finalize the exit transaction.</Typography>
-            <LoadingButton loading={isSendingMessageRelayOnGoerli} disabled={!isL2TxHashExited} onClick={handleRelayMessageClick} variant="contained">Relay Message on Goerli</LoadingButton>
+            <HighlightedButton loading={isSendingMessageRelayOnGoerli} disabled={!isL2TxHashExited} onClick={handleRelayMessageClick} variant="contained">Relay Message on Goerli</HighlightedButton>
 
             {!(connectorAddress && greeterAddressOnGoerli && greeterAddressOnOptimism && connectorTxOnGoerli && connectorTxOnOptimism && greetingTxOnOptimism) && (
               <Typography variant="body2" mt={2} style={{ opacity: 0.5 }}><em>Send greeting message from Optimism-Goerli to Goerli first</em></Typography>
@@ -1331,7 +1331,7 @@ main()
               </Box>
             )}
           </Box>
-        </Card>
+        </CustomPaper>
 
         <Box mb={4}></Box>
         {(!greetingMessageOnGoerli && greetingTxOnOptimism && messageRelayTxOnGoerli) && (

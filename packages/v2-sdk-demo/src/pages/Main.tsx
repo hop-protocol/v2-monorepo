@@ -1,9 +1,11 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import { SiteWrapper } from '../components/SiteWrapper'
+import { CustomPaper } from '../components/CustomPaper'
 // import gnosisModule from '@web3-onboard/gnosis'
 import { useInterval } from 'react-use'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import { HighlightedButton } from '../components/HighlightedButton'
 import Typography from '@mui/material/Typography'
 import { providers } from 'ethers'
 import { formatEther } from 'ethers/lib/utils'
@@ -265,7 +267,7 @@ export function Main () {
             </Box>
             {!address && (
               <Box ml={4}>
-                <Button onClick={connect} variant="contained">Connect</Button>
+                <HighlightedButton onClick={connect} variant="contained">Connect a Wallet</HighlightedButton>
               </Box>
             )}
             {!!address && (
@@ -298,11 +300,11 @@ export function Main () {
             return (
               <Box mb={8} key={i}>
                 <Box maxWidth="1400px" m="0 auto">
-                  <Card>
+                  <CustomPaper>
                     <Box p={4}>
                       {component}
                     </Box>
-                  </Card>
+                  </CustomPaper>
                 </Box>
               </Box>
             )
