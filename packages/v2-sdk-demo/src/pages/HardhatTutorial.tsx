@@ -18,7 +18,7 @@ import { Hop } from '@hop-protocol/v2-sdk'
 import '../tutorial.css'
 
 export function HardhatTutorial () {
-  const { onboard, wallet, getWallet, address, connect, disconnect } = useWeb3()
+  const { address, getSignerOrRequestWallet, requestWallet, disconnectWallet, checkConnectedNetworkIdOrThrow } = useWeb3()
   const [error, setError] = useState('')
   const [isDeployingGreeterOnGoerli, setIsDeployingGreeterOnGoerli] = useState(false)
   const [isDeployingGreeterOnOptimism, setIsDeployingGreeterOnOptimism] = useState(false)
@@ -286,11 +286,8 @@ export function HardhatTutorial () {
 
   async function deployGreeter (chainId: number) {
     const { abi, bytecode } = bidirectionalGreeterArtifact
-    const signer = await getWallet()
-    const success = await onboard.setChain({ chainId })
-    if (!success) {
-      return
-    }
+    const signer = await getSignerOrRequestWallet()
+    await checkConnectedNetworkIdOrThrow(chainId)
 
     const Greeter = new ContractFactory(abi, bytecode, signer)
     const greeter = await Greeter.deploy()
@@ -329,11 +326,9 @@ export function HardhatTutorial () {
   }
 
   async function connectTargets() {
-    const signer = await getWallet()
-    const success = await onboard.setChain({ chainId: 5 })
-    if (!success) {
-      return
-    }
+    await requestWallet()
+    const signer = await getSignerOrRequestWallet()
+    await checkConnectedNetworkIdOrThrow(5)
 
     const sdk = new Hop('goerli', {
       contractAddresses: {
@@ -370,11 +365,9 @@ export function HardhatTutorial () {
   }
 
   async function setConnector (chainId: number, target: string) {
-    const signer = await getWallet()
-    const success = await onboard.setChain({ chainId })
-    if (!success) {
-      return
-    }
+    await requestWallet()
+    const signer = await getSignerOrRequestWallet()
+    await checkConnectedNetworkIdOrThrow(chainId)
 
     const { abi } = bidirectionalGreeterArtifact
     const greeter = new Contract(target, abi, signer)
@@ -416,11 +409,9 @@ export function HardhatTutorial () {
   }
 
   async function sendGreeting (chainId: number, target: string, greetingMessage: string) {
-    const signer = await getWallet()
-    const success = await onboard.setChain({ chainId })
-    if (!success) {
-      return
-    }
+    await requestWallet()
+    const signer = await getSignerOrRequestWallet()
+    await checkConnectedNetworkIdOrThrow(chainId)
 
     if (!greetingMessage) {
       throw new Error('greeting message is required')
@@ -506,11 +497,9 @@ export function HardhatTutorial () {
   }
 
   async function relayMessage() {
-    const signer = await getWallet()
-    const success = await onboard.setChain({ chainId: 5 })
-    if (!success) {
-      return
-    }
+    await requestWallet()
+    const signer = await getSignerOrRequestWallet()
+    await checkConnectedNetworkIdOrThrow(5)
 
     const sdk = new Hop('goerli', {
       contractAddresses: {
@@ -575,7 +564,7 @@ export function HardhatTutorial () {
     <SiteWrapper>
       {!!address && (
         <Box>
-          <Button onClick={disconnect}>disconnect</Button>
+          <Button onClick={disconnectWallet}>disconnect</Button>
         </Box>
       )}
 
@@ -626,7 +615,7 @@ Connectors are a great way to establish a cross-chain connection between two con
 
         {!address && (
           <Box mt={4}>
-            <HighlightedButton loading={false} disabled={false} onClick={connect} variant="contained">Check balance</HighlightedButton>
+            <HighlightedButton loading={false} disabled={false} onClick={requestWallet} variant="contained">Check balance</HighlightedButton>
           </Box>
         )}
 

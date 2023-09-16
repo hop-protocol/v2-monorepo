@@ -17,7 +17,7 @@ import { useQuery } from 'react-query'
 import '../tutorial.css'
 
 export function PingPongTutorial () {
-  const { onboard, wallet, getWallet, address, connect, disconnect } = useWeb3()
+  const { provider, address, requestWallet, disconnectWallet, checkConnectedNetworkId } = useWeb3()
   const [error, setError] = useState('')
   const [isDeployingTarget1, setIsDeployingTarget1] = useState(false)
   const [isDeployingTarget2, setIsDeployingTarget2] = useState(false)
@@ -236,11 +236,9 @@ export function PingPongTutorial () {
 
   async function deployPingPong (chainId: number) {
     const { abi, bytecode } = pingPongArtifact
-    const signer = await getWallet()
-    const success = await onboard.setChain({ chainId })
-    if (!success) {
-      return
-    }
+    await requestWallet()
+    const signer = provider?.getSigner()
+    await checkConnectedNetworkId(chainId)
 
     const PingPong = new ContractFactory(abi, bytecode, signer)
     const pingPong = await PingPong.deploy()
@@ -279,11 +277,9 @@ export function PingPongTutorial () {
   }
 
   async function connectTargets() {
-    const signer = await getWallet()
-    const success = await onboard.setChain({ chainId: 5 })
-    if (!success) {
-      return
-    }
+    await requestWallet()
+    const signer = provider?.getSigner()
+    await checkConnectedNetworkId(5)
 
     const factoryAddress = '0xeA72163fb54A9bD84F49F2f08D7Cc9bc1b68A649'
     const { abi } = hubConnectorFactoryArtifact
@@ -315,11 +311,9 @@ export function PingPongTutorial () {
   }
 
   async function setCounterpart (chainId: number, target: string) {
-    const signer = await getWallet()
-    const success = await onboard.setChain({ chainId })
-    if (!success) {
-      return
-    }
+    await requestWallet()
+    const signer = provider?.getSigner()
+    await checkConnectedNetworkId(chainId)
 
     const { abi } = pingPongArtifact
     const pingPong = new Contract(target, abi, signer)
@@ -359,11 +353,9 @@ export function PingPongTutorial () {
   }
 
   async function sendPing (chainId: number, target: string) {
-    const signer = await getWallet()
-    const success = await onboard.setChain({ chainId })
-    if (!success) {
-      return
-    }
+    await requestWallet()
+    const signer = provider?.getSigner()
+    await checkConnectedNetworkId(chainId)
 
     const { abi } = pingPongArtifact
     const pingPong = new Contract(target, abi, signer)
@@ -423,7 +415,7 @@ export function PingPongTutorial () {
     <SiteWrapper>
       {!!address && (
         <Box>
-          <Button onClick={disconnect}>disconnect</Button>
+          <Button onClick={disconnectWallet}>disconnect</Button>
         </Box>
       )}
 
@@ -450,7 +442,7 @@ export function PingPongTutorial () {
 
         {!address && (
           <Box mt={4}>
-            <LoadingButton loading={false} disabled={false} onClick={connect} variant="contained">Check balance</LoadingButton>
+            <LoadingButton loading={false} disabled={false} onClick={requestWallet} variant="contained">Check balance</LoadingButton>
           </Box>
         )}
 

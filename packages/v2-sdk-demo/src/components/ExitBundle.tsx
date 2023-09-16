@@ -13,13 +13,14 @@ import { useStyles } from './useStyles'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 
 type Props = {
-  signer: Signer
+  signer?: Signer
   sdk: Hop
-  onboard: any
+  checkConnectedNetworkId: any
+  requestWallet: any
 }
 
 export function ExitBundle (props: Props) {
-  const { signer, sdk, onboard } = props
+  const { signer, sdk, checkConnectedNetworkId, requestWallet } = props
   const styles = useStyles()
   const [copied, setCopied] = useState(false)
   const [fromChainId, setFromChainId] = useState(() => {
@@ -82,23 +83,14 @@ export function ExitBundle (props: Props) {
       const txData = await getSendTxData()
       setTxData(JSON.stringify(txData, null, 2))
       if (!populateTxDataOnly) {
-        let _signer = signer
-        if (!_signer) {
-          const wallets = await onboard.connectWallet()
-          const ethersProvider = new providers.Web3Provider(
-            wallets[0].provider,
-            'any'
-          )
-          _signer = ethersProvider.getSigner()
+        if (!signer) {
+          throw new Error('No signer')
         }
-
-        const success = await onboard.setChain({ chainId: Number(fromChainId) })
-        if (success) {
-          const tx = await _signer.sendTransaction({
-            ...txData
-          })
-          setTxHash(tx.hash)
-        }
+        await checkConnectedNetworkId(Number(fromChainId))
+        const tx = await signer.sendTransaction({
+          ...txData
+        })
+        setTxHash(tx.hash)
       }
     } catch (err: any) {
       console.error(err)
@@ -179,7 +171,12 @@ main().catch(console.error)
               </Box>
             </Box>
             <Box mb={2} display="flex" justifyContent="center">
-              <HighlightedButton loading={loading} fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</HighlightedButton>
+              {!signer && (
+                <HighlightedButton fullWidth variant="contained" size="large" onClick={() => requestWallet()}>Connect Wallet</HighlightedButton>
+              )}
+              {!!signer && (
+                <HighlightedButton loading={loading} fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</HighlightedButton>
+              )}
             </Box>
           </form>
           {!!error && (

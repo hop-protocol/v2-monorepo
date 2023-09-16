@@ -17,13 +17,14 @@ import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 
 type Props = {
-  signer: Signer
+  signer?: Signer
   sdk: Hop
-  onboard: any
+  checkConnectedNetworkId: any
+  requestWallet: any
 }
 
 export function SendMessage (props: Props) {
-  const { signer, sdk, onboard } = props
+  const { signer, sdk, checkConnectedNetworkId, requestWallet } = props
   const styles = useStyles()
   const [copied, setCopied] = useState(false)
   const [fromChainId, setFromChainId] = useState(() => {
@@ -199,28 +200,19 @@ export function SendMessage (props: Props) {
       setTxData(JSON.stringify(txData, null, 2))
       const fee = await sdk.getMessageFee({ fromChainId: Number(fromChainId), toChainId: Number(toChainId) })
       if (!populateTxDataOnly) {
-        let _signer = signer
-        if (!_signer) {
-          const wallets = await onboard.connectWallet()
-          const ethersProvider = new providers.Web3Provider(
-            wallets[0].provider,
-            'any'
-          )
-          _signer = ethersProvider.getSigner()
+        if (!signer) {
+          throw new Error('No signer')
         }
+        await checkConnectedNetworkId(Number(fromChainId))
+        const tx = await signer.sendTransaction({
+          ...txData,
+          value: fee
+        })
+        setTxHash(tx.hash)
 
-        const success = await onboard.setChain({ chainId: Number(fromChainId) })
-        if (success) {
-          const tx = await _signer.sendTransaction({
-            ...txData,
-            value: fee
-          })
-          setTxHash(tx.hash)
-
-          const receipt = await tx.wait()
-          const { messageId } = await sdk.getMessageSentEventFromTransactionReceipt({ fromChainId: Number(fromChainId), receipt })
-          setMessageId(messageId)
-        }
+        const receipt = await tx.wait()
+        const { messageId } = await sdk.getMessageSentEventFromTransactionReceipt({ fromChainId: Number(fromChainId), receipt })
+        setMessageId(messageId)
       }
     } catch (err: any) {
       console.error(err)
@@ -370,7 +362,12 @@ main().catch(console.error)
                 </Box>
               </Box>
               <Box mb={2} display="flex" justifyContent="center">
-                <HighlightedButton loading={loading} fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</HighlightedButton>
+                {!signer && (
+                  <HighlightedButton fullWidth variant="contained" size="large" onClick={() => requestWallet()}>Connect Wallet</HighlightedButton>
+                )}
+                {!!signer && (
+                  <HighlightedButton loading={loading} fullWidth type="submit" variant="contained" size="large">{populateTxDataOnly ? 'Get tx data' : 'Send'}</HighlightedButton>
+                )}
               </Box>
             </form>
           </Box>
