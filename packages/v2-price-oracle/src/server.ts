@@ -30,8 +30,16 @@ app.post('/', async (req: any, res: any) => {
 
 app.get('/v1/gas-price', async (req: any, res: any) => {
   try {
-    const gasPrice = await controller.getRecommendedGasPrice()
-    res.status(200).json({ status: 'ok', data: { gasPrice } })
+    const chainSlug = req.query.chain
+    const timestamp = Number(req.query.timestamp) || Math.floor(Date.now() / 1000)
+    if (!chainSlug) {
+      throw new Error('chainSlug required')
+    }
+    if (!timestamp) {
+      throw new Error('timestamp required')
+    }
+    const data = await controller.getFeeData({ chainSlug, timestamp })
+    res.status(200).json({ status: 'ok', data })
   } catch (err: any) {
     res.status(500).json({ error: err.message })
   }
