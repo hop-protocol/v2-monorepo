@@ -1,10 +1,10 @@
 import wait from 'wait'
 import { ChainController } from './ChainController'
-import { DbController } from './DbController'
-import { pollIntervalSeconds } from './config'
-import { getBlockNumberFromDate } from './utils/getBlockNumberFromDate'
 import { DateTime } from 'luxon'
+import { DbController } from './DbController'
 import { formatUnits } from 'ethers/lib/utils'
+import { getBlockNumberFromDate } from './utils/getBlockNumberFromDate'
+import { pollIntervalSeconds } from './config'
 
 let dbController: DbController
 
@@ -35,6 +35,7 @@ export class Controller {
   async startPoller (options: any = {}) {
     const { syncStartTimestamp } = options
     while (true) {
+      let isFirstPoll = true
       try {
         console.log('poll')
         for (const chainSlug in this.chainControllers) {
@@ -42,10 +43,19 @@ export class Controller {
             const chainController = this.chainControllers[chainSlug]
             console.log('fetching chain', chainSlug)
 
+            let customStartSyncBlock: any = null
+            if (syncStartTimestamp && isFirstPoll) {
+              customStartSyncBlock = await getBlockNumberFromDate(chainController.provider, syncStartTimestamp)
+            }
+
             const syncKey = `${chainSlug}`
             let lastSyncedBlocked: any = null
             try {
-              lastSyncedBlocked = await this.dbController.getSyncState(syncKey)
+              if (customStartSyncBlock) {
+                lastSyncedBlocked = customStartSyncBlock
+              } else {
+                lastSyncedBlocked = await this.dbController.getSyncState(syncKey)
+              }
             } catch (err: any) {
             }
             const endBlockNumber = (await chainController.getBlockNumber() - 1)
@@ -90,12 +100,13 @@ export class Controller {
       } catch (err: any) {
         console.error('poll error', err)
       }
+      isFirstPoll = false
 
       await wait(pollIntervalSeconds * 1000)
     }
   }
 
-  close() {
+  close () {
     this.dbController.close()
   }
 }

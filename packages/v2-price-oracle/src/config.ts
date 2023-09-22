@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
-dotenv.config()
 
-import { TextEncoder, TextDecoder } from 'util'
+import { TextDecoder, TextEncoder } from 'util'
+dotenv.config()
 global.TextEncoder = TextEncoder
 global.TextDecoder = TextDecoder
 

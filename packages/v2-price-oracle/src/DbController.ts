@@ -1,7 +1,7 @@
 import nearest from 'nearest-date'
-import { dbPath } from './config'
 import wait from 'wait'
 import { Level } from 'level'
+import { dbPath } from './config'
 
 export class DbController {
   rootDb: any
@@ -26,7 +26,7 @@ export class DbController {
     this.init()
   }
 
-  async init() {
+  async init () {
     await this.rootDb.open()
     this.ready = true
 
@@ -101,7 +101,7 @@ export class DbController {
     const varianceSeconds = 10 * 60 // 10 minutes
     const buffer = 20 * 60 // 20 minutes
     const startTimestamp = targetTimestamp - buffer
-    const endTimestamp = targetTimestamp + buffer
+    const endTimestamp = Number(targetTimestamp) + buffer
     const filter = {
       gte: `${chainSlug}-${startTimestamp}`,
       lte: `${chainSlug}-${endTimestamp}~`,
@@ -134,7 +134,7 @@ export class DbController {
     await this.syncStateDb.put(key, blockNumber)
   }
 
-  close() {
+  close () {
     this.rootDb.close()
   }
 }
