@@ -14,10 +14,10 @@ export class DbController {
     const rootDb = new Level(dbPath, { valueEncoding: 'json' })
     this.rootDb = rootDb
 
-    const gasFeeDataByTimestampDb = rootDb.sublevel('gas-fee-data-timestamp')
+    const gasFeeDataByTimestampDb = rootDb.sublevel('gas-fee-data-timestamp', { valueEncoding: 'json' })
     this.gasFeeDataByTimestampDb = gasFeeDataByTimestampDb
 
-    const gasFeeDataByBlockNumberDb = rootDb.sublevel('gas-fee-data-block-number')
+    const gasFeeDataByBlockNumberDb = rootDb.sublevel('gas-fee-data-block-number', { valueEncoding: 'json' })
     this.gasFeeDataByBlockNumberDb = gasFeeDataByBlockNumberDb
 
     const syncStateDb = rootDb.sublevel('sync-state')
@@ -109,6 +109,7 @@ export class DbController {
     }
 
     const items = await this.gasFeeDataByTimestampDb.values(filter).all()
+    console.log(JSON.stringify(items))
     const dates = items.map((item: any) => item.timestamp)
     const index = nearest(dates, targetTimestamp)
     if (index === -1) {
