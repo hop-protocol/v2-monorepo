@@ -12,3 +12,4 @@ export const rpcUrls: any = {
   basezk: process.env.BASEZK_RPC,
   linea: process.env.LINEA_RPC
 }
+export const dbPath = process.env.DB_PATH ?? './mydb'

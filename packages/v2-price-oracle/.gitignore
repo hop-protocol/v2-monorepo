@@ -8,3 +8,4 @@ src/scripts
 *.dump
 *.log
 .build-info.json
+mydb

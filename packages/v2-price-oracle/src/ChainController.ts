@@ -1,5 +1,5 @@
-import { providers } from 'ethers'
 import { getRpcProvider } from './utils/getRpcProvider'
+import { providers } from 'ethers'
 
 export class ChainController {
   provider: providers.Provider
@@ -13,7 +13,7 @@ export class ChainController {
     const timestamp = block.timestamp
     const baseFeePerGas = block?.baseFeePerGas?.toString()
     const feeData = {
-      baseFeePerGas,
+      baseFeePerGas
     }
     return {
       timestamp,
