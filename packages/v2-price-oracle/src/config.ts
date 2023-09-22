@@ -1,6 +1,10 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
+import { TextEncoder, TextDecoder } from 'util'
+global.TextEncoder = TextEncoder
+global.TextDecoder = TextDecoder
+
 export const pollIntervalSeconds = Number(process.env.POLL_INTERVAL_SECONDS ?? 10)
 export const port = Number(process.env.PORT ?? 8000)
 export const network = process.env.NETWORK ?? 'goerli'

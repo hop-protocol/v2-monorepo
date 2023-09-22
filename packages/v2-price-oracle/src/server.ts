@@ -3,7 +3,7 @@ import express from 'express'
 import { Controller } from './controller'
 import { port } from './config'
 
-const app = express()
+export const app = express()
 
 app.enable('trust proxy')
 app.use(cors())

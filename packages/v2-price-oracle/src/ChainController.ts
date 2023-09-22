@@ -8,10 +8,13 @@ export class ChainController {
     this.provider = getRpcProvider(chainSlug)
   }
 
-  async getCurrentFeeData () {
-    const block = await this.provider.getBlock('latest')
+  async getFeeData (blockTag: number | string = 'latest') {
+    const block = await this.provider.getBlock(blockTag)
     const timestamp = block.timestamp
     const baseFeePerGas = block?.baseFeePerGas?.toString()
+    if (!baseFeePerGas) {
+      throw new Error('baseFeePerGas not found')
+    }
     const feeData = {
       baseFeePerGas
     }
@@ -19,5 +22,9 @@ export class ChainController {
       timestamp,
       feeData
     }
+  }
+
+  async getBlockNumber () {
+    return Number((await this.provider.getBlockNumber()).toString())
   }
 }
