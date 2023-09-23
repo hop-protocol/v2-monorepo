@@ -1,6 +1,6 @@
 # v2-price-oracle
 
-> A node.js server price oracle for the v2 protocol
+> A node.js server gas price oracle for the Hop V2 Protocol.
 
 ## API
 
@@ -60,7 +60,7 @@ Response
 
 ```json
 {
-    "valid': true,
+    "valid": true,
     "timestamp": 1695439139,
     "gasPrice": "60",
     "minFee": "50",
