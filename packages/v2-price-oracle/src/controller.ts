@@ -29,11 +29,7 @@ export class Controller {
 
   async getFeeData (input: any) {
     const { chainSlug, timestamp } = input
-    const item = await this.dbController.getNearestGasFeeData({ chainSlug, timestamp })
-    if (item) {
-      return item
-    }
-
+    let item = await this.dbController.getNearestGasFeeData({ chainSlug, timestamp })
     if (!item) {
       const startTime = DateTime.fromSeconds(timestamp).toUTC().minus({ minutes: 10 }).toSeconds()
       const endTime = DateTime.fromSeconds(timestamp).toUTC(). plus({ minutes: 10 }).toSeconds()
@@ -43,11 +39,21 @@ export class Controller {
       await this.syncBlockNumberRange(chainSlug, startBlockNumber, endBlockNumber)
     }
 
-    return this.dbController.getNearestGasFeeData({ chainSlug, timestamp })
+    item = await this.dbController.getNearestGasFeeData({ chainSlug, timestamp })
+    if (!item) {
+      throw new Error('result not found')
+    }
+
+    const dt = DateTime.fromSeconds(item.timestamp)
+    const expiration = dt.plus({ minutes: 10 }).toSeconds()
+    return {
+      expiration,
+      ...item
+    }
   }
 
   async startPoller (options: any = {}) {
-    const { syncStartTimestamp } = options
+    let { syncStartTimestamp } = options
     while (true) {
       let isFirstPoll = true
       try {
@@ -131,7 +137,8 @@ export class Controller {
     const chainController = this.chainControllers[chainSlug]
     const feeData = await chainController.getFeeData(blockNumber)
     const timestamp = feeData.timestamp
-    const relativeTime = DateTime.fromSeconds(timestamp).toRelative()
+    const dt = DateTime.fromSeconds(timestamp)
+    const relativeTime = dt.toRelative()
     const gwei = formatUnits(feeData.feeData.baseFeePerGas, 9)
     console.log('storing', chainSlug, 'blockNumber', blockNumber, 'gwei', gwei, 'timestamp', timestamp, 'relativeTime', relativeTime)
     const data = {
