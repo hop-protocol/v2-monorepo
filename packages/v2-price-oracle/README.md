@@ -53,6 +53,18 @@ npm run start
 npm test
 ```
 
+### Environment Variables
+
+```sh
+NETWORK=goerli
+ETHEREUM_RPC=https://rpc.ankr.com/eth_goerli
+ARBITRUM_RPC=https://goerli-rollup.arbitrum.io/rpc
+OPTIMISM_RPC=https://goerli.optimism.io
+BASEZK_RPC=https://goerli.base.org
+POLL_INTERVAL_SECONDS=2
+DB_PATH=/tmp/mydb
+```
+
 ## License
 
 [MIT](LICENSE)
