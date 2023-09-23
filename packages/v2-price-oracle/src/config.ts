@@ -13,7 +13,7 @@ export const rpcUrls: any = {
   arbitrum: process.env.ARBITRUM_RPC,
   optimism: process.env.OPTIMISM_RPC,
   polygon: process.env.POLYGON_RPC,
-  basezk: process.env.BASEZK_RPC,
+  base: process.env.BASE_RPC,
   linea: process.env.LINEA_RPC
 }
 export const dbPath = process.env.DB_PATH ?? './mydb'

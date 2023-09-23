@@ -18,7 +18,7 @@ export class Controller {
       ethereum: new ChainController('ethereum'),
       arbitrum: new ChainController('arbitrum'),
       optimism: new ChainController('optimism'),
-      basezk: new ChainController('basezk')
+      base: new ChainController('base')
     }
 
     if (!dbController) {
@@ -153,17 +153,20 @@ export class Controller {
   }
 
   async getGasPriceValid (input: any) {
-    const { baseFeePerGas, chainSlug, timestamp } = input
-    const items = await this.dbController.getGasFeeDataRange({ chainSlug, timestamp })
+    const { gasPrice, chainSlug, timestamp } = input
 
-    // const startTime = DateTime.fromSeconds(timestamp).toUTC().minus({ minutes: 10 }).toSeconds()
-    // const endTime = DateTime.fromSeconds(timestamp).toUTC(). plus({ minutes: 10 }).toSeconds()
-    // const chainController = this.chainControllers[chainSlug]
-    // const startBlockNumber = await getBlockNumberFromDate(chainController.provider, startTime)
-    // const endBlockNumber = await getBlockNumberFromDate(chainController.provider, endTime)
-    // await this.syncBlockNumberRange(chainSlug, startBlockNumber, endBlockNumber)
+    let items = await this.dbController.getGasFeeDataRange({ chainSlug, timestamp })
+    if (items.length === 0) {
+      const startTime = DateTime.fromSeconds(timestamp).toUTC().minus({ minutes: 10 }).toSeconds()
+      const endTime = DateTime.fromSeconds(timestamp).toUTC(). plus({ minutes: 10 }).toSeconds()
+      const chainController = this.chainControllers[chainSlug]
+      const startBlockNumber = await getBlockNumberFromDate(chainController.provider, startTime)
+      const endBlockNumber = await getBlockNumberFromDate(chainController.provider, endTime)
+      await this.syncBlockNumberRange(chainSlug, startBlockNumber, endBlockNumber)
+    }
 
-    const targetBaseFeePerGasBN = BigNumber.from(baseFeePerGas)
+    items = await this.dbController.getGasFeeDataRange({ chainSlug, timestamp })
+    const targetBaseFeePerGasBN = BigNumber.from(gasPrice)
     let valid = false
     let minFee = BigNumber.from(0)
     let minFeeBlockNumber = 0
@@ -185,7 +188,7 @@ export class Controller {
     return {
       valid,
       timestamp,
-      baseFeePerGas,
+      gasPrice,
       minFee: minFee.toString(),
       minFeeBlockNumber,
       minFeeTimestamp

@@ -9,14 +9,14 @@ describe('Controller', () => {
   }, 60 * 1000)
   it('getGasPriceValid - true', async () => {
     const controller = new Controller()
-    const result = await controller.getGasPriceValid({ chainSlug: 'optimism', timestamp: 1695439139, baseFeePerGas: '50' })
+    const result = await controller.getGasPriceValid({ chainSlug: 'optimism', timestamp: 1695439139, gasPrice: '50' })
     console.log(result)
     expect(result).toBeTruthy()
     expect(result.valid).toBeTruthy()
   }, 60 * 1000)
   it('getGasPriceValid - false', async () => {
     const controller = new Controller()
-    const result = await controller.getGasPriceValid({ chainSlug: 'optimism', timestamp: 1695439139, baseFeePerGas: '49' })
+    const result = await controller.getGasPriceValid({ chainSlug: 'optimism', timestamp: 1695439139, gasPrice: '49' })
     console.log(result)
     expect(result).toBeTruthy()
     expect(result.valid).toBeFalsy()
