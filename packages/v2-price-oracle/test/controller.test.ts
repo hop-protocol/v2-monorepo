@@ -1,12 +1,27 @@
 import { Controller } from '../src/controller'
 
 describe('Controller', () => {
-  it('controller', async () => {
-    const controller = new Controller()
-    const item = await controller.getFeeData({ chainSlug: 'ethereum', timestamp: Math.floor(Date.now() / 1000) })
-    // const item = await controller.dbController.getGasFeeDataItems()
+  const controller = new Controller()
+  it('getFeeData', async () => {
+    const item = await controller.getFeeData({ chainSlug: 'optimism', timestamp: Math.floor(Date.now() / 1000) })
     console.log(item)
     expect(item).toBeTruthy()
-    controller.close()
   }, 60 * 1000)
+  it('getGasPriceValid - true', async () => {
+    const controller = new Controller()
+    const result = await controller.getGasPriceValid({ chainSlug: 'optimism', timestamp: 1695439139, baseFeePerGas: '50' })
+    console.log(result)
+    expect(result).toBeTruthy()
+    expect(result.valid).toBeTruthy()
+  }, 60 * 1000)
+  it('getGasPriceValid - false', async () => {
+    const controller = new Controller()
+    const result = await controller.getGasPriceValid({ chainSlug: 'optimism', timestamp: 1695439139, baseFeePerGas: '49' })
+    console.log(result)
+    expect(result).toBeTruthy()
+    expect(result.valid).toBeFalsy()
+  }, 60 * 1000)
+  afterAll(() => {
+    controller.close()
+  })
 })

@@ -105,11 +105,10 @@ export class DbController {
     const filter = {
       gte: `${chainSlug}-${startTimestamp}`,
       lte: `${chainSlug}-${endTimestamp}~`,
-      limit: 100
+      limit: 5000
     }
 
     const items = await this.gasFeeDataByTimestampDb.values(filter).all()
-    console.log(JSON.stringify(items))
     const dates = items.map((item: any) => item.timestamp)
     const index = nearest(dates, targetTimestamp)
     if (index === -1) {
@@ -123,6 +122,23 @@ export class DbController {
     }
 
     return item
+  }
+
+  async getGasFeeDataRange (input: any): Promise<any> {
+    await this.tilReady()
+    const { chainSlug, timestamp } = input
+
+    const buffer = 10 * 60 // 10 minutes
+    const startTimestamp = timestamp
+    const endTimestamp = Number(timestamp + buffer) + buffer
+    const filter = {
+      gte: `${chainSlug}-${startTimestamp}`,
+      lte: `${chainSlug}-${endTimestamp}~`,
+      limit: 5000
+    }
+
+    const items = await this.gasFeeDataByTimestampDb.values(filter).all()
+    return items
   }
 
   async getSyncState (key: string) {

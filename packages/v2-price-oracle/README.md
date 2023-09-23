@@ -18,7 +18,7 @@ Query Parameters
 Example
 
 ```sh
-curl -X GET "https://v2-gas-price-oracle.hop.exchange/v1/gas-price?chain=ethereum&timestamp=1695439134"
+curl -X GET "https://v2-gas-price-oracle-goerli.hop.exchange/v1/gas-price?chain=optimism&timestamp=1695439134"
 ```
 
 Response
@@ -27,12 +27,12 @@ Response
 {
   "status": "ok",
   "data": {
-    "expiration": 1695439739,
-    "chainSlug": "ethereum",
-    "timestamp": 1695439139,
-    "blockNumber": 18195791,
+    "expiration": 1695439734,
+    "chainSlug": "optimism",
+    "timestamp": 1695439134,
+    "blockNumber": 15005533,
     "feeData": {
-      "baseFeePerGas": "7904402770"
+      "baseFeePerGas": "50"
     }
   }
 }

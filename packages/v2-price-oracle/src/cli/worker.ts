@@ -1,8 +1,8 @@
 import { Controller } from '../controller'
+import { DateTime } from 'luxon'
 import { OsStats } from '../OsStats'
 import { actionHandler, parseString, root } from './shared'
 import { server } from '../server'
-import { DateTime } from 'luxon'
 
 const controller = new Controller()
 

@@ -45,6 +45,27 @@ app.get('/v1/gas-price', async (req: any, res: any) => {
   }
 })
 
+app.get('/v1/gas-price-valid', async (req: any, res: any) => {
+  try {
+    const chainSlug = req.query.chain
+    const timestamp = Number(req.query.timestamp)
+    const baseFeePerGas = req.query.baseFeePerGas
+    if (!chainSlug) {
+      throw new Error('chainSlug required')
+    }
+    if (!timestamp) {
+      throw new Error('timestamp required')
+    }
+    if (!baseFeePerGas) {
+      throw new Error('timestamp required')
+    }
+    const data = await controller.getGasPriceValid({ chainSlug, timestamp, baseFeePerGas })
+    res.status(200).json({ status: 'ok', data })
+  } catch (err: any) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
 app.get('/health', (req: any, res: any) => {
   res.status(200).json({ status: 'ok' })
 })
