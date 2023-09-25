@@ -44,7 +44,7 @@ Response
 
 The expiration is 10 minutes into the future from the timestamp.
 
-### GET /v1/gas-price-valid
+### GET /v1/gas-price-verify
 
 > Returns true if the gas price is valid for the given chain and timestamp. Valid means that the gasPrice is within acceptable range between given timestamp and 10 minute into the past.
 
