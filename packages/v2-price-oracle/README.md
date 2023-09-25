@@ -2,6 +2,8 @@
 
 > A node.js server gas price oracle for the Hop V2 Protocol.
 
+This is node.js worker and server that queries the gas price data of every block using public RPCs for all the supported chains and stores it in a leveldb database. It also provides an API to query the gas price data.
+
 ## API
 
 ### Base URL
@@ -54,7 +56,7 @@ Query Parameters
 | --------- | -------- | --------------------------------------------------------------------------- |
 | `chain`   | `string` | The chain of the gas price to check for. Supported values are `ethereum`, `optimism`, `arbitrum`, `base`         |
 | `timestamp` | `number` | The UTC timestamp in seconds of the target gas price. |
-| `gasPrice` | `string` | The gas price to check for validity. |
+| `gasPrice` | `string` | The target gas price to check for validity. |
 
 Example
 
