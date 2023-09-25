@@ -46,6 +46,8 @@ Response
 
 The expiration is 10 minutes into the future from the timestamp.
 
+The `baseFeePerGas` response is returned in wei.
+
 ### GET /v1/gas-price-verify
 
 > Returns true if the gas price is valid for the given chain and timestamp. Valid means that the gasPrice is within acceptable range between given timestamp and 10 minute into the past.
@@ -56,7 +58,7 @@ Query Parameters
 | --------- | -------- | --------------------------------------------------------------------------- |
 | `chain`   | `string` | The chain of the gas price to check for. Supported values are `ethereum`, `optimism`, `arbitrum`, `base`         |
 | `timestamp` | `number` | The UTC timestamp in seconds of the target gas price. |
-| `gasPrice` | `string` | The target gas price to check for validity. |
+| `gasPrice` | `string` | The target gas price to check for validity. Must be in wei format. |
 
 Example
 
