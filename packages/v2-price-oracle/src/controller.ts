@@ -168,15 +168,15 @@ export class Controller {
     items = await this.dbController.getGasFeeDataRange({ chainSlug, timestamp })
     const targetBaseFeePerGasBN = BigNumber.from(gasPrice)
     let valid = false
-    let minFee = BigNumber.from(0)
-    let minFeeBlockNumber = 0
-    let minFeeTimestamp = 0
+    let minBaseFeePerGas = BigNumber.from(0)
+    let minBaseFeePerGasBlockNumber = 0
+    let minBaseFeePerGasTimestamp = 0
     for (const item of items) {
       const baseFeePerGasBN = BigNumber.from(item.feeData.baseFeePerGas)
-      if (minFee.eq(0) || baseFeePerGasBN.lte(minFee)) {
-        minFee = baseFeePerGasBN
-        minFeeBlockNumber = item.blockNumber
-        minFeeTimestamp = item.timestamp
+      if (minBaseFeePerGas.eq(0) || baseFeePerGasBN.lte(minBaseFeePerGas)) {
+        minBaseFeePerGas = baseFeePerGasBN
+        minBaseFeePerGasBlockNumber = item.blockNumber
+        minBaseFeePerGasTimestamp = item.timestamp
       }
       // console.log('item', item.feeData.baseFeePerGas, item.blockNumber)
       if (targetBaseFeePerGasBN.gte(item.feeData.baseFeePerGas)) {
@@ -189,9 +189,9 @@ export class Controller {
       valid,
       timestamp,
       gasPrice,
-      minFee: minFee.toString(),
-      minFeeBlockNumber,
-      minFeeTimestamp
+      minBaseFeePerGas: minBaseFeePerGas.toString(),
+      minBaseFeePerGasBlockNumber,
+      minBaseFeePerGasTimestamp
     }
   }
 

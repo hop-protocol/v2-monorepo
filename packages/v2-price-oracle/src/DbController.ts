@@ -129,8 +129,8 @@ export class DbController {
     const { chainSlug, timestamp } = input
 
     const buffer = 10 * 60 // 10 minutes
-    const startTimestamp = timestamp
-    const endTimestamp = Number(timestamp + buffer) + buffer
+    const startTimestamp = Number(timestamp) - buffer
+    const endTimestamp = timestamp
     const filter = {
       gte: `${chainSlug}-${startTimestamp}`,
       lte: `${chainSlug}-${endTimestamp}~`,

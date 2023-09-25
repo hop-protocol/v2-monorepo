@@ -4,6 +4,10 @@
 
 ## API
 
+### Base URL
+
+- Goerli: `https://v2-gas-price-oracle-goerli.hop.exchange`
+
 ### GET /v1/gas-price
 
 > Returns the gas price for the given chain and timestamp.
@@ -13,7 +17,7 @@ Query Parameters
 | Name      | Type     | Description                                                                 |
 | --------- | -------- | --------------------------------------------------------------------------- |
 | `chain`   | `string` | The chain to get the gas price for. Supported values are `ethereum`, `optimism`, `arbitrum`, `base`         |
-| `timestamp` | `number` | The UTC timestamp in seconds to get the gas price for. |
+| `timestamp` | `number` | The UTC timestamp in seconds to get the gas price for. (optional) Uses current time as default. |
 
 Example
 
@@ -38,9 +42,11 @@ Response
 }
 ```
 
+The expiration is 10 minutes into the future from the timestamp.
+
 ### GET /v1/gas-price-valid
 
-> Returns true if the gas price is valid (within acceptable range) for the given chain and timestamp.
+> Returns true if the gas price is valid for the given chain and timestamp. Valid means that the gasPrice is within acceptable range between given timestamp and 10 minute into the past.
 
 Query Parameters
 
@@ -53,7 +59,7 @@ Query Parameters
 Example
 
 ```sh
-curl -X GET "http://localhost:8000/v1/gas-price-check?chain=optimism&timestamp=1695439134&gasPrice=50"
+curl -X GET "http://localhost:8000/v1/gas-price-verify?chain=optimism&timestamp=1695439134&gasPrice=50"
 ```
 
 Response
@@ -63,9 +69,9 @@ Response
     "valid": true,
     "timestamp": 1695439139,
     "gasPrice": "60",
-    "minFee": "50",
-    "minFeeBlockNumber": 15005833,
-    "minFeeTimestamp": 1695439734
+    "minBaseFeePerGasFee": "50",
+    "minBaseFeePerGasBlockNumber": 15005833,
+    "minBaseFeePerGasTimestamp": 1695439734
 }
 ```
 

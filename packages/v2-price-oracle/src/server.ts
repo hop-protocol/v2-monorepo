@@ -45,21 +45,21 @@ app.get('/v1/gas-price', async (req: any, res: any) => {
   }
 })
 
-app.get('/v1/gas-price-valid', async (req: any, res: any) => {
+app.get('/v1/gas-price-verify', async (req: any, res: any) => {
   try {
     const chainSlug = req.query.chain
     const timestamp = Number(req.query.timestamp)
-    const baseFeePerGas = req.query.baseFeePerGas
+    const gasPrice = req.query.gasPrice
     if (!chainSlug) {
       throw new Error('chainSlug required')
     }
     if (!timestamp) {
       throw new Error('timestamp required')
     }
-    if (!baseFeePerGas) {
-      throw new Error('timestamp required')
+    if (!gasPrice) {
+      throw new Error('gasPrice is required')
     }
-    const data = await controller.getGasPriceValid({ chainSlug, timestamp, baseFeePerGas })
+    const data = await controller.getGasPriceValid({ chainSlug, timestamp, gasPrice })
     res.status(200).json({ status: 'ok', data })
   } catch (err: any) {
     res.status(500).json({ error: err.message })
