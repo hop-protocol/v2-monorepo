@@ -18,8 +18,10 @@ export class ChainController {
     if (!baseFeePerGas) {
       throw new Error('baseFeePerGas not found')
     }
+    const l1BaseFee = await this.getL1BaseFee(blockTag)
     const feeData = {
-      baseFeePerGas
+      baseFeePerGas,
+      l1BaseFee: l1BaseFee?.toString()
     }
     return {
       timestamp,
@@ -31,10 +33,8 @@ export class ChainController {
     return Number((await this.provider.getBlockNumber()).toString())
   }
 
-  async getL1BaseFee (blockTag: string | number = 'latest') {
-    if (this.chainSlug === 'ethereum') {
-      throw new Error(`${this.chainSlug} does not support L1 base fee`)
-    } else if (this.chainSlug === 'optimism' || this.chainSlug === 'base') {
+  async getL1BaseFee (blockTag: string | number = 'latest'): Promise<any> {
+    if (this.chainSlug === 'optimism' || this.chainSlug === 'base') {
       const l2GasPriceOracle = '0x420000000000000000000000000000000000000F'
       const contract = new Contract(l2GasPriceOracle, L2GasPriceOracleAbi, this.provider)
       const l1BaseFee = await contract.l1BaseFee({
@@ -42,7 +42,8 @@ export class ChainController {
       })
       return l1BaseFee
     } else if (this.chainSlug === 'arbitrum') {
-      throw new Error(`${this.chainSlug} not implemented yet`)
     }
+
+    return
   }
 }

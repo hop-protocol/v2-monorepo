@@ -140,7 +140,7 @@ export class Controller {
     const dt = DateTime.fromSeconds(timestamp)
     const relativeTime = dt.toRelative()
     const gwei = formatUnits(feeData.feeData.baseFeePerGas, 9)
-    console.log('storing', chainSlug, 'blockNumber', blockNumber, 'gwei', gwei, 'timestamp', timestamp, 'relativeTime', relativeTime)
+    console.log('storing', chainSlug, 'blockNumber', blockNumber, 'gwei', gwei, 'timestamp', timestamp, 'relativeTime', relativeTime, 'feeData', JSON.stringify(feeData))
     const data = {
       chainSlug,
       blockNumber,
