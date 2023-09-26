@@ -105,7 +105,7 @@ export class Controller {
     console.log('chain', chainSlug, 'startBlockNumber', startBlockNumber, 'endBlockNumber', endBlockNumber, 'diff', endBlockNumber - startBlockNumber)
     let lastItem: any
     for (let blockNumber = startBlockNumber; blockNumber <= endBlockNumber; blockNumber++) {
-      if (lastItem && blockNumber === lastItem.blockNumber + 1) {
+      if (lastItem && blockNumber === Number(lastItem.blockNumber) + 1) {
         const exists = await this.dbController.getGasFeeData({ chainSlug, timestamp: lastItem.timestamp })
         if (exists) {
           console.log('chain', chainSlug, 'blockNumber', blockNumber, 'lastTimestamp', lastItem.timestamp, 'exists')
@@ -158,7 +158,7 @@ export class Controller {
     let items = await this.dbController.getGasFeeDataRange({ chainSlug, timestamp })
     if (items.length === 0) {
       const startTime = DateTime.fromSeconds(timestamp).toUTC().minus({ minutes: 10 }).toSeconds()
-      const endTime = DateTime.fromSeconds(timestamp).toUTC(). plus({ minutes: 10 }).toSeconds()
+      const endTime = DateTime.fromSeconds(timestamp).toUTC().plus({ minutes: 10 }).toSeconds()
       const chainController = this.chainControllers[chainSlug]
       const startBlockNumber = await getBlockNumberFromDate(chainController.provider, startTime)
       const endBlockNumber = await getBlockNumberFromDate(chainController.provider, endTime)
