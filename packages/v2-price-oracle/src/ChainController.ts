@@ -1,4 +1,5 @@
-import L2GasPriceOracleAbi from './abi/L2GasPriceOracle.json'
+import L2OpGasPriceOracleAbi from './abi/L2OpGasPriceOracle.json'
+import L2ArbGasInfoAbi from './abi/L2ArbGasInfo.json'
 import { Contract, providers } from 'ethers'
 import { getRpcProvider } from './utils/getRpcProvider'
 
@@ -36,12 +37,18 @@ export class ChainController {
   async getL1BaseFee (blockTag: string | number = 'latest'): Promise<any> {
     if (this.chainSlug === 'optimism' || this.chainSlug === 'base') {
       const l2GasPriceOracle = '0x420000000000000000000000000000000000000F'
-      const contract = new Contract(l2GasPriceOracle, L2GasPriceOracleAbi, this.provider)
+      const contract = new Contract(l2GasPriceOracle, L2OpGasPriceOracleAbi, this.provider)
       const l1BaseFee = await contract.l1BaseFee({
         blockTag
       })
       return l1BaseFee
     } else if (this.chainSlug === 'arbitrum') {
+      const l2ArbGasInfo = '0x000000000000000000000000000000000000006C'
+      const contract = new Contract(l2ArbGasInfo, L2ArbGasInfoAbi, this.provider)
+      const l1BaseFee = await contract.getL1BaseFeeEstimate({
+        blockTag
+      })
+      return l1BaseFee
     }
 
     return
