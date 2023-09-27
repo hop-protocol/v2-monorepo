@@ -73,13 +73,26 @@ export class Controller {
     }
 
     const baseFeePerGas = BigNumber.from(item.feeData.baseFeePerGas)
-    let gasCost: BigNumber = BigNumber.from(0)
     if (chainSlug === 'ethereum') {
-      gasCost = baseFeePerGas.mul(gasLimit)
+      if (!gasLimit) {
+        throw new Error('gasLimit is required')
+      }
+      const gasCost = baseFeePerGas.mul(gasLimit)
+      return {
+        gasCost: formatUnits(gasCost, 18)
+      }
     }
 
     if (chainSlug === 'optimism' || chainSlug === 'base') {
-      const maxPriorityFeePerGas = parseUnits('0.0001', 'gwei') // https://community.optimism.io/docs/developers/build/transaction-fees/#priority-fee
+      if (!gasLimit) {
+        throw new Error('gasLimit is required')
+      }
+      if (!txData) {
+        throw new Error('txData is required')
+      }
+
+      // https://community.optimism.io/docs/developers/build/transaction-fees/#priority-fee
+      const maxPriorityFeePerGas = parseUnits('0.0001', 'gwei')
       const txGasPrice = baseFeePerGas.add(maxPriorityFeePerGas)
       const l2Fee = txGasPrice.mul(gasLimit)
 
@@ -87,6 +100,7 @@ export class Controller {
       const l1FeeOverhead = 2100 // mainnet: 188
       const l1FeeScalar = 1000000 // mainnet: 684000
 
+      // these functions are derived from oracle contracts
       function getL1GasUsed (data: string) {
         const _data = Buffer.from(data.replace('0x', ''), 'hex')
         let total = 0
@@ -133,9 +147,7 @@ export class Controller {
       }
     }
 
-    return {
-      gasCost: formatUnits(gasCost, 18)
-    }
+    throw new Error('unsupported chain')
   }
 
   async startPoller (options: any = {}) {

@@ -66,6 +66,26 @@ app.get('/v1/gas-price-verify', async (req: any, res: any) => {
   }
 })
 
+app.get('/v1/gas-cost-estimate', async (req: any, res: any) => {
+  try {
+    const chainSlug = req.query.chain
+    const timestamp = Number(req.query.timestamp) || Math.floor(Date.now() / 1000)
+    const gasLimit = req.query.gasLimit
+    const txData = req.query.txData
+    if (!chainSlug) {
+      throw new Error('chainSlug required')
+    }
+    if (!timestamp) {
+      throw new Error('timestamp required')
+    }
+    const data = await controller.calcGasCost({ chainSlug, timestamp, gasLimit, txData })
+    res.status(200).json({ status: 'ok', data })
+  } catch (err: any) {
+    console.error(err)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 app.get('/health', (req: any, res: any) => {
   res.status(200).json({ status: 'ok' })
 })
