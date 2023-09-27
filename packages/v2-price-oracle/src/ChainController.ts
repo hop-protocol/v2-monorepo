@@ -1,5 +1,5 @@
-import L2OpGasPriceOracleAbi from './abi/L2OpGasPriceOracle.json'
 import L2ArbGasInfoAbi from './abi/L2ArbGasInfo.json'
+import L2OpGasPriceOracleAbi from './abi/L2OpGasPriceOracle.json'
 import { Contract, providers } from 'ethers'
 import { getRpcProvider } from './utils/getRpcProvider'
 
@@ -50,7 +50,5 @@ export class ChainController {
       })
       return l1BaseFee
     }
-
-    return
   }
 }

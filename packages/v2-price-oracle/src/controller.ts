@@ -1,11 +1,12 @@
 import wait from 'wait'
-import { BigNumber } from 'ethers'
+import { BigNumber, constants } from 'ethers'
 import { ChainController } from './ChainController'
 import { DateTime } from 'luxon'
 import { DbController } from './DbController'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getBlockNumberFromDate } from './utils/getBlockNumberFromDate'
 import { pollIntervalSeconds } from './config'
+import { serialize } from '@ethersproject/transactions'
 
 let dbController: DbController
 
@@ -50,6 +51,90 @@ export class Controller {
     return {
       expiration,
       ...item
+    }
+  }
+
+  async calcGasCost (input: any) {
+    const { chainSlug, timestamp, gasLimit, txData } = input
+
+    let item = await this.dbController.getNearestGasFeeData({ chainSlug, timestamp })
+    if (!item) {
+      const startTime = DateTime.fromSeconds(timestamp).toUTC().minus({ minutes: 10 }).toSeconds()
+      const endTime = DateTime.fromSeconds(timestamp).toUTC().plus({ minutes: 10 }).toSeconds()
+      const chainController = this.chainControllers[chainSlug]
+      const startBlockNumber = await getBlockNumberFromDate(chainController.provider, startTime)
+      const endBlockNumber = await getBlockNumberFromDate(chainController.provider, endTime)
+      await this.syncBlockNumberRange(chainSlug, startBlockNumber, endBlockNumber)
+    }
+
+    item = await this.dbController.getNearestGasFeeData({ chainSlug, timestamp })
+    if (!item) {
+      throw new Error('result not found')
+    }
+
+    const baseFeePerGas = BigNumber.from(item.feeData.baseFeePerGas)
+    let gasCost: BigNumber = BigNumber.from(0)
+    if (chainSlug === 'ethereum') {
+      gasCost = baseFeePerGas.mul(gasLimit)
+    }
+
+    if (chainSlug === 'optimism' || chainSlug === 'base') {
+      const maxPriorityFeePerGas = parseUnits('0.0001', 'gwei') // https://community.optimism.io/docs/developers/build/transaction-fees/#priority-fee
+      const txGasPrice = baseFeePerGas.add(maxPriorityFeePerGas)
+      const l2Fee = txGasPrice.mul(gasLimit)
+
+      const l1BaseFee = item.feeData.l1BaseFee
+      const l1FeeOverhead = 2100 // mainnet: 188
+      const l1FeeScalar = 1000000 // mainnet: 684000
+
+      function getL1GasUsed (data: string) {
+        const _data = Buffer.from(data.replace('0x', ''), 'hex')
+        let total = 0
+        const length = _data.length
+        for (let i = 0; i < length; i++) {
+          if (_data[i] === 0) {
+            total += 4
+          } else {
+            total += 16
+          }
+        }
+        const unsigned = total + l1FeeOverhead
+        return BigNumber.from(unsigned + (68 * 16))
+      }
+
+      function getL1Fee (_data: string) {
+        const DECIMALS = 6
+        const l1GasUsed = getL1GasUsed(_data)
+        console.log('l1GasUsed:', l1GasUsed.toString())
+        const l1Fee = l1GasUsed.mul(BigNumber.from(l1BaseFee))
+        const divisor = BigNumber.from(10).pow(DECIMALS)
+        const unscaled = l1Fee.mul(BigNumber.from(l1FeeScalar))
+        const scaled = unscaled.div(divisor)
+        return scaled
+      }
+
+      const serialized = serialize({
+        data: txData,
+        to: constants.AddressZero,
+        gasPrice: baseFeePerGas,
+        type: 1,
+        gasLimit: gasLimit,
+        nonce: 1
+      })
+
+      const l1Fee = getL1Fee(serialized)
+      const totalFee = l1Fee.add(l1Fee)
+      console.log('fee info', formatUnits(l1Fee, 18), formatUnits(l2Fee, 18), formatUnits(totalFee, 18))
+
+      return {
+        l1Fee: formatUnits(l1Fee, 18),
+        l2Fee: formatUnits(l2Fee, 18),
+        gasCost: formatUnits(totalFee, 18)
+      }
+    }
+
+    return {
+      gasCost: formatUnits(gasCost, 18)
     }
   }
 
