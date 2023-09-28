@@ -8,12 +8,15 @@ global.TextDecoder = TextDecoder
 export const pollIntervalSeconds = Number(process.env.POLL_INTERVAL_SECONDS ?? 10)
 export const port = Number(process.env.PORT ?? 8000)
 export const network = process.env.NETWORK ?? 'goerli'
-export const rpcUrls: any = {
-  ethereum: process.env.ETHEREUM_RPC,
-  arbitrum: process.env.ARBITRUM_RPC,
-  optimism: process.env.OPTIMISM_RPC,
-  polygon: process.env.POLYGON_RPC,
-  base: process.env.BASE_RPC,
-  linea: process.env.LINEA_RPC
+const chains = ['ethereum', 'optimism', 'arbitrum', 'base']
+
+export const rpcUrls: any = {}
+
+for (const chain of chains) {
+  const urls = process.env[`${chain.toUpperCase()}_RPC`]?.split(',').map((url: string) => url.trim()).filter(Boolean)
+  if (urls) {
+    rpcUrls[chain] = urls
+  }
 }
+
 export const dbPath = process.env.DB_PATH ?? './mydb'

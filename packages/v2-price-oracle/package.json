@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@ethersproject/transactions": "^5.7.0",
+    "@hop-protocol/sdk": "^0.0.1-beta.536",
     "@openzeppelin/upgrades-core": "^1.29.0",
     "commander": "^10.0.1",
     "cors": "^2.8.5",

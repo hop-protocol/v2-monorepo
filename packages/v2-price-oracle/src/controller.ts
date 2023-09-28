@@ -118,7 +118,8 @@ export class Controller {
       function getL1Fee (_data: string) {
         const DECIMALS = 6
         const l1GasUsed = getL1GasUsed(_data)
-        console.log('l1GasUsed:', l1GasUsed.toString())
+        // console.log('l1GasUsed:', l1GasUsed.toString())
+
         const l1Fee = l1GasUsed.mul(BigNumber.from(l1BaseFee))
         const divisor = BigNumber.from(10).pow(DECIMALS)
         const unscaled = l1Fee.mul(BigNumber.from(l1FeeScalar))
