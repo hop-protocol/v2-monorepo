@@ -28,12 +28,20 @@ describe('Controller', () => {
     expect(result).toBeTruthy()
     expect(result.gasCost).toBe('0.000147')
   }, 60 * 1000)
-  it.only('calcGasCost - optimism', async () => {
+  it('calcGasCost - optimism', async () => {
     const controller = new Controller()
-    const txData = ''
+    const txData = '0x01de8001328252089400000000000000000000000000000000000000008080c0'
     const result = await controller.calcGasCost({ chainSlug: 'optimism', timestamp: 1695772800, gasLimit: '21000', txData })
     console.log(result)
     expect(result).toBeTruthy()
+  }, 60 * 1000)
+  it('calcGasCost - arbitrum', async () => {
+    const controller = new Controller()
+    const txData = '0x01de8001328252089400000000000000000000000000000000000000008080c0'
+    const result = await controller.calcGasCost({ chainSlug: 'arbitrum', timestamp: 1695772800, txData })
+    console.log(result)
+    expect(result).toBeTruthy()
+    expect(result.gasCost).toBe('0.0000267173')
   }, 60 * 1000)
   afterAll(() => {
     controller.close()

@@ -81,9 +81,7 @@ export class Controller {
       return {
         gasCost: formatUnits(gasCost, 18)
       }
-    }
-
-    if (chainSlug === 'optimism' || chainSlug === 'base') {
+    } else if (chainSlug === 'optimism' || chainSlug === 'base') {
       if (!gasLimit) {
         throw new Error('gasLimit is required')
       }
@@ -100,7 +98,8 @@ export class Controller {
       const l1FeeOverhead = 2100 // mainnet: 188
       const l1FeeScalar = 1000000 // mainnet: 684000
 
-      // these functions are derived from oracle contracts
+      // these functions are derived from oracle contract
+      // https://goerli-optimism.etherscan.io/address/0x420000000000000000000000000000000000000F#code
       function getL1GasUsed (data: string) {
         const _data = Buffer.from(data.replace('0x', ''), 'hex')
         let total = 0
@@ -144,6 +143,27 @@ export class Controller {
         l1Fee: formatUnits(l1Fee, 18),
         l2Fee: formatUnits(l2Fee, 18),
         gasCost: formatUnits(totalFee, 18)
+      }
+    } else if (chainSlug === 'arbitrum') {
+      if (!txData) {
+        throw new Error('txData is required')
+      }
+
+      const data = await this.chainControllers[chainSlug].getArbInfo(txData, item.blockNumber)
+
+      const l1GasEstimated = data.gasEstimateForL1
+      const l2GasUsed = data.gasEstimate.sub(l1GasEstimated)
+      const l2EstimatedPrice = data.baseFee
+      const l1EstimatedPrice = data.l1BaseFeeEstimate.mul(16)
+      const l1Cost = l1GasEstimated.mul(l2EstimatedPrice)
+      const l1Size = l1Cost.div(l1EstimatedPrice)
+      const L1Cost = l1EstimatedPrice.mul(l1Size)
+      const ExtraBuffer = L1Cost.div(l2EstimatedPrice)
+      const GasLimit = l2GasUsed.add(ExtraBuffer)
+      const gasCost = l2EstimatedPrice.mul(GasLimit)
+
+      return {
+        gasCost: formatUnits(gasCost, 18)
       }
     }
 

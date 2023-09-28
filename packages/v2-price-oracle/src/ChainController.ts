@@ -1,4 +1,5 @@
 import L2ArbGasInfoAbi from './abi/L2ArbGasInfo.json'
+import L2ArbNodeInterface from './abi/L2ArbNodeInterface.json'
 import L2OpGasPriceOracleAbi from './abi/L2OpGasPriceOracle.json'
 import { Contract, providers } from 'ethers'
 import { getRpcProvider } from './utils/getRpcProvider'
@@ -50,5 +51,33 @@ export class ChainController {
       })
       return l1BaseFee
     }
+  }
+
+  async getArbInfo (txData: string, blockTag: string | number = 'latest'): Promise<any> {
+    const destinationAddress = '0x0000000000000000000000000000000000000000'
+    const nodeInterface = '0x00000000000000000000000000000000000000C8'
+    const provider = new providers.JsonRpcProvider('https://arbitrum2.rpc.hop.exchange')
+    const contract = new Contract(nodeInterface, L2ArbNodeInterface, provider)
+    const contractCreation = false
+    const data = await contract.callStatic.gasEstimateComponents(
+      destinationAddress,
+      contractCreation,
+      txData,
+      {
+        blockTag
+      }
+    )
+
+    // console.log(
+    //   'gasEstimate', data.gasEstimate.toString(),
+    //   'gasEstimateForL1', data.gasEstimateForL1.toString(),
+    //   'baseFee', data.baseFee.toString(),
+    //   'l1BaseFeeEstimate', data.l1BaseFeeEstimate.toString(),
+    // )
+
+    // gasEstimate 21272  gasEstimateForL1 0      baseFee 100000000 l1BaseFeeEstimate 0
+    // gasEstimate 180521 gasEstimateForL1 159249 baseFee 100000000 l1BaseFeeEstimate 5179678243
+
+    return data
   }
 }
