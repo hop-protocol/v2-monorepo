@@ -29,7 +29,7 @@ export class Controller {
     this.dbController = dbController
   }
 
-  async getFeeData (input: any) {
+  async getGasFeeData (input: any) {
     const { chainSlug, timestamp } = input
     let item = await this.dbController.getNearestGasFeeData({ chainSlug, timestamp })
     if (!item) {
@@ -54,7 +54,7 @@ export class Controller {
     }
   }
 
-  async calcGasCost (input: any) {
+  async getGasCostEstimate (input: any) {
     const { chainSlug, timestamp, gasLimit, txData } = input
 
     let item = await this.dbController.getNearestGasFeeData({ chainSlug, timestamp })
@@ -169,6 +169,26 @@ export class Controller {
     }
 
     throw new Error('unsupported chain')
+  }
+
+  async gasCostVerify (input: any) {
+    const { chainSlug, timestamp, gasLimit, txData, targetGasCost } = input
+
+    const { gasCost } = await this.getGasCostEstimate({
+      chainSlug,
+      timestamp,
+      gasLimit,
+      txData,
+    })
+
+    const valid = targetGasCost >= gasCost
+
+    return {
+      valid,
+      timestamp,
+      gasCost,
+      targetGasCost
+    }
   }
 
   async startPoller (options: any = {}) {

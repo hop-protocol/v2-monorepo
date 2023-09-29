@@ -10,9 +10,9 @@ This is node.js worker and server that queries the gas price data of every block
 
 - Goerli: `https://v2-gas-price-oracle-goerli.hop.exchange`
 
-### GET /v1/gas-price
+### GET /v1/gas-fee-data
 
-> Returns the gas price for the given chain and timestamp.
+> Returns the gas fee data for the given chain and timestamp.
 
 Query Parameters
 
@@ -24,7 +24,7 @@ Query Parameters
 Example
 
 ```sh
-curl -X GET "http://localhost:8000/v1/gas-price?chain=optimism&timestamp=1695439134"
+curl -X GET "http://localhost:8000/v1/gas-fee-data?chain=optimism&timestamp=1695439134"
 ```
 
 Response
@@ -38,7 +38,8 @@ Response
     "timestamp": 1695439134,
     "blockNumber": 15005533,
     "feeData": {
-      "baseFeePerGas": "50"
+      "baseFeePerGas": "50",
+      "l1BaseFee": "7"
     }
   }
 }
@@ -47,6 +48,8 @@ Response
 The expiration is 10 minutes into the future from the timestamp.
 
 The `baseFeePerGas` response is returned in wei.
+
+The `l1BaseFee` response is returned in wei and it is only returned for rollups.
 
 ### GET /v1/gas-price-verify
 
@@ -79,6 +82,71 @@ Response
 }
 ```
 
+### GET /v1/gas-cost-estimate
+
+> Returns the estimated total gas cost for the given chain, timestamp, gas limit, and tx data.
+
+Query Parameters
+
+| Name      | Type     | Description                                                                 |
+| --------- | -------- | --------------------------------------------------------------------------- |
+| `chain`   | `string` | The chain to get the estimated gas cost for. Supported values are `ethereum`, `optimism`, `arbitrum`, `base`         |
+| `timestamp` | `number` | The UTC timestamp in seconds to get the gas estimate for. (optional) Uses current time as default. |
+| `gasLimit` | `number` | The gas limit to use for estimate. |
+| `txData` | `number` | The transaction `data` needed to calculate gas cost estimate for rollups. |
+
+Example
+
+```sh
+curl -X GET "http://localhost:8000/v1/gas-cost-estimate?chain=optimism&timestamp=1695439134&gasLimit=200000&txData=0x01de8001328252089400000000000000000000000000000000000000008080c0"
+```
+
+Response
+
+```json
+{
+    "status": "ok",
+    "data": {
+        "l1Fee": "0.000000000000026236",
+        "l2Fee": "0.00000000210105",
+        "gasCost": "0.000000000000052472"
+    }
+}
+```
+
+### GET /v1/gas-cost-estimate-verify
+
+> Returns true if the target gas cost is greater than or equal to the estimated gas cost for the given chain, timestamp, gas limit, and tx data.
+
+Query Parameters
+
+| Name      | Type     | Description                                                                 |
+| --------- | -------- | --------------------------------------------------------------------------- |
+| `chain`   | `string` | The chain to get the estimated gas cost for. Supported values are `ethereum`, `optimism`, `arbitrum`, `base`         |
+| `timestamp` | `number` | The UTC timestamp in seconds to get the gas estimate for. (optional) Uses current time as default. |
+| `gasLimit` | `number` | The gas limit to use for estimate. |
+| `txData` | `number` | The transaction `data` needed to calculate gas cost estimate for rollups. |
+| `targetGasCost` | `number` | The target gas cost to compare to. |
+
+Example
+
+```sh
+curl -X GET "http://localhost:8000/v1/gas-cost-estimate-verify?chain=optimism&timestamp=1695439134&gasLimit=200000&txData=0x01de8001328252089400000000000000000000000000000000000000008080c0&targetGasCost=0.000000000000052472"
+```
+
+Response
+
+```json
+{
+    "status": "ok",
+    "data": {
+        "valid": true,
+        "timestamp": 1695439134,
+        "gasCost": "0.000000000000052472",
+        "targetGasCost": "0.000000000000052472"
+    }
+}
+```
 
 ## Development
 
