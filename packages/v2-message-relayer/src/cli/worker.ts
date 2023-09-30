@@ -16,6 +16,7 @@ async function main (source: any) {
   const osStats = new OsStats()
 
   await Promise.all([
+    controller.startPoller(),
     osStats.start(),
     server()
   ])

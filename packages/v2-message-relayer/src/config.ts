@@ -20,3 +20,10 @@ for (const chain of chains) {
 }
 
 export const dbPath = process.env.DB_PATH ?? './mydb'
+
+export const bridgeAddresses: any = {
+  ethereum: '',
+  optimism: '',
+  arbitrum: '',
+  base: ''
+}

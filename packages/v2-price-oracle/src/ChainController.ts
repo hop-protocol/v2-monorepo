@@ -56,8 +56,7 @@ export class ChainController {
   async getArbInfo (txData: string, blockTag: string | number = 'latest'): Promise<any> {
     const destinationAddress = '0x0000000000000000000000000000000000000000'
     const nodeInterface = '0x00000000000000000000000000000000000000C8'
-    const provider = new providers.JsonRpcProvider('https://arbitrum2.rpc.hop.exchange')
-    const contract = new Contract(nodeInterface, L2ArbNodeInterface, provider)
+    const contract = new Contract(nodeInterface, L2ArbNodeInterface, this.provider)
     const contractCreation = false
     const data = await contract.callStatic.gasEstimateComponents(
       destinationAddress,
