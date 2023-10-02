@@ -59,7 +59,7 @@ app.get('/v1/gas-price-verify', async (req: any, res: any) => {
     if (!gasPrice) {
       throw new Error('gasPrice is required')
     }
-    const data = await controller.getGasPriceValid({ chainSlug, timestamp, gasPrice })
+    const data = await controller.getGasPriceVerify({ chainSlug, timestamp, gasPrice })
     res.status(200).json({ status: 'ok', data })
   } catch (err: any) {
     res.status(500).json({ error: err.message })

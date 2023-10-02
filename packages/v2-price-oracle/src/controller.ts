@@ -72,13 +72,29 @@ export class Controller {
       throw new Error('result not found')
     }
 
-    const baseFeePerGas = BigNumber.from(item.feeData.baseFeePerGas)
+    const gasCost = await this.calcGasCost({
+      chainSlug,
+      gasLimit,
+      txData,
+      baseFeePerGas: BigNumber.from(item.feeData.baseFeePerGas),
+      l1BaseFee: item.feeData.l1BaseFee != null ? BigNumber.from(item.feeData.l1BaseFee) : null,
+      blockNumber: item.blockNumber
+    })
+
+    return gasCost
+  }
+
+  async calcGasCost (input: any) {
+    const { chainSlug, gasLimit, txData, baseFeePerGas, l1BaseFee, blockNumber } = input
+
     if (chainSlug === 'ethereum') {
       if (!gasLimit) {
         throw new Error('gasLimit is required')
       }
       const gasCost = baseFeePerGas.mul(gasLimit)
+
       return {
+        gasCostBN: gasCost,
         gasCost: formatUnits(gasCost, 18)
       }
     } else if (chainSlug === 'optimism' || chainSlug === 'base') {
@@ -94,7 +110,6 @@ export class Controller {
       const txGasPrice = baseFeePerGas.add(maxPriorityFeePerGas)
       const l2Fee = txGasPrice.mul(gasLimit)
 
-      const l1BaseFee = item.feeData.l1BaseFee
       const l1FeeOverhead = 2100 // mainnet: 188
       const l1FeeScalar = 1000000 // mainnet: 684000
 
@@ -120,7 +135,7 @@ export class Controller {
         const l1GasUsed = getL1GasUsed(_data)
         // console.log('l1GasUsed:', l1GasUsed.toString())
 
-        const l1Fee = l1GasUsed.mul(BigNumber.from(l1BaseFee))
+        const l1Fee = l1GasUsed.mul(l1BaseFee)
         const divisor = BigNumber.from(10).pow(DECIMALS)
         const unscaled = l1Fee.mul(BigNumber.from(l1FeeScalar))
         const scaled = unscaled.div(divisor)
@@ -138,11 +153,12 @@ export class Controller {
 
       const l1Fee = getL1Fee(serialized)
       const totalFee = l1Fee.add(l1Fee)
-      console.log('fee info', formatUnits(l1Fee, 18), formatUnits(l2Fee, 18), formatUnits(totalFee, 18))
+      // console.log('fee info', formatUnits(l1Fee, 18), formatUnits(l2Fee, 18), formatUnits(totalFee, 18))
 
       return {
         l1Fee: formatUnits(l1Fee, 18),
         l2Fee: formatUnits(l2Fee, 18),
+        gasCostBN: totalFee,
         gasCost: formatUnits(totalFee, 18)
       }
     } else if (chainSlug === 'arbitrum') {
@@ -150,7 +166,8 @@ export class Controller {
         throw new Error('txData is required')
       }
 
-      const data = await this.chainControllers[chainSlug].getArbInfo(txData, item.blockNumber)
+      // TODO: store in db
+      const data = await this.chainControllers[chainSlug].getArbInfo(txData, blockNumber)
 
       const l1GasEstimated = data.gasEstimateForL1
       const l2GasUsed = data.gasEstimate.sub(l1GasEstimated)
@@ -164,6 +181,7 @@ export class Controller {
       const gasCost = l2EstimatedPrice.mul(GasLimit)
 
       return {
+        gasCostBN: gasCost,
         gasCost: formatUnits(gasCost, 18)
       }
     }
@@ -174,20 +192,68 @@ export class Controller {
   async gasCostVerify (input: any) {
     const { chainSlug, timestamp, gasLimit, txData, targetGasCost } = input
 
-    const { gasCost } = await this.getGasCostEstimate({
-      chainSlug,
-      timestamp,
-      gasLimit,
-      txData,
-    })
+    let items = await this.dbController.getGasFeeDataRange({ chainSlug, timestamp })
+    if (items.length === 0) {
+      const startTime = DateTime.fromSeconds(timestamp).toUTC().minus({ minutes: 10 }).toSeconds()
+      const endTime = DateTime.fromSeconds(timestamp).toUTC().plus({ minutes: 10 }).toSeconds()
+      const chainController = this.chainControllers[chainSlug]
+      const startBlockNumber = await getBlockNumberFromDate(chainController.provider, startTime)
+      const endBlockNumber = await getBlockNumberFromDate(chainController.provider, endTime)
+      await this.syncBlockNumberRange(chainSlug, startBlockNumber, endBlockNumber)
+    }
 
-    const valid = targetGasCost >= gasCost
+    items = await this.dbController.getGasFeeDataRange({ chainSlug, timestamp })
+
+    let minGasCostEstimate = BigNumber.from(0)
+    let minGasFeeDataBlockNumber = 0
+    let minGasFeeDataTimestamp = 0
+    let minGasFeeDataBaseFeePerGas: any
+    let minGasFeeDataL1BaseFee: any
+
+    for (const item of items) {
+      const baseFeePerGas = BigNumber.from(item.feeData.baseFeePerGas)
+      const l1BaseFee = item.feeData.l1BaseFee != null ? BigNumber.from(item.feeData.l1BaseFee) : null
+      const { gasCost, gasCostBN } = await this.calcGasCost({
+        chainSlug,
+        gasLimit,
+        txData,
+        baseFeePerGas,
+        l1BaseFee,
+        blockNumber: item.blockNumber
+      })
+
+      if (minGasCostEstimate.eq(0)) {
+        minGasCostEstimate = gasCostBN
+        minGasFeeDataBlockNumber = item.blockNumber
+        minGasFeeDataTimestamp = item.timestamp
+        minGasFeeDataBaseFeePerGas = baseFeePerGas?.toString()
+        minGasFeeDataL1BaseFee = l1BaseFee?.toString()
+      } else {
+        if (gasCostBN.lt(minGasCostEstimate)) {
+          minGasCostEstimate = gasCostBN
+          minGasFeeDataBlockNumber = item.blockNumber
+          minGasFeeDataTimestamp = item.timestamp
+          minGasFeeDataBaseFeePerGas = baseFeePerGas?.toString()
+          minGasFeeDataL1BaseFee = l1BaseFee?.toString()
+        }
+      }
+    }
+
+    if (minGasCostEstimate.eq(0)) {
+      throw new Error('minGasCostEstimate is 0')
+    }
+
+    const valid = parseUnits(targetGasCost, 18).gte(minGasCostEstimate)
 
     return {
       valid,
       timestamp,
-      gasCost,
-      targetGasCost
+      targetGasCost,
+      minGasCostEstimate: formatUnits(minGasCostEstimate, 18),
+      minGasFeeDataBlockNumber,
+      minGasFeeDataTimestamp,
+      minGasFeeDataBaseFeePerGas,
+      minGasFeeDataL1BaseFee
     }
   }
 
@@ -290,7 +356,7 @@ export class Controller {
     return data
   }
 
-  async getGasPriceValid (input: any) {
+  async getGasPriceVerify (input: any) {
     const { gasPrice, chainSlug, timestamp } = input
 
     let items = await this.dbController.getGasFeeDataRange({ chainSlug, timestamp })

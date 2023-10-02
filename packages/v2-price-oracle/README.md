@@ -131,7 +131,7 @@ Query Parameters
 Example
 
 ```sh
-curl -X GET "http://localhost:8000/v1/gas-cost-estimate-verify?chain=optimism&timestamp=1695439134&gasLimit=200000&txData=0x01de8001328252089400000000000000000000000000000000000000008080c0&targetGasCost=0.000000000000052472"
+curl -X GET "http://localhost:8000/v1/gas-cost-estimate-verify?chain=optimism&timestamp=1695772800&gasLimit=21000&txData=0x01de8001328252089400000000000000000000000000000000000000008080c0&targetGasCost=0.000000000000089952"
 ```
 
 Response
@@ -142,8 +142,12 @@ Response
     "data": {
         "valid": true,
         "timestamp": 1695439134,
-        "gasCost": "0.000000000000052472",
-        "targetGasCost": "0.000000000000052472"
+        "targetGasCost": '0.000000000000089952",
+        "minGasCostEstimate": "0.00000000000007496"
+        "minGasFeeDataBlockNumber": 15172066,
+        "minGasFeeDataTimestamp": 1695772200,
+        "minGasFeeDataBaseFeePerGas": "50",
+        "minGasFeeDataL1BaseFee": "10"
     }
 }
 ```
