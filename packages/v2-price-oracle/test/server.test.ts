@@ -34,6 +34,18 @@ describe('Server', () => {
     expect(data.l2Fee).toBe('0.00000000210105')
     expect(data.gasCost).toBe('0.000000000000052472')
   }, 60 * 1000)
+  it.only('gas-cost-estimate - optimism2', async () => {
+    const timestamp = 1696283252
+    const gasLimit = 50994
+    const txData = '0x723a177900000000000000000000000077c4335bc35abaec784613ad55e9c11399d0222600000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000010a56f823ba000000000000000000000000000000000000000000000000000000000000003b6261666b7265696232616d73697a653372757a70676970757968717a366668677a366d676f7369763578727a78766164666c626268617a357463650000000000'
+    const res = await request(app).get(`/v1/gas-cost-estimate?chain=optimism&timestamp=${timestamp}&gasLimit=${gasLimit}&txData=${txData}`).send()
+    const { data } = res.body
+    console.log(data)
+    console.log(JSON.stringify(res.body, null, 2))
+    expect(data).toBeTruthy()
+    // expect(data.gasCost).toBe('0.00007649100260742') // etherscan value
+    expect(data.gasCost).toBe('0.00007649100260338')
+  }, 10 * 60 * 1000)
   it('gas-cost-estimate - arbitrum', async () => {
     const timestamp = 1695439134
     const gasLimit = 21000

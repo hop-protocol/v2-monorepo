@@ -106,7 +106,7 @@ export class Controller {
       }
 
       // https://community.optimism.io/docs/developers/build/transaction-fees/#priority-fee
-      const maxPriorityFeePerGas = parseUnits('0.0001', 'gwei')
+      const maxPriorityFeePerGas = parseUnits('1.5', 'gwei') // TODO store in db
       const txGasPrice = baseFeePerGas.add(maxPriorityFeePerGas)
       const l2Fee = txGasPrice.mul(gasLimit)
 
@@ -116,6 +116,7 @@ export class Controller {
       // these functions are derived from oracle contract
       // https://goerli-optimism.etherscan.io/address/0x420000000000000000000000000000000000000F#code
       function getL1GasUsed (data: string) {
+        // console.log(data)
         const _data = Buffer.from(data.replace('0x', ''), 'hex')
         let total = 0
         const length = _data.length
@@ -132,8 +133,9 @@ export class Controller {
 
       function getL1Fee (_data: string) {
         const DECIMALS = 6
+        // TODO: figure out why this value doesn't match "L1 Gas Used by Txn" in block explorer. The getL1GasUsed implementation is correct however.
         const l1GasUsed = getL1GasUsed(_data)
-        // console.log('l1GasUsed:', l1GasUsed.toString())
+        console.log('l1GasUsed:', l1GasUsed.toString())
 
         const l1Fee = l1GasUsed.mul(l1BaseFee)
         const divisor = BigNumber.from(10).pow(DECIMALS)
@@ -152,7 +154,7 @@ export class Controller {
       })
 
       const l1Fee = getL1Fee(serialized)
-      const totalFee = l1Fee.add(l1Fee)
+      const totalFee = l2Fee.add(l1Fee)
       // console.log('fee info', formatUnits(l1Fee, 18), formatUnits(l2Fee, 18), formatUnits(totalFee, 18))
 
       return {
