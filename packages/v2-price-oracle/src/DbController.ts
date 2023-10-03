@@ -96,7 +96,11 @@ export class DbController {
 
   async getNearestGasFeeData (input: any): Promise<any> {
     await this.tilReady()
-    const { chainSlug, timestamp: targetTimestamp } = input
+    const { chainSlug, timestamp: targetTimestamp, blockNumber: targetBlockNumber } = input
+
+    if (targetBlockNumber) {
+      return this.getGasFeeData({ chainSlug, blockNumber: targetBlockNumber })
+    }
 
     const varianceSeconds = 10 * 60 // 10 minutes
     const buffer = 20 * 60 // 20 minutes

@@ -33,8 +33,8 @@ export class Controller {
     const { chainSlug, timestamp } = input
     let item = await this.dbController.getNearestGasFeeData({ chainSlug, timestamp })
     if (!item) {
-      const startTime = DateTime.fromSeconds(timestamp).toUTC().minus({ minutes: 10 }).toSeconds()
-      const endTime = DateTime.fromSeconds(timestamp).toUTC().plus({ minutes: 10 }).toSeconds()
+      const startTime = DateTime.fromSeconds(timestamp).toUTC().minus({ minutes: 1 }).toSeconds()
+      const endTime = DateTime.fromSeconds(timestamp).toUTC().plus({ minutes: 1 }).toSeconds()
       const chainController = this.chainControllers[chainSlug]
       const startBlockNumber = await getBlockNumberFromDate(chainController.provider, startTime)
       const endBlockNumber = await getBlockNumberFromDate(chainController.provider, endTime)
@@ -55,19 +55,27 @@ export class Controller {
   }
 
   async getGasCostEstimate (input: any) {
-    const { chainSlug, timestamp, gasLimit, txData } = input
+    const { chainSlug, timestamp, blockNumber, gasLimit, txData, destinationAddress, from } = input
 
-    let item = await this.dbController.getNearestGasFeeData({ chainSlug, timestamp })
+    let item = await this.dbController.getNearestGasFeeData({ chainSlug, timestamp, blockNumber })
     if (!item) {
-      const startTime = DateTime.fromSeconds(timestamp).toUTC().minus({ minutes: 10 }).toSeconds()
-      const endTime = DateTime.fromSeconds(timestamp).toUTC().plus({ minutes: 10 }).toSeconds()
-      const chainController = this.chainControllers[chainSlug]
-      const startBlockNumber = await getBlockNumberFromDate(chainController.provider, startTime)
-      const endBlockNumber = await getBlockNumberFromDate(chainController.provider, endTime)
+      let startBlockNumber: any = null
+      let endBlockNumber: any = null
+      if (blockNumber) {
+        startBlockNumber = Number(blockNumber) - 5
+        endBlockNumber = Number(blockNumber) + 5
+      } else {
+        const startTime = DateTime.fromSeconds(timestamp).toUTC().minus({ minutes: 1 }).toSeconds()
+        const endTime = DateTime.fromSeconds(timestamp).toUTC().plus({ minutes: 1 }).toSeconds()
+        const chainController = this.chainControllers[chainSlug]
+        startBlockNumber = await getBlockNumberFromDate(chainController.provider, startTime)
+        endBlockNumber = await getBlockNumberFromDate(chainController.provider, endTime)
+      }
       await this.syncBlockNumberRange(chainSlug, startBlockNumber, endBlockNumber)
     }
 
-    item = await this.dbController.getNearestGasFeeData({ chainSlug, timestamp })
+    console.log('timestamp', timestamp, blockNumber)
+    item = await this.dbController.getNearestGasFeeData({ chainSlug, timestamp, blockNumber })
     if (!item) {
       throw new Error('result not found')
     }
@@ -79,13 +87,15 @@ export class Controller {
       baseFeePerGas: BigNumber.from(item.feeData.baseFeePerGas),
       l1BaseFee: item.feeData.l1BaseFee != null ? BigNumber.from(item.feeData.l1BaseFee) : null,
       blockNumber: item.blockNumber
+      // destinationAddress,
+      // from
     })
 
     return gasCost
   }
 
   async calcGasCost (input: any) {
-    const { chainSlug, gasLimit, txData, baseFeePerGas, l1BaseFee, blockNumber } = input
+    const { chainSlug, gasLimit, txData, destinationAddress, from, baseFeePerGas, l1BaseFee, blockNumber } = input
 
     if (chainSlug === 'ethereum') {
       if (!gasLimit) {
@@ -167,14 +177,30 @@ export class Controller {
       if (!txData) {
         throw new Error('txData is required')
       }
+      // if (!destinationAddress) {
+      //   throw new Error('destinationAddress is required')
+      // }
+      // if (!from) {
+      //   throw new Error('from is required')
+      // }
 
-      // TODO: store in db
-      const data = await this.chainControllers[chainSlug].getArbInfo(txData, blockNumber)
+      // const data = await this.chainControllers[chainSlug].getArbEstimateComponents({
+      //   txData,
+      //   destinationAddress,
+      //   from,
+      //   blockNumber
+      // })
 
-      const l1GasEstimated = data.gasEstimateForL1
-      const l2GasUsed = data.gasEstimate.sub(l1GasEstimated)
-      const l2EstimatedPrice = data.baseFee
-      const l1EstimatedPrice = data.l1BaseFeeEstimate.mul(16)
+      // https://docs.arbitrum.io/devs-how-tos/how-to-estimate-gas#where-do-we-get-all-this-information-from
+      // const l1GasEstimated = data.gasEstimateForL1
+      const L1P = l1BaseFee.mul(16)
+      const fixedBuffer = 140
+      const dataBytes = Buffer.from(txData.replace('0x', ''), 'hex').byteLength
+      const L1S = (BigNumber.from(fixedBuffer + dataBytes).mul(baseFeePerGas)).div(L1P)
+      const l1GasEstimated = L1S // data.gasEstimateForL1
+      const l2GasUsed = BigNumber.from(gasLimit).sub(l1GasEstimated) // data.gasEstimate.sub(l1GasEstimated)
+      const l2EstimatedPrice = baseFeePerGas // data.baseFee
+      const l1EstimatedPrice = l1BaseFee.mul(16) // data.l1BaseFeeEstimate.mul(16)
       const l1Cost = l1GasEstimated.mul(l2EstimatedPrice)
       const l1Size = l1Cost.div(l1EstimatedPrice)
       const L1Cost = l1EstimatedPrice.mul(l1Size)
@@ -192,9 +218,9 @@ export class Controller {
   }
 
   async gasCostVerify (input: any) {
-    const { chainSlug, timestamp, gasLimit, txData, targetGasCost } = input
+    const { chainSlug, timestamp, gasLimit, txData, destinationAddress, from, blockNumber, targetGasCost } = input
 
-    let items = await this.dbController.getGasFeeDataRange({ chainSlug, timestamp })
+    let items = await this.dbController.getGasFeeDataRange({ chainSlug, timestamp, blockNumber })
     if (items.length === 0) {
       const startTime = DateTime.fromSeconds(timestamp).toUTC().minus({ minutes: 10 }).toSeconds()
       const endTime = DateTime.fromSeconds(timestamp).toUTC().plus({ minutes: 10 }).toSeconds()
@@ -204,7 +230,7 @@ export class Controller {
       await this.syncBlockNumberRange(chainSlug, startBlockNumber, endBlockNumber)
     }
 
-    items = await this.dbController.getGasFeeDataRange({ chainSlug, timestamp })
+    items = await this.dbController.getGasFeeDataRange({ chainSlug, timestamp, blockNumber })
 
     let minGasCostEstimate = BigNumber.from(0)
     let minGasFeeDataBlockNumber = 0
@@ -215,13 +241,15 @@ export class Controller {
     for (const item of items) {
       const baseFeePerGas = BigNumber.from(item.feeData.baseFeePerGas)
       const l1BaseFee = item.feeData.l1BaseFee != null ? BigNumber.from(item.feeData.l1BaseFee) : null
-      const { gasCost, gasCostBN } = await this.calcGasCost({
+      const { gasCostBN } = await this.calcGasCost({
         chainSlug,
         gasLimit,
         txData,
         baseFeePerGas,
         l1BaseFee,
-        blockNumber: item.blockNumber
+        // destinationAddress,
+        // from,
+        blockNumber: blockNumber || item.blockNumber
       })
 
       if (minGasCostEstimate.eq(0)) {

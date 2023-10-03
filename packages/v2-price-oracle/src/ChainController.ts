@@ -1,7 +1,7 @@
 import L2ArbGasInfoAbi from './abi/L2ArbGasInfo.json'
 import L2ArbNodeInterface from './abi/L2ArbNodeInterface.json'
 import L2OpGasPriceOracleAbi from './abi/L2OpGasPriceOracle.json'
-import { Contract, providers } from 'ethers'
+import { Contract, constants, providers } from 'ethers'
 import { getRpcProvider } from './utils/getRpcProvider'
 
 export class ChainController {
@@ -53,19 +53,31 @@ export class ChainController {
     }
   }
 
-  async getArbInfo (txData: string, blockTag: string | number = 'latest'): Promise<any> {
-    const destinationAddress = '0x0000000000000000000000000000000000000000'
+  async getArbPricesInWei (blockTag: string | number = 'latest'): Promise<any> {
+    const l2ArbGasInfo = '0x000000000000000000000000000000000000006C'
+    const contract = new Contract(l2ArbGasInfo, L2ArbGasInfoAbi, this.provider)
+    const l1BaseFee = await contract.getPricesInWei({
+      blockTag: 'latest'
+    })
+    return l1BaseFee
+  }
+
+  async getArbEstimateComponents (input: any): Promise<any> {
+    const { from, destinationAddress = constants.AddressZero, txData, blockNumber = 'latest' } = input
     const nodeInterface = '0x00000000000000000000000000000000000000C8'
     const contract = new Contract(nodeInterface, L2ArbNodeInterface, this.provider)
     const contractCreation = false
-    const data = await contract.callStatic.gasEstimateComponents(
+    const args = [
       destinationAddress,
       contractCreation,
       txData,
       {
-        blockTag
+        blockTag: blockNumber,
+        from
       }
-    )
+    ]
+    // console.log('args', args)
+    const data = await contract.callStatic.gasEstimateComponents(...args)
 
     // console.log(
     //   'gasEstimate', data.gasEstimate.toString(),
