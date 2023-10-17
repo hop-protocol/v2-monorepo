@@ -30,6 +30,8 @@ export class DbController {
     await this.rootDb.open()
     this.ready = true
 
+    this.startPrunePoller()
+
     process.once('uncaughtException', async () => {
       this.rootDb.close()
       process.exit(0)
@@ -153,6 +155,61 @@ export class DbController {
   async putSyncState (key: string, blockNumber: number) {
     await this.tilReady()
     await this.syncStateDb.put(key, blockNumber)
+  }
+
+  private async startPrunePoller () {
+    await this.tilReady()
+    while (true) {
+      try {
+        await this.prune()
+        await wait(60 * 60 * 1000)
+      } catch (err: any) {
+        console.error('prune poller error', err)
+      }
+    }
+  }
+
+  async getItemsToPrune (): Promise<any[]> {
+    await this.tilReady()
+    const OneMonthMs = 1 // 30 * 24 * 60 * 60 * 1000
+    const oneMonthAgo = Math.floor((Date.now() - OneMonthMs) / 1000)
+
+    const items = await this.gasFeeDataByTimestampDb.iterator({
+      keys: true
+    }).all()
+
+    const filtered = items.filter(([key, value]: any) => {
+      return value.timestamp < oneMonthAgo
+    })
+      .map(([key, value]: any) => {
+        return {
+          key,
+          value
+        }
+      })
+
+    return filtered
+  }
+
+  private async prune (): Promise<void> {
+    await this.tilReady()
+    const items = await this.getItemsToPrune()
+    console.log(`items to prune: ${items.length}`)
+    for (const item of items) {
+      try {
+        const { key, value } = item
+        if (!key) {
+          throw new Error(`key not found for item ${JSON.stringify(value)}`)
+        }
+        await this.gasFeeDataByTimestampDb.del(key)
+
+        const key2 = `${value.chainSlug}-${value.blockNumber}`
+        await this.gasFeeDataByBlockNumberDb.del(key2)
+        console.log('prune', key, key2)
+      } catch (err) {
+        console.error(`error pruning db item: ${err.message}`)
+      }
+    }
   }
 
   close () {
