@@ -1389,7 +1389,7 @@ export class Hop {
       throw new Error('address not found for hub connector factory')
     }
     const factory = HubERC5164ConnectorFactory__factory.connect(address, signer)
-    const tx = await factory.connectTargets(hubChainId, target1, spokeChainId, target2)
+    const tx = await factory.deployConnectors(hubChainId, target1, spokeChainId, target2)
     const receipt = await tx.wait()
     const event = receipt.events?.find(
       (event: any) => event.event === 'ConnectorDeployed'
