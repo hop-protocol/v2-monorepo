@@ -63,10 +63,12 @@
     "module-alias": "2.2.2",
     "node-fetch": "2.6.7",
     "p-queue": "6.6.2",
+    "pg-promise": "^11.5.4",
     "prompt": "1.2.2",
     "reflect-metadata": "0.1.13",
     "rimraf": "3.0.2",
     "subleveldown": "6.0.1",
+    "uuid": "^9.0.1",
     "wait": "^0.4.2"
   },
   "devDependencies": {
