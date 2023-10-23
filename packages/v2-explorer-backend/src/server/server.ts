@@ -5,7 +5,7 @@ import { ipRateLimitMiddleware } from './rateLimit'
 import { port } from '../config'
 import { responseCache } from './responseCache'
 
-const app = express()
+export const app = express()
 
 app.enable('trust proxy')
 app.use(cors())
@@ -19,6 +19,30 @@ app.get('/', (req: any, res: any) => {
 
 app.get('/health', (req: any, res: any) => {
   res.status(200).json({ status: 'ok' })
+})
+
+app.get('/v1/explorer2', responseCache, async (req: any, res: any) => {
+  try {
+    let { limit = 10, filter } = req.query
+    limit = Number(limit)
+    if (limit < 1) {
+      throw new Error('limit must be greater than 0')
+    }
+    if (limit > 10) {
+      throw new Error('limit must be less than 10')
+    }
+    const controller = new Controller()
+    const { items } = await controller.getExplorerEventsForApi2({
+      limit,
+      filter
+    })
+    res.status(200).json({
+      events: items
+    })
+  } catch (err: any) {
+    console.error(err)
+    res.json({ error: err.message })
+  }
 })
 
 app.get('/v1/explorer', responseCache, async (req: any, res: any) => {
@@ -82,6 +106,9 @@ app.get('/v1/events', responseCache, async (req: any, res: any) => {
 })
 
 const host = '0.0.0.0'
-app.listen(port, host, () => {
-  console.log(`Listening on port ${port}`)
-})
+
+export function server () {
+  app.listen(port, host, () => {
+    console.log(`Listening on port ${port}`)
+  })
+}

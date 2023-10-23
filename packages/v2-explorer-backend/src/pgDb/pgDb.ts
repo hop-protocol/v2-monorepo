@@ -1,17 +1,18 @@
 import pgp from 'pg-promise'
-import { postgresConfig } from '../config'
 import { BundleCommitted } from './events/BundleCommitted'
 import { BundleForwarded } from './events/BundleForwarded'
+import { BundleReceived } from './events/BundleReceived'
 import { BundleSet } from './events/BundleSet'
 import { FeesSentToHub } from './events/FeesSentToHub'
 import { MessageBundled } from './events/MessageBundled'
 import { MessageExecuted } from './events/MessageExecuted'
 import { MessageSent } from './events/MessageSent'
-import {BundleReceived} from './events/BundleReceived'
+import { postgresConfig } from '../config'
+import minimist from 'minimist'
 
-const argv = require('minimist')(process.argv.slice(2))
+const argv = minimist(process.argv.slice(2))
 
-export class DbController {
+export class PgDb {
   db: any
   events: any = {}
 
@@ -24,9 +25,6 @@ export class DbController {
 
     const db = pgp(initOptions)({ ...postgresConfig, ...opts })
     this.db = db
-    this.init().catch(console.error).then(() => {
-      console.log('db init done')
-    })
 
     this.events = {
       BundleCommitted: new BundleCommitted(this.db),
@@ -36,8 +34,15 @@ export class DbController {
       FeesSentToHub: new FeesSentToHub(this.db),
       MessageBundled: new MessageBundled(this.db),
       MessageExecuted: new MessageExecuted(this.db),
-      MessageSent: new MessageSent(this.db),
+      MessageSent: new MessageSent(this.db)
     }
+
+    this.init().catch((err: any) => {
+      console.error('pg db error', err)
+      process.exit(1)
+    }).then(() => {
+      console.log('pg db init done')
+    })
   }
 
   async init () {

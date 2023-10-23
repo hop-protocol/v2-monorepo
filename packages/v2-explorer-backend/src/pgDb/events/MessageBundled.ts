@@ -1,24 +1,31 @@
 import { v4 as uuid } from 'uuid'
+import { BaseType } from './BaseType'
+
+export interface MessageBundled extends BaseType {
+  messageId: string
+  bundleId: string
+  treeIndex: number
+}
 
 export class MessageBundled {
   db: any
 
-  constructor(db: any) {
+  constructor (db: any) {
     this.db = db
   }
 
-  async createTable() {
+  async createTable () {
     await this.db.query(`CREATE TABLE IF NOT EXISTS message_bundled_events (
         id TEXT PRIMARY KEY,
         timestamp INTEGER NOT NULL,
         tx_hash VARCHAR NOT NULL,
-        message_id VARCHAR NOT NULL,
+        message_id VARCHAR NOT NULL UNIQUE,
         bundle_id VARCHAR NOT NULL,
         tree_index INTEGER NOT NULL
     )`)
   }
 
-  async createIndexes() {
+  async createIndexes () {
     await this.db.query(
       'CREATE UNIQUE INDEX IF NOT EXISTS idx_message_bundled_events_message_id_bundle_id ON message_bundled_events (message_id, bundle_id);'
     )

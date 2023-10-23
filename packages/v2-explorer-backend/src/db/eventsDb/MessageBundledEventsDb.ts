@@ -10,8 +10,6 @@ export interface MessageBundled extends EventBase {
 export class MessageBundledEventsDb extends EventsBaseDb<MessageBundled> {
   constructor (dbPath: string) {
     super(dbPath, EventType.MessageBundled)
-
-    this.addPropertyIndex('bundleId')
   }
 
   getPrimaryKeyProperty (): string {

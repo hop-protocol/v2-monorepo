@@ -1,6 +1,7 @@
 import { BigNumber } from 'ethers'
 import { DateTime } from 'luxon'
 import { db } from '../db'
+import { PgDb } from '../pgDb'
 import { formatUnits } from 'ethers/lib/utils'
 import { getTransactionHashExplorerUrl } from 'src/utils/getTransactionHashExplorerUrl'
 import { truncateString } from '../utils/truncateString'
@@ -21,6 +22,7 @@ type EventsApiInput = {
 
 export class Controller {
   db: any
+  pgDb = new PgDb()
   events: any
 
   constructor () {
@@ -223,6 +225,16 @@ export class Controller {
       lastKey: newLastKey,
       firstKey: newFirstKey,
       items: explorerItems
+    }
+  }
+
+  async getExplorerEventsForApi2 (input: any): Promise<any> {
+    const { limit = 10, filter } = input
+
+    console.log('here0')
+    const items = await this.pgDb.events.BundleSet.getItems()
+    return {
+      items
     }
   }
 

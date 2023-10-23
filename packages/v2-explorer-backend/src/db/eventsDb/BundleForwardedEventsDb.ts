@@ -11,8 +11,6 @@ export interface BundleForwarded extends EventBase {
 export class BundleForwardedEventsDb extends EventsBaseDb<BundleForwarded> {
   constructor (dbPath: string) {
     super(dbPath, EventType.BundleForwarded)
-
-    this.addPropertyIndex('bundleRoot')
   }
 
   getPrimaryKeyProperty (): string {

@@ -1,26 +1,36 @@
 import { v4 as uuid } from 'uuid'
+import { BigNumber } from 'ethers'
+import { BaseType } from './BaseType'
+
+export interface BundleCommitted extends BaseType {
+  bundleId: string
+  bundleRoot: string
+  bundleFees: BigNumber
+  toChainId: number
+  commitTime: number
+}
 
 export class BundleCommitted {
   db: any
 
-  constructor(db: any) {
+  constructor (db: any) {
     this.db = db
   }
 
-  async createTable() {
+  async createTable () {
     await this.db.query(`CREATE TABLE IF NOT EXISTS bundle_committed_events (
         id TEXT PRIMARY KEY,
         timestamp INTEGER NOT NULL,
         tx_hash VARCHAR NOT NULL,
-        bundle_id VARCHAR NOT NULL,
-        bundle_root VARCHAR NOT NULL,
+        bundle_id VARCHAR NOT NULL UNIQUE,
+        bundle_root VARCHAR NOT NULL UNIQUE,
         bundle_fees NUMERIC NOT NULL,
         to_chain_id VARCHAR NOT NULL,
         commit_time INTEGER NOT NULL
     )`)
   }
 
-  async createIndexes() {
+  async createIndexes () {
     await this.db.query(
       'CREATE UNIQUE INDEX IF NOT EXISTS idx_bundle_committed_events_bundle_id ON bundle_committed_events (bundle_id);'
     )
@@ -32,7 +42,7 @@ export class BundleCommitted {
       `SELECT
         timestamp,
         tx_hash AS "txHash",
-        bundle_id AS "bundleId"
+        bundle_id AS "bundleId",
         bundle_root AS "bundleRoot",
         bundle_fees AS "bundleFees",
         to_chain_id AS "toChainId",
@@ -50,7 +60,7 @@ export class BundleCommitted {
   }
 
   async upsertItem (item: any) {
-    const { timestamp, txHash, bundleId, bundleRoot, bundleFees, toChainId, commitTime } = item
+    const { timestamp, txHash, bundleId, bundleRoot, bundleFees, toChainId, commitTime } = this.normalizeDataForPut(item)
     const args = [uuid(), timestamp, txHash, bundleId, bundleRoot, bundleFees, toChainId, commitTime]
     await this.db.query(
       `INSERT INTO
@@ -60,5 +70,25 @@ export class BundleCommitted {
       ON CONFLICT (bundle_id)
       DO UPDATE SET timestamp = $2, tx_hash = $3`, args
     )
+  }
+
+  normalizeDataForGet (getData: Partial<BundleCommitted>): Partial<BundleCommitted> {
+    if (!getData) {
+      return getData
+    }
+    const data = Object.assign({}, getData)
+    if (data.bundleFees && typeof data.bundleFees === 'string') {
+      data.bundleFees = BigNumber.from(data.bundleFees)
+    }
+    return data
+  }
+
+  normalizeDataForPut (putData: Partial<BundleCommitted>): Partial<BundleCommitted> {
+    const data = Object.assign({}, putData) as any
+    if (data.bundleFees && typeof data.bundleFees !== 'string') {
+      data.bundleFees = data.bundleFees.toString()
+    }
+
+    return data
   }
 }

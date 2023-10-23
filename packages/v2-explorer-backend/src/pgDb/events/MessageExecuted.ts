@@ -1,23 +1,29 @@
 import { v4 as uuid } from 'uuid'
+import { BaseType } from './BaseType'
+
+export interface MessageExecuted extends BaseType {
+  messageId: string
+  fromChainId: number
+}
 
 export class MessageExecuted {
   db: any
 
-  constructor(db: any) {
+  constructor (db: any) {
     this.db = db
   }
 
-  async createTable() {
+  async createTable () {
     await this.db.query(`CREATE TABLE IF NOT EXISTS message_executed_events (
         id TEXT PRIMARY KEY,
         timestamp INTEGER NOT NULL,
         tx_hash VARCHAR NOT NULL,
-        message_id VARCHAR NOT NULL,
+        message_id VARCHAR NOT NULL UNIQUE,
         from_chain_id VARCHAR NOT NULL
     )`)
   }
 
-  async createIndexes() {
+  async createIndexes () {
     await this.db.query(
       'CREATE UNIQUE INDEX IF NOT EXISTS idx_message_executed_events_message_id ON message_executed_events (message_id);'
     )

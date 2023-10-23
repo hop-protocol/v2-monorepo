@@ -2,20 +2,15 @@ import { BundleCommittedEventsDb } from './eventsDb/BundleCommittedEventsDb'
 import { BundleForwardedEventsDb } from './eventsDb/BundleForwardedEventsDb'
 import { BundleReceivedEventsDb } from './eventsDb/BundleReceivedEventsDb'
 import { BundleSetEventsDb } from './eventsDb/BundleSetEventsDb'
-import { ConfirmationSentEventsDb } from './nftEventsDb/ConfirmationSentEventsDb'
 import { EventsBaseDb } from './eventsDb/EventsBaseDb'
-import { ExitableBundlesDb } from './exitableBundlesDb/ExitableBundlesDb'
 import { FeesSentToHubEventsDb } from './eventsDb/FeesSentToHubEventsDb'
 import { MessageBundledEventsDb } from './eventsDb/MessageBundledEventsDb'
 import { MessageExecutedEventsDb } from './eventsDb/MessageExecutedEventsDb'
 import { MessageSentEventsDb } from './eventsDb/MessageSentEventsDb'
-import { TokenConfirmedEventsDb } from './nftEventsDb/TokenConfirmedEventsDb'
-import { TokenSentEventsDb } from './nftEventsDb/TokenSentEventsDb'
-import { TxStateDb } from './txStateDb/TxStateDb'
 import { dbPath as _configDbPath } from '../config'
 
 let configDbPath = _configDbPath
-const instances: Record<string, EventsBaseDb<any> | TxStateDb | ExitableBundlesDb | TokenSentEventsDb> = {}
+const instances: Record<string, EventsBaseDb<any>> = {}
 
 function getDb (DbClass: any) {
   const dbName = DbClass.name
@@ -58,26 +53,5 @@ export const db = {
   },
   get messageSentEventsDb (): MessageSentEventsDb {
     return getDb(MessageSentEventsDb)
-  },
-  get txStateDb (): TxStateDb {
-    return getDb(TxStateDb)
-  },
-  get exitableBundlesDb (): ExitableBundlesDb {
-    const _db = getDb(ExitableBundlesDb)
-    if (!_db.otherDbs) {
-      _db.otherDbs = db
-    }
-    return _db
-  },
-  nft: {
-    get confirmationSentEventsDb (): ConfirmationSentEventsDb {
-      return getDb(ConfirmationSentEventsDb)
-    },
-    get tokenConfirmedEventsDb (): TokenConfirmedEventsDb {
-      return getDb(TokenConfirmedEventsDb)
-    },
-    get tokenSentEventsDb (): TokenSentEventsDb {
-      return getDb(TokenSentEventsDb)
-    }
   }
 }

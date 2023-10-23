@@ -10,8 +10,6 @@ export interface BundleSet extends EventBase {
 export class BundleSetEventsDb extends EventsBaseDb<BundleSet> {
   constructor (dbPath: string) {
     super(dbPath, EventType.BundleSet)
-
-    this.addPropertyIndex('bundleRoot')
   }
 
   getPrimaryKeyProperty (): string {

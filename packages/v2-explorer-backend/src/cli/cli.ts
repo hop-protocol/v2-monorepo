@@ -2,8 +2,6 @@ import '../moduleAlias'
 import packageJson from '../../package.json'
 import { program } from './shared'
 
-import './keystore'
-import './nftWorker'
 import './worker'
 
 program.version(packageJson.version)

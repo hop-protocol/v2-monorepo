@@ -1,28 +1,40 @@
 import { v4 as uuid } from 'uuid'
+import { BaseType } from './BaseType'
+import { BigNumber } from 'ethers'
+
+export interface BundleReceived extends BaseType {
+  bundleId: string
+  bundleRoot: string
+  bundleFees: BigNumber
+  fromChainId: number
+  toChainId: number
+  relayWindowStart: number
+  relayer: string
+}
 
 export class BundleReceived {
   db: any
 
-  constructor(db: any) {
+  constructor (db: any) {
     this.db = db
   }
 
-  async createTable() {
+  async createTable () {
     await this.db.query(`CREATE TABLE IF NOT EXISTS bundle_received_events (
         id TEXT PRIMARY KEY,
         timestamp INTEGER NOT NULL,
         tx_hash VARCHAR NOT NULL,
-        bundle_id VARCHAR NOT NULL,
-        bundle_root VARCHAR NOT NULL,
+        bundle_id VARCHAR NOT NULL UNIQUE,
+        bundle_root VARCHAR NOT NULL UNIQUE,
         bundle_fees NUMERIC NOT NULL,
         from_chain_id VARCHAR NOT NULL,
         to_chain_id VARCHAR NOT NULL,
         relay_window_start INTEGER NOT NULL,
-        relayer VARCHAR NOT NULL,
+        relayer VARCHAR NOT NULL
     )`)
   }
 
-  async createIndexes() {
+  async createIndexes () {
     await this.db.query(
       'CREATE UNIQUE INDEX IF NOT EXISTS idx_bundle_received_events_bundle_id ON bundle_received_events (bundle_id);'
     )
@@ -54,7 +66,7 @@ export class BundleReceived {
   }
 
   async upsertItem (item: any) {
-    const { timestamp, txHash, bundleId, bundleRoot, fromChainId, toChainId } = item
+    const { timestamp, txHash, bundleId, bundleRoot, bundleFees, fromChainId, toChainId, relayWindowStart, relayer } = this.normalizeDataForPut(item)
     const args = [uuid(), timestamp, txHash, bundleId, bundleRoot, bundleFees, fromChainId, toChainId, relayWindowStart, relayer]
     await this.db.query(
       `INSERT INTO
@@ -64,5 +76,25 @@ export class BundleReceived {
       ON CONFLICT (bundle_id)
       DO UPDATE SET timestamp = $2, tx_hash = $3`, args
     )
+  }
+
+  normalizeDataForGet (getData: Partial<BundleReceived>): Partial<BundleReceived> {
+    if (!getData) {
+      return getData
+    }
+    const data = Object.assign({}, getData)
+    if (data.bundleFees && typeof data.bundleFees === 'string') {
+      data.bundleFees = BigNumber.from(data.bundleFees)
+    }
+    return data
+  }
+
+  normalizeDataForPut (putData: Partial<BundleReceived>): Partial<BundleReceived> {
+    const data = Object.assign({}, putData) as any
+    if (data.bundleFees && typeof data.bundleFees !== 'string') {
+      data.bundleFees = data.bundleFees.toString()
+    }
+
+    return data
   }
 }

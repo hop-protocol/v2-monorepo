@@ -1,6 +1,8 @@
 /* eslint-disable */
 import dotenv from 'dotenv'
 import os from 'os'
+import { TextDecoder, TextEncoder } from 'util'
+global.TextEncoder = TextEncoder
 dotenv.config()
 
 export const dbPath = process.env.DB_PATH ?? '/tmp/tempdb'
