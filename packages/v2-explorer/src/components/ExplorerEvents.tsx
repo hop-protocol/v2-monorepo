@@ -20,8 +20,8 @@ export function ExplorerEvents () {
   const [filterValue, setFilterValue] = useState('')
   const filter = { [filterBy]: filterValue }
   function onPagination (params: any) {
-    const { firstKey, lastKey } = params
-    updateQueryParams({ firstKey, lastKey })
+    const { page } = params
+    updateQueryParams({ page })
   }
   const { events, nextPage, previousPage, showNextButton, showPreviousButton, limit, loading } = useEvents('explorer', filter, onPagination, queryParams)
 

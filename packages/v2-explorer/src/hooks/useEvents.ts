@@ -4,9 +4,7 @@ import { apiUrl } from '../config'
 
 export function useEvents (eventName: string, filter: any = {}, onPagination?: any, queryParams?: any) {
   const [events, setEvents] = useState([])
-  const [lastKey, setLastKey] = useState(queryParams?.lastKey || '')
-  const [firstKey, setFirstKey] = useState(queryParams?.firstKey || '')
-  const [lastUrl, setLastUrl] = useState('')
+  const [page, setPage] = useState(queryParams?.page || 1)
   const [loading, setLoading] = useState(true)
   const limit = 10
 
@@ -21,13 +19,13 @@ export function useEvents (eventName: string, filter: any = {}, onPagination?: a
     return str
   }, [filter])
 
-  const updateEvents = async (_lastKey: string = '', _firstKey: string = '') => {
+  const updateEvents = async (page: number) => {
     try {
       let pathname = '/events'
       if (eventName === 'explorer')  {
         pathname = '/explorer2'
       }
-      const url = lastUrl || `${apiUrl}/v1${pathname}?limit=${limit}&lastKey=${_lastKey}&firstKey=${_firstKey}&eventName=${eventName}${filterString}`
+      const url = `${apiUrl}/v1${pathname}?limit=${limit}&page=${page || 1}&eventName=${eventName}${filterString}`
       const res = await fetch(url)
       const json = await res.json()
       if (json.error) {
@@ -37,8 +35,6 @@ export function useEvents (eventName: string, filter: any = {}, onPagination?: a
         throw new Error('no events')
       }
       setEvents(json.events)
-      setLastKey(json.lastKey ?? '')
-      setFirstKey(json.firstKey ?? '')
       setLoading(false)
       return url
     } catch (err: any) {
@@ -51,29 +47,32 @@ export function useEvents (eventName: string, filter: any = {}, onPagination?: a
   const updateEventsCb = useCallback(updateEvents, [filterString])
 
   useEffect(() => {
-    updateEventsCb(lastKey, firstKey).catch(console.error)
-  }, [updateEventsCb])
+    updateEventsCb(page).catch(console.error)
+  }, [updateEventsCb, page])
 
   useInterval(updateEvents, 10 * 1000)
 
   async function previousPage (event: any) {
     event.preventDefault()
-    setLastUrl(await updateEventsCb('', firstKey))
     if (onPagination) {
-      onPagination({ lastKey: '', firstKey })
+      const newPage = (Number(page) - 1) || 1
+      setPage(newPage)
+      onPagination({ page: newPage })
     }
   }
 
   async function nextPage (event: any) {
     event.preventDefault()
-    setLastUrl(await updateEventsCb(lastKey, ''))
     if (onPagination) {
-      onPagination({ lastKey, firstKey: '' })
+      const newPage = (Number(page) + 1) || 1
+      setPage(newPage)
+      onPagination({ page: newPage })
     }
   }
 
-  const showNextButton = events.length === limit && !!lastKey
-  const showPreviousButton = events.length > 0 && !!firstKey
+  // const showNextButton = events.length === limit
+  const showNextButton = events.length > 0
+  const showPreviousButton = events.length > 0
 
   return {
     events,

@@ -229,9 +229,9 @@ export class Controller {
   }
 
   async getEvents2 (input: any): Promise<any> {
-    const { eventName, limit = 10, filter } = input
+    const { eventName, limit = 10, filter, page } = input
 
-    const items = await this.pgDb.events[eventName].getItems({ limit, filter })
+    const items = await this.pgDb.events[eventName].getItems({ limit, filter, page })
 
     const chainNames: any = {
       1: 'Ethereum (Mainnet)',
@@ -293,9 +293,9 @@ export class Controller {
   }
 
   async getExplorerEventsForApi2 (input: any): Promise<any> {
-    const { limit = 10, filter } = input
+    const { limit = 10, filter, page } = input
 
-    const { items } = await this.getEvents2({ limit, filter, eventName: 'MessageSent' })
+    const { items } = await this.getEvents2({ limit, filter, eventName: 'MessageSent', page })
 
     const promises = items.map(async (item: any) => {
       const { messageId } = item

@@ -36,7 +36,11 @@ export class MessageSent {
   }
 
   async getItems (opts: any = {}) {
-    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now()/1000), limit=100, offset=0, filter } = opts
+    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now()/1000), limit=10, filter, page=1 } = opts
+    let offset = (page-1) * limit
+    if (offset < 0) {
+      offset = 0
+    }
     const items = await this.db.any(
       `SELECT
         message_id AS "messageId",

@@ -23,7 +23,7 @@ app.get('/health', (req: any, res: any) => {
 
 app.get('/v1/explorer2', responseCache, async (req: any, res: any) => {
   try {
-    let { limit = 10, filter } = req.query
+    let { limit = 10, filter, page } = req.query
     limit = Number(limit)
     if (limit < 1) {
       throw new Error('limit must be greater than 0')
@@ -34,7 +34,8 @@ app.get('/v1/explorer2', responseCache, async (req: any, res: any) => {
     const controller = new Controller()
     const { items } = await controller.getExplorerEventsForApi2({
       limit,
-      filter
+      filter,
+      page
     })
     res.status(200).json({
       events: items
