@@ -1,7 +1,7 @@
 import wait from 'wait'
 import { EventsBaseDb } from '../db/eventsDb/EventsBaseDb'
 import { Hop } from '@hop-protocol/v2-sdk'
-import { PgDb } from '../pgDb'
+import { pgDb } from '../pgDb'
 import { db } from '../db'
 import { sdkContractAddresses } from 'src/config'
 
@@ -36,7 +36,7 @@ export class Indexer {
   paused: boolean = false
   syncIndex: number = 0
   db = db
-  pgDb = new PgDb()
+  pgDb = pgDb
   eventsToSync: Record<string, EventsBaseDb<any>>
 
   constructor (options?: Options) {
@@ -177,7 +177,7 @@ export class Indexer {
         const _db = this.eventsToSync[event.eventName]
         const key = _db.getKeyStringFromEvent(event)!
         // await _db.updateEvent(key, event)
-        await this.pgDb.events[event.eventName].upsertItem({ ...event, timestamp: event.context.blockTimestamp, txHash: event.context.transactionHash })
+        await this.pgDb.events[event.eventName].upsertItem({ ...event, context: event.context, timestamp: event.context.blockTimestamp, txHash: event.context.transactionHash })
         await _db.putSyncState(chainId, { fromBlock, toBlock })
         _events.push(event)
       }

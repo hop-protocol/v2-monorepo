@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import { BaseType } from './BaseType'
+import { contextSqlCreation, contextSqlSelect } from './context'
 
 export interface MessageSent extends BaseType {
   messageId: string
@@ -19,13 +20,12 @@ export class MessageSent {
   async createTable () {
     await this.db.query(`CREATE TABLE IF NOT EXISTS message_sent_events (
         id TEXT PRIMARY KEY,
-        timestamp INTEGER NOT NULL,
-        tx_hash VARCHAR NOT NULL,
         message_id VARCHAR NOT NULL UNIQUE,
         "from" VARCHAR NOT NULL,
         to_chain_id VARCHAR NOT NULL,
         "to" VARCHAR NOT NULL,
-        "data" VARCHAR NOT NULL
+        "data" VARCHAR NOT NULL,
+        ${contextSqlCreation}
     )`)
   }
 
@@ -36,38 +36,86 @@ export class MessageSent {
   }
 
   async getItems (opts: any = {}) {
-    const { startTimestamp, endTimestamp, limit, offset } = opts
-    return this.db.any(
+    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now()/1000), limit=100, offset=0, filter } = opts
+    const items = await this.db.any(
       `SELECT
-        timestamp,
-        tx_hash AS "txHash",
         message_id AS "messageId",
         "from",
         to_chain_id AS "toChainId",
         "to",
-        "data"
+        "data",
+        ${contextSqlSelect}
       FROM
         message_sent_events
       WHERE
-        timestamp >= $1
+        _block_timestamp >= $1
         AND
-        timestamp <= $2
+        _block_timestamp <= $2
       ORDER BY
-        timestamp
+        _block_timestamp
       DESC OFFSET $4`,
       [startTimestamp, endTimestamp, limit, offset])
+
+    return items.map((x: any) => {
+      return {
+        ...x,
+        context: {
+          ...x
+        }
+      }
+    })
   }
 
   async upsertItem (item: any) {
-    const { timestamp, txHash, messageId, from, toChainId, to, data } = item
-    const args = [uuid(), timestamp, txHash, messageId, from, toChainId, to, data]
+    const { messageId, from, toChainId, to, data, context } = item
+    const args = [
+      uuid(), messageId, from, toChainId, to, data,
+      context?.chainSlug,
+      context?.chainId,
+      context?.transactionHash,
+      context?.transactionIndex,
+      context?.logIndex,
+      context?.blockNumber,
+      context?.blockTimestamp,
+      context?.fromAddress,
+      context?.toAddress,
+      context?.value,
+      context?.nonce,
+      context?.gasLimit,
+      context?.gasUsed,
+      context?.gasPrice,
+      context?.data
+    ]
+
     await this.db.query(
       `INSERT INTO
         message_sent_events
-      (id, timestamp, tx_hash, message_id, "from", to_chain_id, "to", "data")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      (
+        id,
+        message_id,
+        "from",
+        to_chain_id,
+        "to",
+        "data",
+        _chain_slug,
+        _chain_id,
+        _transaction_hash,
+        _transaction_index,
+        _log_index,
+        _block_number,
+        _block_timestamp,
+        _from_address,
+        _to_address,
+        _value,
+        _nonce,
+        _gas_limit,
+        _gas_used,
+        _gas_price,
+        _data
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
       ON CONFLICT (message_id)
-      DO UPDATE SET timestamp = $2, tx_hash = $3`, args
+      DO UPDATE SET _block_timestamp = $13, _transaction_hash = $9`, args
     )
   }
 }

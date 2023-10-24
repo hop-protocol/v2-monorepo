@@ -25,7 +25,7 @@ export function useEvents (eventName: string, filter: any = {}, onPagination?: a
     try {
       let pathname = '/events'
       if (eventName === 'explorer')  {
-        pathname = '/explorer'
+        pathname = '/explorer2'
       }
       const url = lastUrl || `${apiUrl}/v1${pathname}?limit=${limit}&lastKey=${_lastKey}&firstKey=${_firstKey}&eventName=${eventName}${filterString}`
       const res = await fetch(url)

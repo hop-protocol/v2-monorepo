@@ -38,7 +38,7 @@
     "@arbitrum/sdk": "2.0.18",
     "@eth-optimism/contracts": "^0.5.3",
     "@eth-optimism/message-relayer": "^0.2.18",
-    "@eth-optimism/sdk": "^1.10.4",
+    "@eth-optimism/sdk": "^3.1.4",
     "@fxportal/maticjs-fxportal": "1.1.1",
     "@hop-protocol/core": "0.0.1-beta.111",
     "@hop-protocol/v2-core": "0.0.0-beta.5",

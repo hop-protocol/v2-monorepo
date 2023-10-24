@@ -1,7 +1,7 @@
 import { BigNumber } from 'ethers'
 import { DateTime } from 'luxon'
 import { db } from '../db'
-import { PgDb } from '../pgDb'
+import { pgDb } from '../pgDb'
 import { formatUnits } from 'ethers/lib/utils'
 import { getTransactionHashExplorerUrl } from 'src/utils/getTransactionHashExplorerUrl'
 import { truncateString } from '../utils/truncateString'
@@ -22,7 +22,7 @@ type EventsApiInput = {
 
 export class Controller {
   db: any
-  pgDb = new PgDb()
+  pgDb = pgDb
   events: any
 
   constructor () {
@@ -228,13 +228,94 @@ export class Controller {
     }
   }
 
+  async getEvents2 (input: any): Promise<any> {
+    const { eventName, limit = 10, filter } = input
+
+    const items = await this.pgDb.events[eventName].getItems({ limit, filter })
+
+    const chainNames: any = {
+      1: 'Ethereum (Mainnet)',
+      10: 'Optimism (Mainnet)',
+      420: 'Optimism (Goerli)',
+      5: 'Ethereum (Goerli)'
+    }
+
+    for (const item of items) {
+      if (item.messageId) {
+        item.messageIdTruncated = truncateString(item.messageId, 4)
+      }
+      if (item.bundleId) {
+        item.bundleIdTruncated = truncateString(item.bundleId, 4)
+      }
+      if (item.bundleRoot) {
+        item.bundleRootTruncated = truncateString(item.bundleRoot, 4)
+      }
+      if (item.relayer) {
+        item.relayerTruncated = truncateString(item.relayer, 4)
+      }
+      if (item.from) {
+        item.fromTruncated = truncateString(item.from, 4)
+      }
+      if (item.to) {
+        item.toTruncated = truncateString(item.to, 4)
+      }
+      if (item.chainId) {
+        item.chainName = chainNames[item.chainId]
+        item.chainLabel = `${item.chainId} - ${chainNames[item.chainId]}`
+      }
+      if (item.fromChainId) {
+        item.fromChainName = chainNames[item.fromChainId]
+        item.fromChainLabel = `${item.fromChainId} - ${chainNames[item.fromChainId]}`
+      }
+      if (item.toChainId) {
+        item.toChainName = chainNames[item.toChainId]
+        item.toChainLabel = `${item.toChainId} - ${chainNames[item.toChainId]}`
+      }
+      if (item.bundleFees) {
+        item.bundleFeesDisplay = formatUnits(item.bundleFees, 18)
+      }
+      if (item.context?.blockTimestamp) {
+        item.context.blockTimestampRelative = DateTime.fromSeconds(item.context.blockTimestamp).toRelative()
+      }
+      if (item.context?.transactionHash) {
+        item.context.transactionHashTruncated = truncateString(item.context.transactionHash, 4)
+        item.context.transactionHashExplorerUrl = getTransactionHashExplorerUrl(item.context.transactionHash, item.context.chainId)
+      }
+      if (item.context?.chainId) {
+        item.context.chainName = chainNames[item.context.chainId]
+        item.context.chainLabel = `${item.context.chainId} - ${chainNames[item.context.chainId]}`
+      }
+    }
+
+    return {
+      items: items.map(this.normalizeEventForApi)
+    }
+  }
+
   async getExplorerEventsForApi2 (input: any): Promise<any> {
     const { limit = 10, filter } = input
 
-    console.log('here0')
-    const items = await this.pgDb.events.BundleSet.getItems()
+    const { items } = await this.getEvents2({ limit, filter, eventName: 'MessageSent' })
+
+    const promises = items.map(async (item: any) => {
+      const { messageId } = item
+      const messageExecutedEvent = await this.getEvents2({
+        eventName: 'MessageExecuted',
+        filter: {
+          messageId
+        }
+      })
+      item.messageExecutedEvent = null
+      if (messageExecutedEvent.items.length > 0) {
+        item.messageExecutedEvent = messageExecutedEvent.items[0]
+      }
+      return item
+    })
+
+    const explorerItems = await Promise.all(promises)
+
     return {
-      items
+      items: explorerItems
     }
   }
 

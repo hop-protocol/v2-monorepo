@@ -30,7 +30,14 @@ export class MessageExecuted {
   }
 
   async getItems (opts: any = {}) {
-    const { startTimestamp, endTimestamp, limit, offset } = opts
+    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now()/1000), limit=100, offset=0, filter } = opts
+
+    const args = [startTimestamp, endTimestamp, limit, offset]
+
+    if (filter?.messageId) {
+      args.push(filter.messageId)
+    }
+
     return this.db.any(
       `SELECT
         timestamp,
@@ -43,10 +50,11 @@ export class MessageExecuted {
         timestamp >= $1
         AND
         timestamp <= $2
+        ${filter?.messageId ? `AND message_id = $5` : ''}
       ORDER BY
         timestamp
       DESC OFFSET $4`,
-      [startTimestamp, endTimestamp, limit, offset])
+      args)
   }
 
   async upsertItem (item: any) {

@@ -74,7 +74,7 @@ export function ExplorerEvents () {
       },
       {
         key: 'created',
-        value: `${event.context.blockTimestampRelative}`
+        value: `${event.context?.blockTimestampRelative}`
       },
       {
         key: 'messageId',
@@ -83,13 +83,13 @@ export function ExplorerEvents () {
       },
       {
         key: 'sourceChain',
-        value: event.context.chainLabel
+        value: event.context?.chainLabel
       },
       {
         key: 'sourceTransactionHash',
-        value: event.context.transactionHashTruncated,
-        valueUrl: event.context.transactionHashExplorerUrl,
-        clipboardValue: event.context.transactionHash
+        value: event.context?.transactionHashTruncated,
+        valueUrl: event.context?.transactionHashExplorerUrl,
+        clipboardValue: event.context?.transactionHash
       },
       {
         key: 'destinationChain',

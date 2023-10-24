@@ -35,6 +35,7 @@
     "zlib": "^1.0.5"
   },
   "devDependencies": {
+    "@craco/craco": "^7.1.0",
     "@types/react-copy-to-clipboard": "^5.0.4",
     "@types/react-dom": "^18.0.5",
     "@types/react-router-dom": "^5.3.3",
@@ -48,12 +49,13 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-react": "^7.21.5",
-    "eslint-plugin-react-hooks": "^4.2.0"
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "zlib-browserify": "^0.0.3"
   },
   "scripts": {
     "dev": "BROWSER=none npm start",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "craco start",
+    "build": "craco build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "npx eslint --fix \"src/*.{ts,tsx}\""

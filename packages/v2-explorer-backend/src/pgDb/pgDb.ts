@@ -72,3 +72,5 @@ export class PgDb {
     return this.events.MessageSent.upsertItem(item)
   }
 }
+
+export const pgDb = new PgDb()
