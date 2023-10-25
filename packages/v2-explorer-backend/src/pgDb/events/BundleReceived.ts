@@ -48,9 +48,7 @@ export class BundleReceived {
     }
     const items = await this.db.any(
       `SELECT
-        timestamp,
-        tx_hash AS "txHash",
-        bundle_id AS "bundleId"
+        bundle_id AS "bundleId",
         bundle_root AS "bundleRoot",
         bundle_fees AS "bundleFees",
         from_chain_id AS "fromChainId",

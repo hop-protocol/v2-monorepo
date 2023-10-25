@@ -21,7 +21,7 @@ export function useEvents (eventName: string, filter: any = {}, onPagination?: a
 
   const updateEvents = async (page: number) => {
     try {
-      let pathname = '/events'
+      let pathname = '/events2'
       if (eventName === 'explorer')  {
         pathname = '/explorer2'
       }
@@ -54,18 +54,18 @@ export function useEvents (eventName: string, filter: any = {}, onPagination?: a
 
   async function previousPage (event: any) {
     event.preventDefault()
+    const newPage = (Number(page) - 1) || 1
+    setPage(newPage)
     if (onPagination) {
-      const newPage = (Number(page) - 1) || 1
-      setPage(newPage)
       onPagination({ page: newPage })
     }
   }
 
   async function nextPage (event: any) {
     event.preventDefault()
+    const newPage = (Number(page) + 1) || 1
+    setPage(newPage)
     if (onPagination) {
-      const newPage = (Number(page) + 1) || 1
-      setPage(newPage)
       onPagination({ page: newPage })
     }
   }

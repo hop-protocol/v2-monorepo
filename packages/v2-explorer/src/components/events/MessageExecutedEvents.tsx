@@ -8,8 +8,8 @@ import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
-export function MessageRelayedEvents () {
-  const eventName = 'MessageRelayed'
+export function MessageExecutedEvents () {
+  const eventName = 'MessageExecuted'
   const [filterBy, setFilterBy] = useState('messageId')
   const [filterValue, setFilterValue] = useState('')
   const filter = { [filterBy]: filterValue }

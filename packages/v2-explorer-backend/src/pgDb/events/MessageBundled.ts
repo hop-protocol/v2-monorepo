@@ -39,8 +39,6 @@ export class MessageBundled {
     }
     const items = await this.db.any(
       `SELECT
-        timestamp,
-        tx_hash AS "txHash",
         message_id AS "messageId",
         bundle_id AS "bundleId",
         tree_index AS "treeIndex",

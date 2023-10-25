@@ -8,8 +8,7 @@ import { BundleForwardedEvents } from '../components/events/BundleForwardedEvent
 import { BundleReceivedEvents } from '../components/events/BundleReceivedEvents'
 import { BundleSetEvents } from '../components/events/BundleSetEvents'
 import { MessageBundledEvents } from '../components/events/MessageBundledEvents'
-import { MessageRelayedEvents } from '../components/events/MessageRelayedEvents'
-import { MessageRevertedEvents } from '../components/events/MessageRevertedEvents'
+import { MessageExecutedEvents } from '../components/events/MessageExecutedEvents'
 import { MessageSentEvents } from '../components/events/MessageSentEvents'
 
 export function Events () {
@@ -21,8 +20,7 @@ export function Events () {
     <BundleReceivedEvents />,
     <BundleSetEvents />,
     <MessageBundledEvents />,
-    <MessageRelayedEvents />,
-    <MessageRevertedEvents />,
+    <MessageExecutedEvents />,
     <MessageSentEvents />
   ]
 

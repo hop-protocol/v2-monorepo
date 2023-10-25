@@ -41,9 +41,7 @@ export class BundleForwarded {
     }
     const items = await this.db.any(
       `SELECT
-        timestamp,
-        tx_hash AS "txHash",
-        bundle_id AS "bundleId"
+        bundle_id AS "bundleId",
         bundle_root AS "bundleRoot",
         from_chain_id AS "fromChainId",
         to_chain_id AS "toChainId",
@@ -53,7 +51,7 @@ export class BundleForwarded {
       WHERE
         _block_timestamp >= $1
         AND
-        _bock_timestamp <= $2
+        _block_timestamp <= $2
       ORDER BY
         _block_timestamp
       DESC OFFSET $4`,

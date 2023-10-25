@@ -17,6 +17,7 @@ type EventsApiInput = {
   limit?: number
   lastKey?: string | null
   firstKey?: string | null
+  page?: string | null
   filter: any
 }
 
@@ -193,6 +194,74 @@ export class Controller {
     }
   }
 
+  async getEventsForApi2 (input: EventsApiInput): Promise<EventsResult> {
+    const { eventName, limit = 10, filter, page } = input
+    const firstKey: string | null = null
+    const lastKey: string | null = null
+
+    const { items } = await this.getEvents2({ eventName, limit, page, filter })
+
+    const chainNames: any = {
+      1: 'Ethereum (Mainnet)',
+      10: 'Optimism (Mainnet)',
+      420: 'Optimism (Goerli)',
+      5: 'Ethereum (Goerli)'
+    }
+
+    for (const item of items) {
+      if (item.messageId) {
+        item.messageIdTruncated = truncateString(item.messageId, 4)
+      }
+      if (item.bundleId) {
+        item.bundleIdTruncated = truncateString(item.bundleId, 4)
+      }
+      if (item.bundleRoot) {
+        item.bundleRootTruncated = truncateString(item.bundleRoot, 4)
+      }
+      if (item.relayer) {
+        item.relayerTruncated = truncateString(item.relayer, 4)
+      }
+      if (item.from) {
+        item.fromTruncated = truncateString(item.from, 4)
+      }
+      if (item.to) {
+        item.toTruncated = truncateString(item.to, 4)
+      }
+      if (item.chainId) {
+        item.chainName = chainNames[item.chainId]
+        item.chainLabel = `${item.chainId} - ${chainNames[item.chainId]}`
+      }
+      if (item.fromChainId) {
+        item.fromChainName = chainNames[item.fromChainId]
+        item.fromChainLabel = `${item.fromChainId} - ${chainNames[item.fromChainId]}`
+      }
+      if (item.toChainId) {
+        item.toChainName = chainNames[item.toChainId]
+        item.toChainLabel = `${item.toChainId} - ${chainNames[item.toChainId]}`
+      }
+      if (item.bundleFees) {
+        item.bundleFeesDisplay = formatUnits(item.bundleFees, 18)
+      }
+      if (item.context?.blockTimestamp) {
+        item.context.blockTimestampRelative = DateTime.fromSeconds(item.context.blockTimestamp).toRelative()
+      }
+      if (item.context?.transactionHash) {
+        item.context.transactionHashTruncated = truncateString(item.context.transactionHash, 4)
+        item.context.transactionHashExplorerUrl = getTransactionHashExplorerUrl(item.context.transactionHash, item.context.chainId)
+      }
+      if (item.context?.chainId) {
+        item.context.chainName = chainNames[item.context.chainId]
+        item.context.chainLabel = `${item.context.chainId} - ${chainNames[item.context.chainId]}`
+      }
+    }
+
+    return {
+      items: items.map(this.normalizeEventForApi),
+      lastKey,
+      firstKey
+    }
+  }
+
   async getExplorerEventsForApi (input: any): Promise<any> {
     const { limit = 10, lastKey = '~', firstKey = '', filter } = input
     const eventName = 'MessageSent'
@@ -230,6 +299,10 @@ export class Controller {
 
   async getEvents2 (input: any): Promise<any> {
     const { eventName, limit = 10, filter, page } = input
+
+    if (!this.pgDb.events[eventName]) {
+      throw new Error(`Event ${eventName} not found`)
+    }
 
     const items = await this.pgDb.events[eventName].getItems({ limit, filter, page })
 
@@ -346,6 +419,12 @@ export class Controller {
     } else if (filter.transactionHash) {
       return eventsDb.getEventByTransactionHash(filter.transactionHash)
     }
+
+    return null
+  }
+
+  async getFilteredEvents2 (eventName: string, filter: any): Promise<any | null> {
+    const eventsDb = this.events[eventName]
 
     return null
   }

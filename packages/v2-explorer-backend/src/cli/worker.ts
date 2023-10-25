@@ -1,6 +1,7 @@
 import wait from 'wait'
 import { Worker } from '../worker'
 import { actionHandler, parseBool, parseNumber, root } from './shared'
+import { server } from '../server'
 
 export const workerProgram = root
   .command('worker')
@@ -24,15 +25,15 @@ export const workerProgram = root
   .action(actionHandler(main))
 
 async function main (source: any) {
-  const { dry: dryMode, server, indexerPollSeconds } = source
+  const { dry: dryMode, server: startServer, indexerPollSeconds } = source
 
   console.log('starting worker')
   console.log('dryMode:', !!dryMode)
-  console.log('server:', !!server)
+  console.log('server:', !!startServer)
   console.log('indexerPollSeconds:', indexerPollSeconds || 'default')
 
-  if (server) {
-    server.server()
+  if (startServer) {
+    server()
   }
 
   const worker = new Worker({

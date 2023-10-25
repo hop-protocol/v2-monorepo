@@ -106,6 +106,35 @@ app.get('/v1/events', responseCache, async (req: any, res: any) => {
   }
 })
 
+app.get('/v1/events2', responseCache, async (req: any, res: any) => {
+  try {
+    let { eventName, page, limit = 10, filter } = req.query
+    if (!eventName) {
+      throw new Error('missing eventName')
+    }
+    limit = Number(limit)
+    if (limit < 1) {
+      throw new Error('limit must be greater than 0')
+    }
+    if (limit > 10) {
+      throw new Error('limit must be less than 10')
+    }
+    const controller = new Controller()
+    const { items } = await controller.getEventsForApi2({
+      eventName,
+      limit,
+      filter,
+      page
+    })
+    res.status(200).json({
+      events: items
+    })
+  } catch (err: any) {
+    console.error(err)
+    res.json({ error: err.message })
+  }
+})
+
 const host = '0.0.0.0'
 
 export function server () {
