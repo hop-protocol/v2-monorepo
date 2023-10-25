@@ -1,6 +1,7 @@
-import { v4 as uuid } from 'uuid'
 import { BaseType } from './BaseType'
 import { BigNumber } from 'ethers'
+import { contextSqlCreation, contextSqlInsert, contextSqlSelect, getItemsWithContext, getOrderedInsertContextArgs } from './context'
+import { v4 as uuid } from 'uuid'
 
 export interface BundleReceived extends BaseType {
   bundleId: string
@@ -22,15 +23,14 @@ export class BundleReceived {
   async createTable () {
     await this.db.query(`CREATE TABLE IF NOT EXISTS bundle_received_events (
         id TEXT PRIMARY KEY,
-        timestamp INTEGER NOT NULL,
-        tx_hash VARCHAR NOT NULL,
         bundle_id VARCHAR NOT NULL UNIQUE,
         bundle_root VARCHAR NOT NULL UNIQUE,
         bundle_fees NUMERIC NOT NULL,
         from_chain_id VARCHAR NOT NULL,
         to_chain_id VARCHAR NOT NULL,
         relay_window_start INTEGER NOT NULL,
-        relayer VARCHAR NOT NULL
+        relayer VARCHAR NOT NULL,
+        ${contextSqlCreation}
     )`)
   }
 
@@ -41,8 +41,12 @@ export class BundleReceived {
   }
 
   async getItems (opts: any = {}) {
-    const { startTimestamp, endTimestamp, limit, offset } = opts
-    return this.db.any(
+    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now() / 1000), limit = 10, page = 1 } = opts
+    let offset = (page - 1) * limit
+    if (offset < 0) {
+      offset = 0
+    }
+    const items = await this.db.any(
       `SELECT
         timestamp,
         tx_hash AS "txHash",
@@ -52,29 +56,38 @@ export class BundleReceived {
         from_chain_id AS "fromChainId",
         to_chain_id AS "toChainId",
         relay_window_start AS "relayWindowStart",
-        relayer
+        relayer,
+        ${contextSqlSelect}
       FROM
         bundle_received_events
       WHERE
-        timestamp >= $1
+        _block_timestamp >= $1
         AND
-        timestamp <= $2
+        _block_timestamp <= $2
       ORDER BY
-        timestamp
+        _block_timestamp
       DESC OFFSET $4`,
       [startTimestamp, endTimestamp, limit, offset])
+
+    return getItemsWithContext(items)
   }
 
   async upsertItem (item: any) {
-    const { timestamp, txHash, bundleId, bundleRoot, bundleFees, fromChainId, toChainId, relayWindowStart, relayer } = this.normalizeDataForPut(item)
-    const args = [uuid(), timestamp, txHash, bundleId, bundleRoot, bundleFees, fromChainId, toChainId, relayWindowStart, relayer]
+    const { bundleId, bundleRoot, bundleFees, fromChainId, toChainId, relayWindowStart, relayer, context } = this.normalizeDataForPut(item)
+    const args = [
+      uuid(), bundleId, bundleRoot, bundleFees, fromChainId, toChainId, relayWindowStart, relayer,
+      ...getOrderedInsertContextArgs(context)
+    ]
     await this.db.query(
       `INSERT INTO
         bundle_received_events
-      (id, timestamp, tx_hash, bundle_id, bundle_root, bundle_fees, from_chain_id, to_chain_id, relay_window_start, relayer)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      (
+        id, bundle_id, bundle_root, bundle_fees, from_chain_id, to_chain_id, relay_window_start, relayer,
+        ${contextSqlInsert}
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
       ON CONFLICT (bundle_id)
-      DO UPDATE SET timestamp = $2, tx_hash = $3`, args
+      DO UPDATE SET _block_timestamp = $15, _transaction_hash = $11`, args
     )
   }
 

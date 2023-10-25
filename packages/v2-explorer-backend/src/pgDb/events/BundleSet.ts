@@ -1,5 +1,12 @@
-import { v4 as uuid } from 'uuid'
 import { BaseType } from './BaseType'
+import { contextSqlCreation, contextSqlInsert, contextSqlSelect, getItemsWithContext, getOrderedInsertContextArgs } from './context'
+import { v4 as uuid } from 'uuid'
+
+export interface BundleSet extends BaseType {
+  bundleId: string
+  bundleRoot: string
+  fromChainId: number
+}
 
 export class BundleSet {
   db: any
@@ -11,11 +18,10 @@ export class BundleSet {
   async createTable () {
     await this.db.query(`CREATE TABLE IF NOT EXISTS bundle_set_events (
         id TEXT PRIMARY KEY,
-        timestamp INTEGER NOT NULL,
-        tx_hash VARCHAR NOT NULL,
         bundle_id VARCHAR NOT NULL UNIQUE,
         bundle_root VARCHAR NOT NULL UNIQUE,
-        from_chain_id VARCHAR NOT NULL
+        from_chain_id VARCHAR NOT NULL,
+        ${contextSqlCreation}
     )`)
   }
 
@@ -26,36 +32,47 @@ export class BundleSet {
   }
 
   async getItems (opts: any = {}) {
-    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now()/1000), limit=100, offset=0 } = opts
-    return this.db.any(
+    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now() / 1000), limit = 10, page = 1 } = opts
+    let offset = (page - 1) * limit
+    if (offset < 0) {
+      offset = 0
+    }
+    const items = await this.db.any(
       `SELECT
-        timestamp,
-        tx_hash AS "txHash",
         bundle_id AS "bundleId",
         bundle_root AS "bundleRoot",
-        from_chain_id AS "fromChainId"
+        from_chain_id AS "fromChainId",
+        ${contextSqlSelect}
       FROM
         bundle_set_events
       WHERE
-        timestamp >= $1
+        _block_timestamp >= $1
         AND
-        timestamp <= $2
+        _block_timestamp <= $2
       ORDER BY
-        timestamp
+        _block_timestamp
       DESC OFFSET $4`,
       [startTimestamp, endTimestamp, limit, offset])
+
+    return getItemsWithContext(items)
   }
 
   async upsertItem (item: any) {
-    const { timestamp, txHash, bundleId, bundleRoot, fromChainId } = item
-    const args = [uuid(), timestamp, txHash, bundleId, bundleRoot, fromChainId]
+    const { bundleId, bundleRoot, fromChainId, context } = item
+    const args = [
+      uuid(), bundleId, bundleRoot, fromChainId,
+      ...getOrderedInsertContextArgs(context)
+    ]
     await this.db.query(
       `INSERT INTO
         bundle_set_events
-      (id, timestamp, tx_hash, bundle_id, bundle_root, from_chain_id)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      (
+        id, bundle_id, bundle_root, from_chain_id,
+        ${contextSqlInsert}
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
       ON CONFLICT (bundle_id)
-      DO UPDATE SET timestamp = $2, tx_hash = $3`, args
+      DO UPDATE SET _block_timestamp = $11, _transaction_hash = $7`, args
     )
   }
 }

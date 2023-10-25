@@ -1,5 +1,5 @@
-import { Worker } from '../worker'
 import wait from 'wait'
+import { Worker } from '../worker'
 import { actionHandler, parseBool, parseNumber, root } from './shared'
 
 export const workerProgram = root
@@ -32,7 +32,7 @@ async function main (source: any) {
   console.log('indexerPollSeconds:', indexerPollSeconds || 'default')
 
   if (server) {
-    require('../server').server()
+    server.server()
   }
 
   const worker = new Worker({

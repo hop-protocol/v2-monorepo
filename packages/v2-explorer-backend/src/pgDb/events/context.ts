@@ -33,3 +33,66 @@ export const contextSqlSelect = `
   _gas_price AS "gasPrice",
   _data AS "data"
 `
+
+export const contextSqlInsert = `
+  _chain_slug,
+  _chain_id,
+  _transaction_hash,
+  _transaction_index,
+  _log_index,
+  _block_number,
+  _block_timestamp,
+  _from_address,
+  _to_address,
+  _value,
+  _nonce,
+  _gas_limit,
+  _gas_used,
+  _gas_price,
+  _data
+`
+
+export function getOrderedInsertContextArgs (context: any) {
+  return [
+    context?.chainSlug,
+    context?.chainId,
+    context?.transactionHash,
+    context?.transactionIndex,
+    context?.logIndex,
+    context?.blockNumber,
+    context?.blockTimestamp,
+    context?.fromAddress,
+    context?.toAddress,
+    context?.value,
+    context?.nonce,
+    context?.gasLimit,
+    context?.gasUsed,
+    context?.gasPrice,
+    context?.data
+  ]
+}
+
+export function getItemsWithContext (items: any[]) {
+  return items.map((x: any) => {
+    return {
+      ...x,
+      context: {
+        chainSlug: x.chainSlug,
+        chainId: x.chainId,
+        transactionHash: x.transactionHash,
+        transactionIndex: x.transactionIndex,
+        logIndex: x.logIndex,
+        blockNumber: x.blockNumber,
+        blockTimestamp: x.blockTimestamp,
+        from: x.fromAddress,
+        to: x.toAddress,
+        value: x.value,
+        nonce: x.nonce,
+        gasLimit: x.gasLimit,
+        gasUsed: x.gasUsed,
+        gasPrice: x.gasPrice,
+        data: x.data
+      }
+    }
+  })
+}

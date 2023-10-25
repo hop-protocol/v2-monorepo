@@ -1,3 +1,4 @@
+import minimist from 'minimist'
 import pgp from 'pg-promise'
 import { BundleCommitted } from './events/BundleCommitted'
 import { BundleForwarded } from './events/BundleForwarded'
@@ -8,7 +9,6 @@ import { MessageBundled } from './events/MessageBundled'
 import { MessageExecuted } from './events/MessageExecuted'
 import { MessageSent } from './events/MessageSent'
 import { postgresConfig } from '../config'
-import minimist from 'minimist'
 
 const argv = minimist(process.argv.slice(2))
 

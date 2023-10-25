@@ -1,5 +1,6 @@
-import { v4 as uuid } from 'uuid'
 import { BaseType } from './BaseType'
+import { contextSqlCreation, getItemsWithContext, getOrderedInsertContextArgs } from './context'
+import { v4 as uuid } from 'uuid'
 
 export interface MessageExecuted extends BaseType {
   messageId: string
@@ -16,10 +17,9 @@ export class MessageExecuted {
   async createTable () {
     await this.db.query(`CREATE TABLE IF NOT EXISTS message_executed_events (
         id TEXT PRIMARY KEY,
-        timestamp INTEGER NOT NULL,
-        tx_hash VARCHAR NOT NULL,
         message_id VARCHAR NOT NULL UNIQUE,
-        from_chain_id VARCHAR NOT NULL
+        from_chain_id VARCHAR NOT NULL,
+        ${contextSqlCreation}
     )`)
   }
 
@@ -30,7 +30,11 @@ export class MessageExecuted {
   }
 
   async getItems (opts: any = {}) {
-    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now()/1000), limit=100, offset=0, filter } = opts
+    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now() / 1000), limit = 10, page = 1, filter } = opts
+    let offset = (page - 1) * limit
+    if (offset < 0) {
+      offset = 0
+    }
 
     const args = [startTimestamp, endTimestamp, limit, offset]
 
@@ -38,35 +42,38 @@ export class MessageExecuted {
       args.push(filter.messageId)
     }
 
-    return this.db.any(
+    const items = await this.db.any(
       `SELECT
-        timestamp,
-        tx_hash AS "txHash",
         message_id AS "messageId",
         from_chain_id AS "fromChainId"
       FROM
         message_executed_events
       WHERE
-        timestamp >= $1
+        _block_timestamp >= $1
         AND
-        timestamp <= $2
-        ${filter?.messageId ? `AND message_id = $5` : ''}
+        _block_timestamp <= $2
+        ${filter?.messageId ? 'AND message_id = $5' : ''}
       ORDER BY
-        timestamp
+        _block_timestamp
       DESC OFFSET $4`,
       args)
+
+    return getItemsWithContext(items)
   }
 
   async upsertItem (item: any) {
-    const { timestamp, txHash, messageId, fromChainId } = item
-    const args = [uuid(), timestamp, txHash, messageId, fromChainId]
+    const { messageId, fromChainId, context } = item
+    const args = [
+      uuid(), messageId, fromChainId,
+      ...getOrderedInsertContextArgs(context)
+    ]
     await this.db.query(
       `INSERT INTO
         message_executed_events
-      (id, timestamp, tx_hash, message_id, fromChaiNId )
-      VALUES ($1, $2, $3, $4, $5)
+      (id, timestamp, tx_hash, message_id, from_chain_id )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
       ON CONFLICT (message_id)
-      DO UPDATE SET timestamp = $2, tx_hash = $3`, args
+      DO UPDATE SET _block_timestamp = $12, _transaction_hash = $8`, args
     )
   }
 }

@@ -1,6 +1,7 @@
-import { BigNumber } from 'ethers'
-import { v4 as uuid } from 'uuid'
 import { BaseType } from './BaseType'
+import { BigNumber } from 'ethers'
+import { contextSqlCreation, getItemsWithContext, getOrderedInsertContextArgs } from './context'
+import { v4 as uuid } from 'uuid'
 
 export interface FeesSentToHub extends BaseType {
   amount: BigNumber
@@ -16,9 +17,8 @@ export class FeesSentToHub {
   async createTable () {
     await this.db.query(`CREATE TABLE IF NOT EXISTS fees_sent_to_hub_events (
         id TEXT PRIMARY KEY,
-        timestamp INTEGER NOT NULL,
-        tx_hash VARCHAR NOT NULL,
-        amount NUMERIC NOT NULL
+        amount NUMERIC NOT NULL,
+        ${contextSqlCreation}
     )`)
   }
 
@@ -27,34 +27,41 @@ export class FeesSentToHub {
   }
 
   async getItems (opts: any = {}) {
-    const { startTimestamp, endTimestamp, limit, offset } = opts
-    return this.db.any(
+    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now() / 1000), limit = 10, page = 1 } = opts
+    let offset = (page - 1) * limit
+    if (offset < 0) {
+      offset = 0
+    }
+    const items = await this.db.any(
       `SELECT
-        timestamp,
-        tx_hash AS "txHash",
         amount
       FROM
         fees_sent_to_hub_events
       WHERE
-        timestamp >= $1
+        _block_timestamp >= $1
         AND
-        timestamp <= $2
+        _block_timestamp <= $2
       ORDER BY
-        timestamp
+        _block_timestamp
       DESC OFFSET $4`,
       [startTimestamp, endTimestamp, limit, offset])
+
+    return getItemsWithContext(items)
   }
 
   async upsertItem (item: any) {
-    const { timestamp, txHash, amount } = this.normalizeDataForPut(item)
-    const args = [uuid(), timestamp, txHash, amount]
+    const { amount, context } = this.normalizeDataForPut(item)
+    const args = [
+      uuid(), amount,
+      ...getOrderedInsertContextArgs(context)
+    ]
     await this.db.query(
       `INSERT INTO
         bundle_set_events
-      (id, timestamp, tx_hash, amount)
-      VALUES ($1, $2, $3, $4)
+      (id, amount)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       ON CONFLICT (tx_hash)
-      DO UPDATE SET timestamp = $2, tx_hash = $3`, args
+      DO UPDATE SET _block_timestamp = $9, _transaction_hash = $5`, args
     )
   }
 

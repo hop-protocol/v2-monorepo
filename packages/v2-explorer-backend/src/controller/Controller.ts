@@ -1,9 +1,9 @@
 import { BigNumber } from 'ethers'
 import { DateTime } from 'luxon'
 import { db } from '../db'
-import { pgDb } from '../pgDb'
 import { formatUnits } from 'ethers/lib/utils'
 import { getTransactionHashExplorerUrl } from 'src/utils/getTransactionHashExplorerUrl'
+import { pgDb } from '../pgDb'
 import { truncateString } from '../utils/truncateString'
 
 type EventsResult = {

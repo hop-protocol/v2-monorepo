@@ -1,6 +1,6 @@
-import { v4 as uuid } from 'uuid'
 import { BaseType } from './BaseType'
-import { contextSqlCreation, contextSqlSelect } from './context'
+import { contextSqlCreation, contextSqlInsert, contextSqlSelect, getItemsWithContext, getOrderedInsertContextArgs } from './context'
+import { v4 as uuid } from 'uuid'
 
 export interface MessageSent extends BaseType {
   messageId: string
@@ -36,8 +36,8 @@ export class MessageSent {
   }
 
   async getItems (opts: any = {}) {
-    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now()/1000), limit=10, filter, page=1 } = opts
-    let offset = (page-1) * limit
+    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now() / 1000), limit = 10, page = 1 } = opts
+    let offset = (page - 1) * limit
     if (offset < 0) {
       offset = 0
     }
@@ -60,35 +60,14 @@ export class MessageSent {
       DESC OFFSET $4`,
       [startTimestamp, endTimestamp, limit, offset])
 
-    return items.map((x: any) => {
-      return {
-        ...x,
-        context: {
-          ...x
-        }
-      }
-    })
+    return getItemsWithContext(items)
   }
 
   async upsertItem (item: any) {
     const { messageId, from, toChainId, to, data, context } = item
     const args = [
       uuid(), messageId, from, toChainId, to, data,
-      context?.chainSlug,
-      context?.chainId,
-      context?.transactionHash,
-      context?.transactionIndex,
-      context?.logIndex,
-      context?.blockNumber,
-      context?.blockTimestamp,
-      context?.fromAddress,
-      context?.toAddress,
-      context?.value,
-      context?.nonce,
-      context?.gasLimit,
-      context?.gasUsed,
-      context?.gasPrice,
-      context?.data
+      ...getOrderedInsertContextArgs(context)
     ]
 
     await this.db.query(
@@ -101,25 +80,11 @@ export class MessageSent {
         to_chain_id,
         "to",
         "data",
-        _chain_slug,
-        _chain_id,
-        _transaction_hash,
-        _transaction_index,
-        _log_index,
-        _block_number,
-        _block_timestamp,
-        _from_address,
-        _to_address,
-        _value,
-        _nonce,
-        _gas_limit,
-        _gas_used,
-        _gas_price,
-        _data
+        ${contextSqlInsert}
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
       ON CONFLICT (message_id)
-      DO UPDATE SET _block_timestamp = $13, _transaction_hash = $9`, args
+      DO UPDATE SET _block_timestamp = $12, _transaction_hash = $8`, args
     )
   }
 }
