@@ -27,15 +27,27 @@ export class BundleSet {
 
   async createIndexes () {
     await this.db.query(
-      'CREATE UNIQUE INDEX IF NOT EXISTS idx_bundle_set_events_id ON bundle_set_events (bundle_id);'
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_bundle_set_events_bundle_id ON bundle_set_events (bundle_id);'
+    )
+    await this.db.query(
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_bundle_set_events_bundle_root ON bundle_set_events (bundle_root);'
     )
   }
 
   async getItems (opts: any = {}) {
-    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now() / 1000), limit = 10, page = 1 } = opts
+    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now() / 1000), limit = 10, page = 1, filter } = opts
     let offset = (page - 1) * limit
     if (offset < 0) {
       offset = 0
+    }
+
+    const args = [startTimestamp, endTimestamp, limit, offset]
+    if (filter?.bundleId) {
+      args.push(filter.bundleId)
+    } else if (filter?.bundleRoot) {
+      args.push(filter.bundleRoot)
+    } else if (filter?.transactionHash) {
+      args.push(filter.transactionHash)
     }
     const items = await this.db.any(
       `SELECT
@@ -49,10 +61,15 @@ export class BundleSet {
         _block_timestamp >= $1
         AND
         _block_timestamp <= $2
+        ${filter?.bundleId ? 'AND bundle_id = $5' : ''}
+        ${filter?.bundleRoot ? 'AND bundle_root = $5' : ''}
+        ${filter?.transactionHash ? 'AND _transaction_hash = $5' : ''}
       ORDER BY
         _block_timestamp
-      DESC OFFSET $4`,
-      [startTimestamp, endTimestamp, limit, offset])
+      DESC
+      LIMIT $3
+      OFFSET $4`,
+      args)
 
     return getItemsWithContext(items)
   }

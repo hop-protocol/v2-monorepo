@@ -21,7 +21,7 @@ app.get('/health', (req: any, res: any) => {
   res.status(200).json({ status: 'ok' })
 })
 
-app.get('/v1/explorer2', responseCache, async (req: any, res: any) => {
+app.get('/v1/explorer', responseCache, async (req: any, res: any) => {
   try {
     let { limit = 10, filter, page } = req.query
     limit = Number(limit)
@@ -32,41 +32,14 @@ app.get('/v1/explorer2', responseCache, async (req: any, res: any) => {
       throw new Error('limit must be less than 10')
     }
     const controller = new Controller()
-    const { items } = await controller.getExplorerEventsForApi2({
+    const { items, hasNextPage } = await controller.getExplorerEventsForApi({
       limit,
       filter,
-      page
-    })
-    res.status(200).json({
-      events: items
-    })
-  } catch (err: any) {
-    console.error(err)
-    res.json({ error: err.message })
-  }
-})
-
-app.get('/v1/explorer', responseCache, async (req: any, res: any) => {
-  try {
-    let { firstKey, lastKey, limit = 10, filter } = req.query
-    limit = Number(limit)
-    if (limit < 1) {
-      throw new Error('limit must be greater than 0')
-    }
-    if (limit > 10) {
-      throw new Error('limit must be less than 10')
-    }
-    const controller = new Controller()
-    const { lastKey: newLastKey, firstKey: newFirstKey, items } = await controller.getExplorerEventsForApi({
-      limit,
-      lastKey,
-      firstKey,
-      filter
+      page: Number(page)
     })
     res.status(200).json({
       events: items,
-      lastKey: newLastKey,
-      firstKey: newFirstKey
+      hasNextPage
     })
   } catch (err: any) {
     console.error(err)
@@ -75,38 +48,6 @@ app.get('/v1/explorer', responseCache, async (req: any, res: any) => {
 })
 
 app.get('/v1/events', responseCache, async (req: any, res: any) => {
-  try {
-    let { eventName, firstKey, lastKey, limit = 10, filter } = req.query
-    if (!eventName) {
-      throw new Error('missing eventName')
-    }
-    limit = Number(limit)
-    if (limit < 1) {
-      throw new Error('limit must be greater than 0')
-    }
-    if (limit > 10) {
-      throw new Error('limit must be less than 10')
-    }
-    const controller = new Controller()
-    const { lastKey: newLastKey, firstKey: newFirstKey, items } = await controller.getEventsForApi({
-      eventName,
-      limit,
-      lastKey,
-      firstKey,
-      filter
-    })
-    res.status(200).json({
-      events: items,
-      lastKey: newLastKey,
-      firstKey: newFirstKey
-    })
-  } catch (err: any) {
-    console.error(err)
-    res.json({ error: err.message })
-  }
-})
-
-app.get('/v1/events2', responseCache, async (req: any, res: any) => {
   try {
     let { eventName, page, limit = 10, filter } = req.query
     if (!eventName) {
@@ -120,14 +61,15 @@ app.get('/v1/events2', responseCache, async (req: any, res: any) => {
       throw new Error('limit must be less than 10')
     }
     const controller = new Controller()
-    const { items } = await controller.getEventsForApi2({
+    const { items, hasNextPage } = await controller.getEventsForApi({
       eventName,
       limit,
       filter,
-      page
+      page: Number(page)
     })
     res.status(200).json({
-      events: items
+      events: items,
+      hasNextPage
     })
   } catch (err: any) {
     console.error(err)

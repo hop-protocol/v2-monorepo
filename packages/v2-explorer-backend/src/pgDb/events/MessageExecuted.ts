@@ -40,6 +40,8 @@ export class MessageExecuted {
 
     if (filter?.messageId) {
       args.push(filter.messageId)
+    } else if (filter?.transactionHash) {
+      args.push(filter.transactionHash)
     }
 
     const items = await this.db.any(
@@ -53,9 +55,12 @@ export class MessageExecuted {
         AND
         _block_timestamp <= $2
         ${filter?.messageId ? 'AND message_id = $5' : ''}
+        ${filter?.transactionHash ? 'AND _transaction_hash = $5' : ''}
       ORDER BY
         _block_timestamp
-      DESC OFFSET $4`,
+      DESC
+      LIMIT $3
+      OFFSET $4`,
       args)
 
     return getItemsWithContext(items)

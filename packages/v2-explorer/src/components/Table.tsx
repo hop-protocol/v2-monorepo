@@ -149,10 +149,10 @@ export function Table (props: Props) {
                                 ) : (
                                   typeof col.value === 'string'
                                   ? <Typography variant="body2">{col.value}</Typography>
-                                  : (col.value || '-')
+                                  : (col.value != null ? col.value : '-')
                                 )}
                               </Box>
-                              {!!col.clipboardValue && (
+                              {col.clipboardValue != null && (
                                 <Box ml={0.5}>
                                   <CopyToClipboard text={col.clipboardValue}
                                     onCopy={event => handleCopy(col.clipboardValue!)}>

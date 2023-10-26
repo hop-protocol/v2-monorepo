@@ -5,6 +5,7 @@ import App from './App'
 import reportWebVitals from './reportWebVitals'
 import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { QueryClient, QueryClientProvider } from 'react-query'
 
 const theme = createTheme({
   palette: {
@@ -18,12 +19,22 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 )
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retryDelay: (attemptIndex: number) => 10 * 1000,
+    },
+  }
+})
+
 root.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </QueryClientProvider>
     </ThemeProvider>
   </React.StrictMode>
 )

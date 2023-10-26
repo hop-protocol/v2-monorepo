@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import { useInterval } from 'react-use'
 import { apiUrl } from '../config'
+import { useQuery } from 'react-query'
 
 export function useEvents (eventName: string, filter: any = {}, onPagination?: any, queryParams?: any) {
-  const [events, setEvents] = useState([])
+  const [hasNextPage, setHasNextPage] = useState(false)
   const [page, setPage] = useState(queryParams?.page || 1)
-  const [loading, setLoading] = useState(true)
   const limit = 10
 
   const filterString = useMemo(() => {
@@ -19,11 +19,11 @@ export function useEvents (eventName: string, filter: any = {}, onPagination?: a
     return str
   }, [filter])
 
-  const updateEvents = async (page: number) => {
+  const { isLoading: loading, data, error } = useQuery([`events:${eventName}-${page}-${filterString}`, page, eventName, filterString], async () => {
     try {
-      let pathname = '/events2'
+      let pathname = '/events'
       if (eventName === 'explorer')  {
-        pathname = '/explorer2'
+        pathname = '/explorer'
       }
       const url = `${apiUrl}/v1${pathname}?limit=${limit}&page=${page || 1}&eventName=${eventName}${filterString}`
       const res = await fetch(url)
@@ -34,23 +34,14 @@ export function useEvents (eventName: string, filter: any = {}, onPagination?: a
       if (!json.events) {
         throw new Error('no events')
       }
-      setEvents(json.events)
-      setLoading(false)
-      return url
+      return json
     } catch (err: any) {
       console.error(err.message)
     }
-    setLoading(false)
-    return ''
-  }
-
-  const updateEventsCb = useCallback(updateEvents, [filterString])
-
-  useEffect(() => {
-    updateEventsCb(page).catch(console.error)
-  }, [updateEventsCb, page])
-
-  useInterval(updateEvents, 10 * 1000)
+  }, {
+    enabled: true,
+    refetchInterval: 10 * 1000
+  })
 
   async function previousPage (event: any) {
     event.preventDefault()
@@ -70,9 +61,9 @@ export function useEvents (eventName: string, filter: any = {}, onPagination?: a
     }
   }
 
-  // const showNextButton = events.length === limit
-  const showNextButton = events.length > 0
-  const showPreviousButton = events.length > 0
+  const showPreviousButton = page > 1
+  const events = data?.events || []
+  const showNextButton = data?.hasNextPage ?? false
 
   return {
     events,

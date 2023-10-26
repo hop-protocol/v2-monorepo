@@ -43,7 +43,9 @@ export class FeesSentToHub {
         _block_timestamp <= $2
       ORDER BY
         _block_timestamp
-      DESC OFFSET $4`,
+      DESC
+      LIMIT $3
+      OFFSET $4`,
       [startTimestamp, endTimestamp, limit, offset])
 
     return getItemsWithContext(items)
