@@ -14,6 +14,8 @@ export const responseCacheDurationMs = Number(process.env.RESPONSE_CACHE_DURATIO
 export const defaultConfigDir = `${os.homedir()}/.v2-explorer-backend`
 export const defaultConfigFilePath = `${defaultConfigDir}/config.json`
 export const defaultKeystoreFilePath = `${defaultConfigDir}/keystore.json`
+
+// TODO: read from core
 export const sdkContractAddresses = {
   5: {
     startBlock: 8095954,
@@ -29,6 +31,7 @@ export const sdkContractAddresses = {
     nftBridge: '' // TODO
   }
 }
+
 export const postgresConfig = {
   user: process.env.POSTGRES_USER || 'postgres',
   host: process.env.POSTGRES_HOST || 'localhost',

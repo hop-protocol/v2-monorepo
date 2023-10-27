@@ -21,27 +21,9 @@ type EventsApiInput = {
 }
 
 export class Controller {
-  db: any
+  db: any = db
   pgDb = pgDb
   events: any
-
-  constructor () {
-    this.db = db
-    this.events = {
-      BundleCommitted: this.db.bundleCommittedEventsDb,
-      BundleForwarded: this.db.bundleForwardedEventsDb, // hub
-      BundleReceived: this.db.bundleReceivedEventsDb, // hub
-      BundleSet: this.db.bundleSetEventsDb, // hub
-      FeesSentToHub: this.db.feesSentToHubEventsDb,
-      MessageBundled: this.db.messageBundledEventsDb,
-      MessageExecuted: this.db.messageExecutedEventsDb,
-      MessageSent: this.db.messageSentEventsDb
-    }
-  }
-
-  async getEventNames () {
-    return Object.keys(this.events)
-  }
 
   async getEventsForApi (input: EventsApiInput): Promise<EventsResult> {
     const { eventName, limit = 10, filter, page = 1 } = input

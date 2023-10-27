@@ -1,9 +1,9 @@
 import wait from 'wait'
-import { EventsBaseDb } from '../db/eventsDb/EventsBaseDb'
 import { Hop } from '@hop-protocol/v2-sdk'
+import { SyncStateDb } from '../db/syncStateDb'
 import { db } from '../db'
+import { dbPath, sdkContractAddresses } from 'src/config'
 import { pgDb } from '../pgDb'
-import { sdkContractAddresses } from 'src/config'
 
 type StartBlocks = {
   [chainId: string]: number
@@ -37,7 +37,7 @@ export class Indexer {
   syncIndex: number = 0
   db = db
   pgDb = pgDb
-  eventsToSync: Record<string, EventsBaseDb<any>>
+  eventsToSync: Record<string, any>
 
   constructor (options?: Options) {
     if (options?.pollIntervalSeconds) {
@@ -64,14 +64,14 @@ export class Indexer {
     }
 
     this.eventsToSync = {
-      BundleCommitted: this.db.bundleCommittedEventsDb,
-      BundleForwarded: this.db.bundleForwardedEventsDb, // hub
-      BundleReceived: this.db.bundleReceivedEventsDb, // hub
-      BundleSet: this.db.bundleSetEventsDb, // hub
-      FeesSentToHub: this.db.feesSentToHubEventsDb,
-      MessageBundled: this.db.messageBundledEventsDb,
-      MessageExecuted: this.db.messageExecutedEventsDb,
-      MessageSent: this.db.messageSentEventsDb
+      BundleCommitted: new SyncStateDb(dbPath, 'BundleCommitted'),
+      BundleForwarded: new SyncStateDb(dbPath, 'BundleForwarded'), // hub
+      BundleReceived: new SyncStateDb(dbPath, 'BundleReceived'), // hub
+      BundleSet: new SyncStateDb(dbPath, 'BundleSet'), // hub
+      FeesSentToHub: new SyncStateDb(dbPath, 'FeesSentToHub'),
+      MessageBundled: new SyncStateDb(dbPath, 'MessageBundled'),
+      MessageExecuted: new SyncStateDb(dbPath, 'MessageExecuted'),
+      MessageSent: new SyncStateDb(dbPath, 'MessageSent')
     }
   }
 
@@ -99,30 +99,6 @@ export class Indexer {
   }
 
   async syncEvents (): Promise<any[]> {
-    const events: any[] = []
-
-    for (const eventName in this.eventsToSync) {
-      const _db = this.eventsToSync[eventName]
-      for (const _chainId in this.chainIds) {
-        const chainId = Number(_chainId)
-        // for debugging
-        if (eventName === 'BundleCommitted') {
-          // await _db.resetSyncState(chainId)
-        }
-
-        // for debugging
-        if (eventName === 'BundleSet') {
-          // await _db.resetSyncState(chainId)
-        }
-        const _events = await this.syncChainEvents(chainId, eventName, _db)
-        events.push(..._events)
-      }
-    }
-
-    return events
-  }
-
-  async syncEvents2 (): Promise<any[]> {
     const l1Events = ['BundleForwarded', 'BundleReceived']
     const baseEvents = [
       'BundleSet',
@@ -175,8 +151,6 @@ export class Indexer {
         console.log('event', event)
 
         const _db = this.eventsToSync[event.eventName]
-        const key = _db.getKeyStringFromEvent(event)!
-        // await _db.updateEvent(key, event)
         await this.pgDb.events[event.eventName].upsertItem({ ...event, context: event.context })
         await _db.putSyncState(chainId, { fromBlock, toBlock })
         _events.push(event)
@@ -190,13 +164,13 @@ export class Indexer {
   async poll () {
     console.log('poll start')
 
-    const events = await this.syncEvents2()
+    const events = await this.syncEvents()
 
     this.syncIndex++
     console.log('poll done')
   }
 
-  async syncChainEvents (chainId: number, eventName: string, _db: EventsBaseDb<any>): Promise<any[]> {
+  async syncChainEvents (chainId: number, eventName: string, _db: any): Promise<any[]> {
     const isL1 = this.getIsL1(chainId)
     const hubEvents = ['BundleForwarded', 'BundleReceived', 'BundleSet']
     if (hubEvents.includes(eventName)) {
@@ -217,7 +191,7 @@ export class Indexer {
     let fromBlock = this.startBlocks[chainId]
     let toBlock = await provider.getBlockNumber()
     if (syncState?.toBlock) {
-      fromBlock = syncState.toBlock + 1
+      fromBlock = Number(syncState.toBlock) + 1
       toBlock = await provider.getBlockNumber()
     }
 
@@ -225,9 +199,6 @@ export class Indexer {
     const events = await this.sdk.getEvents({ eventName, chainId, fromBlock, toBlock })
     console.log('events', eventName, events.length)
     for (const event of events) {
-      // const key = _db.getKeyStringFromEvent(event)!
-      // await _db.updateEvent(key, event)
-
       console.log('upsert', eventName)
       await this.pgDb.events[eventName].upsertItem(event)
     }

@@ -1,16 +1,7 @@
-import { BundleCommittedEventsDb } from './eventsDb/BundleCommittedEventsDb'
-import { BundleForwardedEventsDb } from './eventsDb/BundleForwardedEventsDb'
-import { BundleReceivedEventsDb } from './eventsDb/BundleReceivedEventsDb'
-import { BundleSetEventsDb } from './eventsDb/BundleSetEventsDb'
-import { EventsBaseDb } from './eventsDb/EventsBaseDb'
-import { FeesSentToHubEventsDb } from './eventsDb/FeesSentToHubEventsDb'
-import { MessageBundledEventsDb } from './eventsDb/MessageBundledEventsDb'
-import { MessageExecutedEventsDb } from './eventsDb/MessageExecutedEventsDb'
-import { MessageSentEventsDb } from './eventsDb/MessageSentEventsDb'
 import { dbPath as _configDbPath } from '../config'
 
 let configDbPath = _configDbPath
-const instances: Record<string, EventsBaseDb<any>> = {}
+const instances: Record<string, any> = {}
 
 function getDb (DbClass: any) {
   const dbName = DbClass.name
@@ -29,29 +20,5 @@ export const db = {
       throw new Error('dbPath can only be set before any db instance is created')
     }
     configDbPath = dbPath
-  },
-  get bundleCommittedEventsDb (): BundleCommittedEventsDb {
-    return getDb(BundleCommittedEventsDb)
-  },
-  get bundleForwardedEventsDb (): BundleForwardedEventsDb {
-    return getDb(BundleForwardedEventsDb)
-  },
-  get bundleReceivedEventsDb (): BundleReceivedEventsDb {
-    return getDb(BundleReceivedEventsDb)
-  },
-  get bundleSetEventsDb (): BundleSetEventsDb {
-    return getDb(BundleSetEventsDb)
-  },
-  get feesSentToHubEventsDb (): FeesSentToHubEventsDb {
-    return getDb(FeesSentToHubEventsDb)
-  },
-  get messageBundledEventsDb (): MessageBundledEventsDb {
-    return getDb(MessageBundledEventsDb)
-  },
-  get messageExecutedEventsDb (): MessageExecutedEventsDb {
-    return getDb(MessageExecutedEventsDb)
-  },
-  get messageSentEventsDb (): MessageSentEventsDb {
-    return getDb(MessageSentEventsDb)
   }
 }
