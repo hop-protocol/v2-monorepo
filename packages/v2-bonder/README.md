@@ -1,10 +1,10 @@
-# @hop-protocol/v2-bundle-relayer
+# @hop-protocol/v2-bonder
 
-> Hop Protocol v2 bundle relayer worker
+> Hop Protocol v2 bonder
 
 ## Documentation
 
-See [docs-v2.hop.exchange/bundle-relayer](https://docs-v2.hop.exchange/bundle-relayer)
+See [docs-v2.hop.exchange/bonder](https://docs-v2.hop.exchange/bonder)
 
 ## Development
 

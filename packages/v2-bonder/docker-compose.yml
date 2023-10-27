@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   bonder:
-    image: hopprotocol/v2-bundle-relayer:latest
+    image: hopprotocol/v2-bonder:latest
     env_file:
       - docker.env
     restart: unless-stopped

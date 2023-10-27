@@ -1,7 +1,7 @@
 {
-  "name": "@hop-protocol/v2-bundle-relayer",
+  "name": "@hop-protocol/v2-bonder",
   "version": "0.0.0-beta.0",
-  "description": "The Hop v2 bundle relayer worker",
+  "description": "The Hop v2 bonder",
   "main": "dist/index.js",
   "engines": {
     "node": ">=14"
