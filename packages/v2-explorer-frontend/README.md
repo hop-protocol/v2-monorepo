@@ -1,6 +1,6 @@
-# Hop v2 Explorer
+# Hop v2 Explorer Frontend
 
-> Hop v2 Explorer
+> Hop v2 Explorer Frontend
 
 [https:/v2-explorer.hop.exchange/](https://v2-explorer.hop.exchange/)
 
