@@ -11,6 +11,8 @@ import { MessageExecutedEventsDb } from './eventsDb/MessageExecutedEventsDb'
 import { MessageSentEventsDb } from './eventsDb/MessageSentEventsDb'
 import { TokenConfirmedEventsDb } from './nftEventsDb/TokenConfirmedEventsDb'
 import { TokenSentEventsDb } from './nftEventsDb/TokenSentEventsDb'
+import { TransferBondedEventsDb } from './liquidityHubEventsDb/TransferBondedDbEvents'
+import { TransferSentEventsDb } from './liquidityHubEventsDb/TransferSentDbEvents'
 import { TxStateDb } from './txStateDb/TxStateDb'
 import { dbPath as _configDbPath } from '../config'
 
@@ -78,6 +80,14 @@ export const db = {
     },
     get tokenSentEventsDb (): TokenSentEventsDb {
       return getDb(TokenSentEventsDb)
+    }
+  },
+  liquidityHub: {
+    get transferSentEventsDb (): TransferSentEventsDb {
+      return getDb(TransferSentEventsDb)
+    },
+    get transferBondedEventsDb (): TransferBondedEventsDb {
+      return getDb(TransferBondedEventsDb)
     }
   }
 }
