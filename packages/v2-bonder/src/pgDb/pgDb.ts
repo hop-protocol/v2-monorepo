@@ -1,13 +1,18 @@
 import minimist from 'minimist'
 import pgp from 'pg-promise'
-import { BundleCommitted } from './events/BundleCommitted'
-import { BundleForwarded } from './events/BundleForwarded'
-import { BundleReceived } from './events/BundleReceived'
-import { BundleSet } from './events/BundleSet'
-import { FeesSentToHub } from './events/FeesSentToHub'
-import { MessageBundled } from './events/MessageBundled'
-import { MessageExecuted } from './events/MessageExecuted'
-import { MessageSent } from './events/MessageSent'
+import { BundleCommitted } from './events/messenger/BundleCommitted'
+import { BundleForwarded } from './events/messenger/BundleForwarded'
+import { BundleReceived } from './events/messenger/BundleReceived'
+import { BundleSet } from './events/messenger/BundleSet'
+import { FeesSentToHub } from './events/messenger/FeesSentToHub'
+import { MessageBundled } from './events/messenger/MessageBundled'
+import { MessageExecuted } from './events/messenger/MessageExecuted'
+import { MessageSent } from './events/messenger/MessageSent'
+import { NftConfirmationSent } from './events/nft/ConfirmationSent'
+import { NftTokenConfirmed } from './events/nft/TokenConfirmed'
+import { NftTokenSent } from './events/nft/TokenSent'
+import { TransferBonded } from './events/liquidityHub/TransferBonded'
+import { TransferSent } from './events/liquidityHub/TransferSent'
 import { postgresConfig } from '../config'
 
 const argv = minimist(process.argv.slice(2))
@@ -34,7 +39,14 @@ export class PgDb {
       FeesSentToHub: new FeesSentToHub(this.db),
       MessageBundled: new MessageBundled(this.db),
       MessageExecuted: new MessageExecuted(this.db),
-      MessageSent: new MessageSent(this.db)
+      MessageSent: new MessageSent(this.db),
+
+      TransferBonded: new TransferBonded(this.db),
+      TransferSent: new TransferSent(this.db),
+
+      ConfirmationSent: new NftConfirmationSent(this.db),
+      TokenConfirmed: new NftTokenConfirmed(this.db),
+      TokenSent: new NftTokenSent(this.db)
     }
 
     this.init().catch((err: any) => {

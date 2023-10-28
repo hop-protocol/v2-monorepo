@@ -170,42 +170,6 @@ export class Indexer {
     console.log('poll done')
   }
 
-  async syncChainEvents (chainId: number, eventName: string, _db: any): Promise<any[]> {
-    const isL1 = this.getIsL1(chainId)
-    const hubEvents = ['BundleForwarded', 'BundleReceived', 'BundleSet']
-    if (hubEvents.includes(eventName)) {
-      if (!isL1) {
-        return []
-      }
-    } else {
-      if (isL1) {
-        return []
-      }
-    }
-
-    // await _db.resetSyncState(chainId)
-    const syncState = await _db.getSyncState(chainId)
-    console.log('syncState', eventName, syncState)
-
-    const provider = this.sdk.getRpcProvider(chainId)
-    let fromBlock = this.startBlocks[chainId]
-    let toBlock = await provider.getBlockNumber()
-    if (syncState?.toBlock) {
-      fromBlock = Number(syncState.toBlock) + 1
-      toBlock = await provider.getBlockNumber()
-    }
-
-    console.log('get', eventName, chainId, fromBlock, toBlock)
-    const events = await this.sdk.getEvents({ eventName, chainId, fromBlock, toBlock })
-    console.log('events', eventName, events.length)
-    for (const event of events) {
-      console.log('upsert', eventName)
-      await this.pgDb.events[eventName].upsertItem(event)
-    }
-    await _db.putSyncState(chainId, { fromBlock, toBlock })
-    return events
-  }
-
   async waitForSyncIndex (syncIndex: number): Promise<boolean> {
     if (this.syncIndex === syncIndex) {
       return true

@@ -4,6 +4,7 @@ import { Indexer } from './indexer'
 import { db } from '../db'
 import { getSigner } from '../signer'
 import { goerliAddresses } from '@hop-protocol/v2-core/addresses'
+import { pgDb } from '../pgDb'
 
 class RelayError extends Error {}
 
@@ -18,6 +19,7 @@ export class Worker {
   sdk: Hop
   pollIntervalMs: number = defaultPollSeconds * 1000
   indexer: Indexer
+  pgDb = pgDb
 
   constructor (options: Options = {}) {
     if (options.eventPollSeconds) {
@@ -60,7 +62,7 @@ export class Worker {
 
   async poll () {
     console.log('poll start')
-    const items = await db.nft.tokenSentEventsDb.getItems()
+    const items = await this.pgDb.events.TokenSent.getItems()
     console.log('items', items.length)
 
     for (const event of items) {

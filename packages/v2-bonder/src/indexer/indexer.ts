@@ -1,8 +1,9 @@
 import wait from 'wait'
-import { EventsBaseDb } from '../db/eventsDb/EventsBaseDb'
 import { Hop } from '@hop-protocol/v2-sdk'
+import { SyncStateDb } from '../db/syncStateDb'
 import { db } from '../db'
-import { sdkContractAddresses } from 'src/config'
+import { dbPath, sdkContractAddresses } from 'src/config'
+import { pgDb } from '../pgDb'
 
 type StartBlocks = {
   [chainId: string]: number
@@ -35,7 +36,8 @@ export class Indexer {
   paused: boolean = false
   syncIndex: number = 0
   db = db
-  eventsToSync: Record<string, EventsBaseDb<any>>
+  pgDb = pgDb
+  eventsToSync: Record<string, any>
 
   constructor (options?: Options) {
     if (options?.pollIntervalSeconds) {
@@ -62,14 +64,25 @@ export class Indexer {
     }
 
     this.eventsToSync = {
-      BundleCommitted: this.db.bundleCommittedEventsDb,
-      BundleForwarded: this.db.bundleForwardedEventsDb, // hub
-      BundleReceived: this.db.bundleReceivedEventsDb, // hub
-      BundleSet: this.db.bundleSetEventsDb, // hub
-      FeesSentToHub: this.db.feesSentToHubEventsDb,
-      MessageBundled: this.db.messageBundledEventsDb,
-      MessageExecuted: this.db.messageExecutedEventsDb,
-      MessageSent: this.db.messageSentEventsDb
+      messenger: {
+        BundleCommitted: new SyncStateDb(dbPath, 'BundleCommitted'),
+        BundleForwarded: new SyncStateDb(dbPath, 'BundleForwared'), // hub
+        BundleReceived: new SyncStateDb(dbPath, 'BundleReceived'), // hub
+        BundleSet: new SyncStateDb(dbPath, 'BundleSet'), // hub
+        FeesSentToHub: new SyncStateDb(dbPath, 'FeesSentToHub'),
+        MessageBundled: new SyncStateDb(dbPath, 'MessageBundled'),
+        MessageExecuted: new SyncStateDb(dbPath, 'MessageExecuted'),
+        MessageSent: new SyncStateDb(dbPath, 'MessageSent')
+      },
+      liquidityHub: {
+        TransferBonded: new SyncStateDb(dbPath, 'TransferBonded'),
+        TransferSent: new SyncStateDb(dbPath, 'TransferSent')
+      },
+      nft: {
+        ConfirmationSent: new SyncStateDb(dbPath, 'NftConfirmationSent'),
+        TokenConfirmed: new SyncStateDb(dbPath, 'NftTokenConfirmed'),
+        TokenSent: new SyncStateDb(dbPath, 'NftTokenSent')
+      }
     }
   }
 
@@ -97,30 +110,6 @@ export class Indexer {
   }
 
   async syncEvents (): Promise<any[]> {
-    const events: any[] = []
-
-    for (const eventName in this.eventsToSync) {
-      const _db = this.eventsToSync[eventName]
-      for (const _chainId in this.chainIds) {
-        const chainId = Number(_chainId)
-        // for debugging
-        if (eventName === 'BundleCommitted') {
-          // await _db.resetSyncState(chainId)
-        }
-
-        // for debugging
-        if (eventName === 'BundleSet') {
-          // await _db.resetSyncState(chainId)
-        }
-        const _events = await this.syncChainEvents(chainId, eventName, _db)
-        events.push(..._events)
-      }
-    }
-
-    return events
-  }
-
-  async syncEvents2 (): Promise<any[]> {
     const l1Events = ['BundleForwarded', 'BundleReceived']
     const baseEvents = [
       'BundleSet',
@@ -140,10 +129,10 @@ export class Indexer {
       let eventNames: string[] = []
 
       if (isL1) {
-        _db = this.eventsToSync[l1Events[0]]
+        _db = this.eventsToSync.messenger[l1Events[0]]
         eventNames = baseEvents.concat(...l1Events)
       } else {
-        _db = this.eventsToSync[baseEvents[0]]
+        _db = this.eventsToSync.messenger[baseEvents[0]]
         eventNames = baseEvents
       }
 
@@ -170,9 +159,8 @@ export class Indexer {
       const events = await this.sdk.getEvents({ eventNames, chainId, fromBlock, toBlock })
       console.log('events', eventNames, events.length)
       for (const event of events) {
-        const _db = this.eventsToSync[event.eventName]
-        const key = _db.getKeyStringFromEvent(event)!
-        await _db.updateEvent(key, event)
+        await this.pgDb.events[event.eventName].upsertItem({ ...event, context: event.context })
+        const _db = this.eventsToSync.messenger[event.eventName]
         await _db.putSyncState(chainId, { fromBlock, toBlock })
         _events.push(event)
       }
@@ -185,7 +173,7 @@ export class Indexer {
   async poll () {
     console.log('poll start')
 
-    const events = await this.syncEvents2()
+    const events = await this.syncEvents()
     const exitableBundles: any = {}
 
     for (const event of events) {
@@ -210,42 +198,6 @@ export class Indexer {
 
     this.syncIndex++
     console.log('poll done')
-  }
-
-  async syncChainEvents (chainId: number, eventName: string, _db: EventsBaseDb<any>): Promise<any[]> {
-    const isL1 = this.getIsL1(chainId)
-    const hubEvents = ['BundleForwarded', 'BundleReceived', 'BundleSet']
-    if (hubEvents.includes(eventName)) {
-      if (!isL1) {
-        return []
-      }
-    } else {
-      if (isL1) {
-        return []
-      }
-    }
-
-    // await _db.resetSyncState(chainId)
-    const syncState = await _db.getSyncState(chainId)
-    console.log('syncState', eventName, syncState)
-
-    const provider = this.sdk.getRpcProvider(chainId)
-    let fromBlock = this.startBlocks[chainId]
-    let toBlock = await provider.getBlockNumber()
-    if (syncState?.toBlock) {
-      fromBlock = syncState.toBlock + 1
-      toBlock = await provider.getBlockNumber()
-    }
-
-    console.log('get', eventName, chainId, fromBlock, toBlock)
-    const events = await this.sdk.getEvents({ eventName, chainId, fromBlock, toBlock })
-    console.log('events', eventName, events.length)
-    for (const event of events) {
-      const key = _db.getKeyStringFromEvent(event)!
-      await _db.updateEvent(key, event)
-    }
-    await _db.putSyncState(chainId, { fromBlock, toBlock })
-    return events
   }
 
   async waitForSyncIndex (syncIndex: number): Promise<boolean> {

@@ -1,7 +1,9 @@
 import wait from 'wait'
 import { Hop } from '@hop-protocol/v2-sdk'
+import { SyncStateDb } from '../db/syncStateDb'
 import { db } from '../db'
-import { sdkContractAddresses } from 'src/config'
+import { dbPath, sdkContractAddresses } from 'src/config'
+import { pgDb } from '../pgDb'
 
 type StartBlocks = {
   [chainId: string]: number
@@ -34,6 +36,7 @@ export class Indexer {
   paused: boolean = false
   syncIndex: number = 0
   db = db
+  pgDb = pgDb
   eventsToSync: Record<string, any>
 
   constructor (options?: Options) {
@@ -61,9 +64,9 @@ export class Indexer {
     }
 
     this.eventsToSync = {
-      tokenSent: this.db.nft.tokenSentEventsDb,
-      confirmationSent: this.db.nft.confirmationSentEventsDb,
-      tokenConfirmed: this.db.nft.tokenConfirmedEventsDb
+      tokenSent: new SyncStateDb(dbPath, 'NftTokenSent'),
+      confirmationSent: new SyncStateDb(dbPath, 'NftConfirmationSent'),
+      tokenConfirmed: new SyncStateDb(dbPath, 'NftConfirmationSent')
     }
   }
 
