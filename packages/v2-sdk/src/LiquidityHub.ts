@@ -1,5 +1,5 @@
 import LiquidityHubAbi from '@hop-protocol/v2-core/abi/generated/LiquidityHub.json'
-import { providers, Contract, Signer } from 'ethers'
+import { Contract, Signer, providers } from 'ethers'
 
 // Constructor input type
 interface LiquidityHubConstructorInput {

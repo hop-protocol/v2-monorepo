@@ -73,12 +73,15 @@ Response
 
 ```json
 {
-    "valid": true,
-    "timestamp": 1695439139,
-    "gasPrice": "60",
-    "minBaseFeePerGasFee": "50",
-    "minBaseFeePerGasBlockNumber": 15005833,
-    "minBaseFeePerGasTimestamp": 1695439734
+    "status": "ok",
+    "data": {
+        "valid": true,
+        "timestamp": 1695439139,
+        "gasPrice": "60",
+        "minBaseFeePerGasFee": "50",
+        "minBaseFeePerGasBlockNumber": 15005833,
+        "minBaseFeePerGasTimestamp": 1695439734
+    }
 }
 ```
 
