@@ -545,4 +545,16 @@ describe('sdk setup', () => {
     console.log(isRelayed)
     expect(isRelayed).toBe(false)
   }, 60 * 1000)
+  it.skip('getRelayFee', async () => {
+    const hop = new Hop('goerli', {
+      contractAddresses: contractAddresses_v003
+    })
+    const fromChainId = 420
+    const toChainId = 5
+    const toAddress = '0x0000000000000000000000000000000000000000'
+    const toCalldata = '0x'
+    const relayFee = await hop.getRelayFee({ fromChainId, toChainId, toAddress, toCalldata })
+    console.log(relayFee)
+    expect(relayFee).toBeDefined()
+  }, 60 * 1000)
 })

@@ -10,6 +10,7 @@ import { ERC721Bridge__factory } from '@hop-protocol/v2-core/contracts/factories
 import { EventFetcher } from './eventFetcher'
 import { ExitRelayer } from './exitRelayers/ExitRelayer'
 import { FeesSentToHub, FeesSentToHubEventFetcher } from './events/FeesSentToHub'
+import { GasPriceOracle } from './GasPriceOracle'
 import { HubERC5164ConnectorFactory__factory } from '@hop-protocol/v2-core/contracts/factories/generated/HubERC5164ConnectorFactory__factory'
 import { HubMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/generated/HubMessageBridge__factory'
 import { MerkleTree } from './utils/MerkleTree'
@@ -20,7 +21,7 @@ import { SpokeMessageBridge__factory } from '@hop-protocol/v2-core/contracts/fac
 import { TokenConfirmed, TokenConfirmedEventFetcher } from './events/nft/TokenConfirmed'
 import { TokenSent, TokenSentEventFetcher } from './events/nft/TokenSent'
 import { chainSlugMap } from './utils/chainSlugMap'
-import { formatEther, formatUnits, getAddress } from 'ethers/lib/utils'
+import { formatEther, formatUnits, getAddress, parseEther } from 'ethers/lib/utils'
 import { getProvider } from './utils/getProvider'
 import { goerliAddresses } from '@hop-protocol/v2-core/addresses'
 
@@ -271,6 +272,13 @@ export type ConnectTargetsInput = {
   signer: Signer
 }
 
+export type GetRelayFeeInput = {
+  fromChainId: number,
+  toChainId: number,
+  toAddress: string,
+  toCalldata: string
+}
+
 export class Hop {
   eventFetcher: EventFetcher
   network: string
@@ -281,8 +289,8 @@ export class Hop {
   }
 
   providers: Record<string, any> = {}
-
   l1ChainId : number
+  gasPriceOracle: GasPriceOracle
 
   constructor (network: string = 'goerli', options?: Options) {
     if (!['mainnet', 'goerli'].includes(network)) {
@@ -303,6 +311,9 @@ export class Hop {
     if (options?.contractAddresses) {
       this.contractAddresses[network] = options.contractAddresses
     }
+
+    const url = 'https://v2-gas-price-oracle-goerli.hop.exchange'
+    this.gasPriceOracle = new GasPriceOracle(url)
   }
 
   get version () {
@@ -640,6 +651,29 @@ export class Hop {
       'MessageExecuted',
       'MessageSent'
     ]
+  }
+
+  async getRelayFee (input: GetRelayFeeInput) {
+    const {
+      fromChainId,
+      toChainId,
+      toAddress,
+      toCalldata
+    } = input
+
+    const populatedTx = await this.getSendMessagePopulatedTx({
+      fromChainId,
+      toChainId,
+      toAddress,
+      toCalldata
+    })
+    const timestamp: any = undefined
+    const txData = populatedTx.data
+    const chain = this.getChainSlug(toChainId)
+    const provider = this.getRpcProvider(toChainId)
+    const gasLimit = await provider.estimateGas(populatedTx)
+    const feeData = await this.gasPriceOracle.estimateGasCost(chain, timestamp, gasLimit.toNumber(), txData)
+    return parseEther(feeData.data.gasCost)
   }
 
   async hasAuctionStarted (input: HasAuctionStartedInput): Promise<boolean> {

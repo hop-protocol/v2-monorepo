@@ -80,7 +80,9 @@ export class GasPriceOracle {
   async estimateGasCost (chain: string, timestamp: number, gasLimit: number, txData: string): Promise<GasCostEstimateResponse> {
     const url = new URL(`${this.baseURL}/v1/gas-cost-estimate`)
     url.searchParams.append('chain', chain)
-    url.searchParams.append('timestamp', timestamp.toString())
+    if (timestamp) {
+      url.searchParams.append('timestamp', timestamp.toString())
+    }
     url.searchParams.append('gasLimit', gasLimit.toString())
     url.searchParams.append('txData', txData)
 
@@ -91,7 +93,9 @@ export class GasPriceOracle {
   async verifyGasCostEstimate (chain: string, timestamp: number, gasLimit: number, txData: string, targetGasCost: string): Promise<GasCostEstimateVerifyResponse> {
     const url = new URL(`${this.baseURL}/v1/gas-cost-estimate-verify`)
     url.searchParams.append('chain', chain)
-    url.searchParams.append('timestamp', timestamp.toString())
+    if (timestamp) {
+      url.searchParams.append('timestamp', timestamp.toString())
+    }
     url.searchParams.append('gasLimit', gasLimit.toString())
     url.searchParams.append('txData', txData.toString())
     url.searchParams.append('targetGasCost', targetGasCost.toString())
