@@ -1,6 +1,7 @@
 import wait from 'wait'
 import { Hop } from '@hop-protocol/v2-sdk'
 import { Indexer } from '../indexer'
+import { Controller as MessageRelayerController } from '../messageRelayer/controller'
 import { db } from '../db'
 import { getSigner } from '../signer'
 import { goerliAddresses } from '@hop-protocol/v2-core/addresses'
@@ -14,6 +15,8 @@ export type Options = {
 }
 
 export const defaultPollSeconds = 10
+
+const messageRelayerController = new MessageRelayerController()
 
 export class Worker {
   sdk: Hop
@@ -37,20 +40,25 @@ export class Worker {
     }
   }
 
-  async start () {
+  async start (options: any) {
     try {
       this.indexer.start()
-      await this.indexer.waitForSyncIndex(1)
-      await this.startPoll()
+      await Promise.all([
+        this.indexer.waitForSyncIndex(1),
+        this.startPoll(options?.messageRelayer)
+      ])
     } catch (err: any) {
       console.error('worker poll error', err)
     }
   }
 
-  async startPoll () {
+  async startPoll (messageRelayerEnabled: boolean = false) {
     while (true) {
       try {
-        await this.poll()
+        await Promise.all([
+          this.pollBundleRelayer(),
+          messageRelayerEnabled ? this.pollMessageRelayer() : Promise.resolve(null)
+        ])
       } catch (err: any) {
         if (err instanceof RelayError) {
           console.warn(err.message)
@@ -63,7 +71,7 @@ export class Worker {
     }
   }
 
-  async poll () {
+  async pollBundleRelayer () {
     console.log('poll start')
     const items = await db.exitableBundlesDb.getItems()
     console.log('items', items.length)
@@ -122,5 +130,9 @@ export class Worker {
         console.log('updated txState', tx?.hash)
       }
     }
+  }
+
+  async pollMessageRelayer () {
+    await messageRelayerController.startPoller()
   }
 }

@@ -19,5 +19,5 @@ COPY --from=build /usr/src/app/node_modules /usr/src/app/node_modules
 COPY --from=build /usr/src/app/dist /usr/src/app/dist
 COPY --from=build /usr/src/app/bin /usr/src/app/bin
 COPY --from=build /usr/src/app/*.json /usr/src/app/
-ENTRYPOINT [ "/usr/src/app/bin/relayer" ]
+ENTRYPOINT [ "/usr/src/app/bin/bonder" ]
 CMD []

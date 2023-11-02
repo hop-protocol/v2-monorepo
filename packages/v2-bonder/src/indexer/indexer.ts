@@ -174,6 +174,7 @@ export class Indexer {
     console.log('poll start')
 
     const events = await this.syncEvents()
+    console.log('got events', events.length)
     const exitableBundles: any = {}
 
     for (const event of events) {

@@ -37,3 +37,22 @@ export const postgresConfig = {
   port: process.env.POSTGRES_PORT ? parseInt(process.env.POSTGRES_PORT, 10) : 5432,
   maxConnections: process.env.POSTGRES_MAX_CONNECTIONS ? parseInt(process.env.POSTGRES_MAX_CONNECTIONS, 10) : 10
 }
+
+export const network = process.env.NETWORK ?? 'goerli'
+const chains = ['ethereum', 'optimism', 'arbitrum', 'base']
+
+export const rpcUrls: any = {}
+
+for (const chain of chains) {
+  const urls = process.env[`${chain.toUpperCase()}_RPC`]?.split(',').map((url: string) => url.trim()).filter(Boolean)
+  if (urls) {
+    rpcUrls[chain] = urls
+  }
+}
+
+export const bridgeAddresses: any = {
+  ethereum: '',
+  optimism: '',
+  arbitrum: '',
+  base: ''
+}

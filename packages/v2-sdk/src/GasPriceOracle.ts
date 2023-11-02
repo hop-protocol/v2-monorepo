@@ -52,8 +52,15 @@ interface GasCostEstimateVerifyResponse {
 export class GasPriceOracle {
   baseURL: string
 
-  constructor (baseURL: string) {
-    this.baseURL = baseURL
+  constructor (networkOrBaseURL: string) {
+    if (networkOrBaseURL.startsWith('http')) {
+      this.baseURL = networkOrBaseURL
+    }
+
+    if (networkOrBaseURL === 'goerli') {
+      const url = 'https://v2-gas-price-oracle-goerli.hop.exchange'
+      this.baseURL = url
+    }
   }
 
   async getGasFeeData (chain: string, timestamp?: number): Promise<GasFeeDataResponse> {
@@ -85,6 +92,7 @@ export class GasPriceOracle {
     }
     url.searchParams.append('gasLimit', gasLimit.toString())
     url.searchParams.append('txData', txData)
+    console.log('url:', url.toString())
 
     const json = await fetchJsonOrThrow(url.toString())
     return json
@@ -99,6 +107,7 @@ export class GasPriceOracle {
     url.searchParams.append('gasLimit', gasLimit.toString())
     url.searchParams.append('txData', txData.toString())
     url.searchParams.append('targetGasCost', targetGasCost.toString())
+    console.log('url:', url.toString())
 
     const json = await fetchJsonOrThrow(url.toString())
     return json

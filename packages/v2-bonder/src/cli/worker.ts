@@ -1,4 +1,5 @@
 import fs from 'fs'
+import { OsStats } from '../osStats'
 import { Worker } from '../worker'
 import { actionHandler, parseBool, parseNumber, root } from './shared'
 import {
@@ -20,6 +21,11 @@ export const workerProgram = root
   .option(
     '--server [boolean]',
     'Start the api server',
+    parseBool
+  )
+  .option(
+    '--message-relayer [boolean]',
+    'Start message relayer',
     parseBool
   )
   .option(
@@ -45,7 +51,7 @@ export const workerProgram = root
   .action(actionHandler(main))
 
 async function main (source: any) {
-  const { dry: dryMode, server, indexerPollSeconds, exitBundlePollSeconds, exitBundleRetryDelaySeconds, demoRelayer } = source
+  const { dry: dryMode, server, indexerPollSeconds, exitBundlePollSeconds, exitBundleRetryDelaySeconds, demoRelayer, messageRelayer } = source
   const keystoreFilePath = defaultKeystoreFilePath
 
   console.log('starting worker')
@@ -55,6 +61,7 @@ async function main (source: any) {
   console.log('exitBundlePollSeconds:', exitBundlePollSeconds || 'default')
   console.log('exitBundleRetryDelaySeconds:', exitBundleRetryDelaySeconds || 'default')
   console.log('demoRelayer:', !!demoRelayer)
+  console.log('messageRelayer:', !!messageRelayer)
 
   const exists = fs.existsSync(keystoreFilePath)
   if (exists) {
@@ -72,10 +79,17 @@ async function main (source: any) {
     require('../demoRelayer')
   }
 
+  const osStats = new OsStats()
+
   const worker = new Worker({
     indexerPollSeconds,
     exitBundlePollSeconds,
     exitBundleRetryDelaySeconds
   })
-  await worker.start()
+  await Promise.all([
+    osStats.start(),
+    worker.start({
+      messageRelayer
+    })
+  ])
 }

@@ -1,6 +1,7 @@
 import cors from 'cors'
 import express from 'express'
 import { ipRateLimitMiddleware } from './rateLimit'
+import { setServerRoutes as messageRelayerSetServerRoutes } from '../messageRelayer/server'
 import { port } from '../config'
 
 const app = express()
@@ -18,6 +19,8 @@ app.get('/', (req: any, res: any) => {
 app.get('/health', (req: any, res: any) => {
   res.status(200).json({ status: 'ok' })
 })
+
+messageRelayerSetServerRoutes(app)
 
 const host = '0.0.0.0'
 app.listen(port, host, () => {

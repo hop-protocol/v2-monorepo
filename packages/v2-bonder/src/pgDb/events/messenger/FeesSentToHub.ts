@@ -59,7 +59,7 @@ export class FeesSentToHub {
     ]
     await this.db.query(
       `INSERT INTO
-        bundle_set_events
+        fees_sent_to_hub_events
       (id, amount)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       ON CONFLICT (tx_hash)
