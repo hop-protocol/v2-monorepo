@@ -8,6 +8,8 @@
 [![NPM version](https://badge.fury.io/js/%40hop-protocol%2Fv2-sdk.svg)](https://badge.fury.io/js/%40hop-protocol%2Fv2-sdk)
 [![npm bundle size (scoped version)](https://img.shields.io/bundlephobia/minzip/@hop-protocol/v2-sdk/latest.svg)](https://bundlephobia.com/result?p=@hop-protocol/v2-sdk@latest)
 
+⚠️ This package is under active development and is subject to change.
+
 ## Demo
 
 [https://v2-sdk-demo.hop.exchange/](https://v2-sdk-demo.hop.exchange/)

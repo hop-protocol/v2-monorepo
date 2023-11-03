@@ -2,6 +2,8 @@
 
 > Hop Protocol v2 bonder
 
+⚠️ This package is under active development and is subject to change.
+
 ## Documentation
 
 See [docs-v2.hop.exchange/bonder](https://docs-v2.hop.exchange/bonder)

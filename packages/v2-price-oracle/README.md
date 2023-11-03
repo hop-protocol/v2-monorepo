@@ -4,6 +4,8 @@
 
 This is node.js worker and server that queries the gas price data of every block using public RPCs for all the supported chains and stores it in a leveldb database. It also provides an API to query the gas price data.
 
+⚠️ This package is under active development and is subject to change.
+
 ## API
 
 ### Base URL

@@ -2,6 +2,8 @@
 
 > Hop Protocol v2 config and metadata
 
+⚠️ This package is under active development and is subject to change.
+
 ## Addresses
 
 ```js
