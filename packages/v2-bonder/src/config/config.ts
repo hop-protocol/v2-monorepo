@@ -56,3 +56,10 @@ export const bridgeAddresses: any = {
   arbitrum: '',
   base: ''
 }
+
+export const liquidityHubAddresses : any = {
+  ethereum: '',
+  optimism: '',
+  arbitrum: '',
+  base: ''
+}

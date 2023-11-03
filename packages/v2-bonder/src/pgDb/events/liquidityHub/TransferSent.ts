@@ -80,6 +80,43 @@ export class TransferSent {
     return getItemsWithContext(items)
   }
 
+  async getUnbondedTransfers (opts: any) {
+    const { startTimestamp = 0, endTimestamp = Math.floor(Date.now() / 1000), limit = 10, page = 1, filter } = opts
+    let offset = (page - 1) * limit
+    if (offset < 0) {
+      offset = 0
+    }
+    const args = [startTimestamp, endTimestamp, limit, offset]
+    const items = await this.db.any(
+      `SELECT
+        tse.claim_id AS "claimId",
+        tse.token_bus_id AS "tokenBusId",
+        tse."to",
+        tse.amount,
+        tse.min_amount_out AS "minAmountOut",
+        tse.source_claims_sent AS "sourceClaimsSent",
+        tse.bonus,
+        ${contextSqlSelect}
+      FROM
+        transfer_sent_events tse
+      LEFT JOIN transfer_bonded_events tbe
+        ON tse.claim_id = tbe.claim_id
+      WHERE
+        tse._block_timestamp >= $1
+        AND
+        tse._block_timestamp <= $2
+        AND
+        tbe.claim_id IS NULL
+      ORDER BY
+        tse._block_timestamp DESC
+      LIMIT $3
+      OFFSET $4`,
+      args
+    )
+
+    return getItemsWithContext(items)
+  }
+
   async upsertItem (item: any) {
     const { claimId, tokenBusId, to, amount, minAmountOut, sourceClaimsSent, bonus, context } = this.normalizeDataForPut(item)
     const args = [
