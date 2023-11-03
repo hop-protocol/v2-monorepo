@@ -1,7 +1,7 @@
 import HubMessageBridgeAbi from '@hop-protocol/v2-core/abi/generated/HubMessageBridge.json'
 import { BigNumber, ethers } from 'ethers'
-import { Event } from './Event'
-import { EventBase } from './types'
+import { Event } from '../Event'
+import { EventBase } from '../types'
 import { HubMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/generated/HubMessageBridge__factory'
 
 // event from HubMessageBridge

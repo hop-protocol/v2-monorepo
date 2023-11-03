@@ -1,25 +1,27 @@
 import pkg from '../package.json'
 import { BigNumber, Signer, providers } from 'ethers'
-import { BundleCommitted, BundleCommittedEventFetcher } from './events/BundleCommitted'
-import { BundleForwarded, BundleForwardedEventFetcher } from './events/BundleForwarded'
-import { BundleReceived, BundleReceivedEventFetcher } from './events/BundleReceived'
-import { BundleSet, BundleSetEventFetcher } from './events/BundleSet'
+import { BundleCommitted, BundleCommittedEventFetcher } from './events/messenger/BundleCommitted'
+import { BundleForwarded, BundleForwardedEventFetcher } from './events/messenger/BundleForwarded'
+import { BundleReceived, BundleReceivedEventFetcher } from './events/messenger/BundleReceived'
+import { BundleSet, BundleSetEventFetcher } from './events/messenger/BundleSet'
 import { ConfirmationSent, ConfirmationSentEventFetcher } from './events/nft/ConfirmationSent'
 import { DateTime } from 'luxon'
 import { ERC721Bridge__factory } from '@hop-protocol/v2-core/contracts/factories/generated/ERC721Bridge__factory'
 import { EventFetcher } from './eventFetcher'
 import { ExitRelayer } from './exitRelayers/ExitRelayer'
-import { FeesSentToHub, FeesSentToHubEventFetcher } from './events/FeesSentToHub'
+import { FeesSentToHub, FeesSentToHubEventFetcher } from './events/messenger/FeesSentToHub'
 import { GasPriceOracle } from './GasPriceOracle'
 import { HubERC5164ConnectorFactory__factory } from '@hop-protocol/v2-core/contracts/factories/generated/HubERC5164ConnectorFactory__factory'
 import { HubMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/generated/HubMessageBridge__factory'
 import { MerkleTree } from './utils/MerkleTree'
-import { MessageBundled, MessageBundledEventFetcher } from './events/MessageBundled'
-import { MessageExecuted, MessageExecutedEventFetcher } from './events/MessageExecuted'
-import { MessageSent, MessageSentEventFetcher } from './events/MessageSent'
+import { MessageBundled, MessageBundledEventFetcher } from './events/messenger/MessageBundled'
+import { MessageExecuted, MessageExecutedEventFetcher } from './events/messenger/MessageExecuted'
+import { MessageSent, MessageSentEventFetcher } from './events/messenger/MessageSent'
 import { SpokeMessageBridge__factory } from '@hop-protocol/v2-core/contracts/factories/generated/SpokeMessageBridge__factory'
 import { TokenConfirmed, TokenConfirmedEventFetcher } from './events/nft/TokenConfirmed'
 import { TokenSent, TokenSentEventFetcher } from './events/nft/TokenSent'
+import { TransferBondedEventFetcher } from './events/liquidityHub/TransferBonded'
+import { TransferSentEventFetcher } from './events/liquidityHub/TransferSent'
 import { chainSlugMap } from './utils/chainSlugMap'
 import { formatEther, formatUnits, getAddress, parseEther } from 'ethers/lib/utils'
 import { getProvider } from './utils/getProvider'
@@ -622,6 +624,18 @@ export class Hop {
       } else if (eventName === 'TokenSent') { // nft
         const address = this.getNftBridgeContractAddress(chainId)
         const _eventFetcher = new TokenSentEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
+        filters.push(filter)
+        map[filter.topics[0] as string] = _eventFetcher
+      } else if (eventName === 'TransferSent') { // LiquidityHub
+        const address = this.getLiquidityHubContractAddress(chainId)
+        const _eventFetcher = new TransferSentEventFetcher(provider, chainId, this.batchBlocks, address)
+        const filter = _eventFetcher.getFilter()
+        filters.push(filter)
+        map[filter.topics[0] as string] = _eventFetcher
+      } else if (eventName === 'TransferBonded') { // LiquidityHub
+        const address = this.getLiquidityHubContractAddress(chainId)
+        const _eventFetcher = new TransferBondedEventFetcher(provider, chainId, this.batchBlocks, address)
         const filter = _eventFetcher.getFilter()
         filters.push(filter)
         map[filter.topics[0] as string] = _eventFetcher
@@ -1431,6 +1445,18 @@ export class Hop {
     const connectorAddress = getAddress(event?.args?.connector)
     return { connectorAddress }
   }
+
+  // liquidity hub start //////////////////////////////////////////////////////
+
+  getLiquidityHubContractAddress (chainId: number): string {
+    if (!chainId) {
+      throw new Error('chainId is required')
+    }
+    const address = this.contractAddresses[this.network]?.[chainId]?.liquidityHub
+    return address
+  }
+
+  // liquidity hub end ////////////////////////////////////////////////////////
 
   // nft start ////////////////////////////////////////////////////////////////
 
