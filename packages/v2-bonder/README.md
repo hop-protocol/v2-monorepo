@@ -17,7 +17,7 @@ npm install
 Run worker
 
 ```bash
-npm start
+npm run start:worker
 ```
 
 ## Test

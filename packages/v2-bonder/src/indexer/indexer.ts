@@ -77,12 +77,12 @@ export class Indexer {
       liquidityHub: {
         TransferBonded: new SyncStateDb(dbPath, 'TransferBonded'),
         TransferSent: new SyncStateDb(dbPath, 'TransferSent')
-      },
-      nft: {
-        ConfirmationSent: new SyncStateDb(dbPath, 'NftConfirmationSent'),
-        TokenConfirmed: new SyncStateDb(dbPath, 'NftTokenConfirmed'),
-        TokenSent: new SyncStateDb(dbPath, 'NftTokenSent')
       }
+      // nft: {
+      //   ConfirmationSent: new SyncStateDb(dbPath, 'NftConfirmationSent'),
+      //   TokenConfirmed: new SyncStateDb(dbPath, 'NftTokenConfirmed'),
+      //   TokenSent: new SyncStateDb(dbPath, 'NftTokenSent')
+      // }
     }
   }
 
@@ -110,61 +110,67 @@ export class Indexer {
   }
 
   async syncEvents (): Promise<any[]> {
-    const l1Events = ['BundleForwarded', 'BundleReceived']
-    const baseEvents = [
-      'BundleSet',
-      'BundleCommitted',
-      'FeesSentToHub',
-      'MessageBundled',
-      'MessageExecuted',
-      'MessageSent'
-    ]
-
     const _events: any[] = []
 
     for (const _chainId in this.chainIds) {
-      const chainId = Number(_chainId)
-      const isL1 = this.getIsL1(chainId)
-      let _db: any
-      let eventNames: string[] = []
+      for (const subType in this.eventsToSync) {
+        let eventNames: string[] = []
+        const chainId = Number(_chainId)
+        const isL1 = this.getIsL1(chainId)
+        let _db: any
+        if (subType === 'messenger') {
+          const l1Events = ['BundleForwarded', 'BundleReceived']
+          const baseEvents = [
+            'BundleSet',
+            'BundleCommitted',
+            'FeesSentToHub',
+            'MessageBundled',
+            'MessageExecuted',
+            'MessageSent'
+          ]
 
-      if (isL1) {
-        _db = this.eventsToSync.messenger[l1Events[0]]
-        eventNames = baseEvents.concat(...l1Events)
-      } else {
-        _db = this.eventsToSync.messenger[baseEvents[0]]
-        eventNames = baseEvents
-      }
+          if (isL1) {
+            _db = this.eventsToSync.messenger[l1Events[0]]
+            eventNames = baseEvents.concat(...l1Events)
+          } else {
+            _db = this.eventsToSync.messenger[baseEvents[0]]
+            eventNames = baseEvents
+          }
+        } else if (subType === 'liquidityHub') {
+          eventNames = ['TransferSent', 'TransferBonded']
+          _db = this.eventsToSync.liquidityHub[eventNames[0]]
+        }
 
-      if (!_db) {
-        continue
-      }
+        if (!_db) {
+          continue
+        }
 
-      const syncState = await _db.getSyncState(chainId)
-      console.log('syncState', chainId, syncState)
+        const syncState = await _db.getSyncState(chainId)
+        console.log('syncState', chainId, syncState)
 
-      const provider = this.sdk.getRpcProvider(chainId)
-      let fromBlock = this.startBlocks[chainId]
-      let headBlock = await provider.getBlockNumber()
-      if (this.endBlocks[chainId]) {
-        headBlock = this.endBlocks[chainId]
-      }
-      let toBlock = headBlock
-      if (syncState?.toBlock) {
-        fromBlock = syncState.toBlock as number + 1
-        toBlock = headBlock
-      }
+        const provider = this.sdk.getRpcProvider(chainId)
+        let fromBlock = this.startBlocks[chainId]
+        let headBlock = await provider.getBlockNumber()
+        if (this.endBlocks[chainId]) {
+          headBlock = this.endBlocks[chainId]
+        }
+        let toBlock = headBlock
+        if (syncState?.toBlock) {
+          fromBlock = syncState.toBlock as number + 1
+          toBlock = headBlock
+        }
 
-      console.log('get', eventNames, chainId, fromBlock, toBlock)
-      const events = await this.sdk.getEvents({ eventNames, chainId, fromBlock, toBlock })
-      console.log('events', eventNames, events.length)
-      for (const event of events) {
-        await this.pgDb.events[event.eventName].upsertItem({ ...event, context: event.context })
-        const _db = this.eventsToSync.messenger[event.eventName]
+        console.log('get', eventNames, chainId, fromBlock, toBlock)
+        const events = await this.sdk.getEvents({ eventNames, chainId, fromBlock, toBlock })
+        console.log('events', eventNames, events.length)
+        for (const event of events) {
+          await this.pgDb.events[event.eventName].upsertItem({ ...event, context: event.context })
+          const _db = this.eventsToSync[subType][event.eventName]
+          await _db.putSyncState(chainId, { fromBlock, toBlock })
+          _events.push(event)
+        }
         await _db.putSyncState(chainId, { fromBlock, toBlock })
-        _events.push(event)
       }
-      await _db.putSyncState(chainId, { fromBlock, toBlock })
     }
 
     return _events
