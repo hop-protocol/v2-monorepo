@@ -1,5 +1,6 @@
 import { Contract, Signer, providers } from 'ethers'
 import { LiquidityHub__factory } from '@hop-protocol/v2-core/contracts/factories/generated/LiquidityHub__factory'
+import { StakingRegistry } from './StakingRegistry'
 
 // Constructor input type
 interface LiquidityHubConstructorInput {
@@ -57,13 +58,18 @@ interface GetTokenBusInfoInput {
   tokenBusId: string
 }
 
-export class LiquidityHub {
+export class LiquidityHub extends StakingRegistry {
   provider: providers.Provider
   signer: Signer
   address : string
 
   constructor (input: LiquidityHubConstructorInput = {}) {
     const { provider, signer, address } = input
+    super({
+      provider,
+      signer,
+      address
+    })
     this.provider = provider
     this.signer = signer
     if (!this.provider && this.signer) {
