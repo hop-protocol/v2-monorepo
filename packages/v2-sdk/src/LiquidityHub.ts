@@ -1,10 +1,11 @@
-import LiquidityHubAbi from '@hop-protocol/v2-core/abi/generated/LiquidityHub.json'
 import { Contract, Signer, providers } from 'ethers'
+import { LiquidityHub__factory } from '@hop-protocol/v2-core/contracts/factories/generated/LiquidityHub__factory'
 
 // Constructor input type
 interface LiquidityHubConstructorInput {
   provider?: providers.Provider
   signer?: Signer
+  address?: string
 }
 
 // getTransferSentEvents and getTransferBondedEvents input type
@@ -35,7 +36,7 @@ interface BondInput {
 interface WithdrawBalanceInput {
   tokenBusId: string
   recipient: string
-  window: number
+  timeWindow: number
 }
 
 // getTokenBusId input type
@@ -59,14 +60,16 @@ interface GetTokenBusInfoInput {
 export class LiquidityHub {
   provider: providers.Provider
   signer: Signer
+  address : string
 
   constructor (input: LiquidityHubConstructorInput = {}) {
-    const { provider, signer } = input
+    const { provider, signer, address } = input
     this.provider = provider
     this.signer = signer
     if (!this.provider && this.signer) {
       this.provider = this.signer.provider
     }
+    this.address = address
   }
 
   connect (signer: Signer) {
@@ -75,18 +78,7 @@ export class LiquidityHub {
 
   async getTransferSentEvents (input: TransferEventInput) {
     const { startBlock, endBlock } = input
-    // event TransferSent(
-    //     bytes32 indexed claimId,
-    //     bytes32 indexed tokenBusId,
-    //     address indexed to,
-    //     uint256 amount,
-    //     uint256 minAmountOut,
-    //     uint256 sourceClaimsSent,
-    //     uint256 bonus
-    // );
-
-    const address = ''
-    const contract = new Contract(address, LiquidityHubAbi, this.provider)
+    const contract = this.getLiquidityHubContract()
     const filter = contract.filters.TransferSent()
     const events = await contract.queryFilter(filter, startBlock, endBlock)
     return events
@@ -94,26 +86,17 @@ export class LiquidityHub {
 
   async getTransferBondedEvents (input: TransferEventInput) {
     const { startBlock, endBlock } = input
-    // event TransferBonded(
-    //     bytes32 indexed claimId,
-    //     bytes32 indexed tokenBusId,
-    //     address indexed to,
-    //     uint256 amount,
-    //     uint256 minAmountOut,
-    //     uint256 sourceClaimsSent,
-    //     uint256 fee
-    // );
-
-    const address = ''
-    const contract = new Contract(address, LiquidityHubAbi, this.provider)
+    const contract = this.getLiquidityHubContract()
     const filter = contract.filters.TransferBonded()
     const events = await contract.queryFilter(filter, startBlock, endBlock)
     return events
   }
 
   getLiquidityHubContract (): Contract {
-    const address = ''
-    const contract = new Contract(address, LiquidityHubAbi, this.signer || this.provider)
+    if (!this.address) {
+      throw new Error('LiquidityHub address not set')
+    }
+    const contract = LiquidityHub__factory.connect(this.address, this.signer || this.provider)
     return contract
   }
 
@@ -139,21 +122,31 @@ export class LiquidityHub {
   }
 
   async withdrawClaims (input: WithdrawBalanceInput) {
-    const { tokenBusId, recipient, window } = input
+    const { tokenBusId, recipient, timeWindow } = input
     const contract = this.getLiquidityHubContract()
-    return contract.withdrawClaims(tokenBusId, recipient, window)
+    return contract.withdrawClaims(tokenBusId, recipient, timeWindow)
   }
 
   async getWithdrawableBalance (input: WithdrawBalanceInput) {
-    const { tokenBusId, recipient, window } = input
+    const { tokenBusId, recipient, timeWindow } = input
     const contract = this.getLiquidityHubContract()
-    return contract.getWithdrawableBalance(tokenBusId, recipient, window)
+    return contract.getWithdrawableBalance(tokenBusId, recipient, timeWindow)
   }
 
   async getClaimId (input: SendBondPostClaimInput) {
     const { tokenBusId, to, amount, minAmountOut, sourceClaimsSent } = input
     const contract = this.getLiquidityHubContract()
     return contract.getClaimId(tokenBusId, to, amount, minAmountOut, sourceClaimsSent)
+  }
+
+  async replaceClaim () {
+    const contract = this.getLiquidityHubContract()
+    return contract.replaceClaim() // TODO
+  }
+
+  async confirmClaim (claimId: string) {
+    const contract = this.getLiquidityHubContract()
+    return contract.confirmClaim(claimId) // TODO
   }
 
   async getTokenBusId (input: GetTokenBusIdInput) {
@@ -166,6 +159,16 @@ export class LiquidityHub {
     const { chainIds } = input
     const contract = this.getLiquidityHubContract()
     return contract.getFee(chainIds)
+  }
+
+  async getHopTokenAddress () {
+    const contract = this.getLiquidityHubContract()
+    return contract.hopToken()
+  }
+
+  async getMinBonderStake () {
+    const contract = this.getLiquidityHubContract()
+    return contract.minBonderStake()
   }
 
   async getTokenBusInfo (input: GetTokenBusInfoInput) {
