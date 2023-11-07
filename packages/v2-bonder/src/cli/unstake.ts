@@ -5,7 +5,7 @@ import { parseUnits } from 'ethers/lib/utils'
 
 root
   .command('unstake')
-  .description('Unstake HOP tokens from liqiudity hub')
+  .description('Unstake HOP tokens from liquidity hub')
   .option('--chain-id <number>', 'Chain', parseString)
   .option('--token <address>', 'Token', parseString)
   .option('--amount <number>', 'Amount (in human readable format)', parseNumber)

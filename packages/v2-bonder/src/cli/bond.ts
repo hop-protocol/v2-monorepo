@@ -1,30 +1,31 @@
 import { actionHandler, parseBool, parseNumber, parseString, root } from './shared'
 import { LiquidityHub } from '@hop-protocol/v2-sdk'
+import { BigNumber } from 'ethers'
 import { parseUnits } from 'ethers/lib/utils'
 import { getSigner } from '../signer'
 
 root
-  .command('stake')
-  .description('Stake HOP tokens on liquidity hub')
+  .command('bond')
+  .description('Bond transfer')
   .option('--chain-id <number>', 'Chain', parseString)
   .option('--token <address>', 'Token', parseString)
-  .option('--amount <number>', 'Amount (in human readable format)', parseNumber)
+  .option('--claim-id <string>', 'Claim ID', parseString)
   .action(actionHandler(main))
 
 async function main (source: any) {
-  const { chainId, token, amount } = source
+  const { chainId, claimId, token } = source
 
-  if (!amount) {
-    throw new Error('amount is required. E.g. 100')
+  if (!token) {
+    throw new Error('token is required')
   }
   if (!chainId) {
     throw new Error('chainId is required')
   }
-  if (!token) {
-    throw new Error('token address is required')
+  if (!claimId) {
+    throw new Error('claim ID is required')
   }
 
-  console.log('stake', chainId, token, amount)
+  console.log('bond', chainId, )
   const address = '' // TODO: liquidity hub address
   const signer = getSigner()
   if (!signer) {
@@ -35,9 +36,13 @@ async function main (source: any) {
     address
   })
 
-  const role = '' // TODO
-  const amountBn = parseUnits(amount, 18)
-  const tx = await liquidityHub.stakeHop({ role, amount: amountBn })
+  const slippageTolerance = 0.05
+  const tokenBusId = '' // TODO
+  const to = '' // TODO
+  const amount = BigNumber.from(0) // TODO
+  const minAmountOut = liquidityHub.calcAmountOutMin({ amountOut: amount, slippageTolerance })
+  const sourceClaimsSent = BigNumber.from(0) // TODO
+  const tx = await liquidityHub.bond({ tokenBusId, to, amount, minAmountOut, sourceClaimsSent })
   console.log('stake hop tx:', tx.hash)
   await tx.wait()
   console.log('stake hop tx confirmed')

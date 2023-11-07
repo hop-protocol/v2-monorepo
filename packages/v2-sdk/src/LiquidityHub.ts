@@ -1,4 +1,4 @@
-import { Contract, Signer, ethers, providers } from 'ethers'
+import { BigNumber, BigNumberish, Contract, Signer, providers } from 'ethers'
 import { ERC20__factory } from '@hop-protocol/v2-core/contracts/factories/static/ERC20__factory'
 import { LiquidityHub__factory } from '@hop-protocol/v2-core/contracts/factories/generated/LiquidityHub__factory'
 import { StakingRegistry } from './StakingRegistry'
@@ -20,18 +20,18 @@ interface TransferEventInput {
 interface SendBondPostClaimInput {
   tokenBusId: string
   to: string
-  amount: number
-  minAmountOut: number
-  sourceClaimsSent?: number
+  amount: BigNumberish
+  minAmountOut: BigNumberish
+  sourceClaimsSent?: BigNumberish
 }
 
 // bond input type
 interface BondInput {
   tokenBusId: string
   to: string
-  amount: number
-  minAmountOut: number
-  sourceClaimsSent: number
+  amount: BigNumberish
+  minAmountOut: BigNumberish
+  sourceClaimsSent: BigNumberish
 }
 
 // withdrawClaims and getWithdrawableBalance input type
@@ -62,12 +62,17 @@ interface GetTokenBusInfoInput {
 interface StakeHopInput {
   role: string;
   staker?: string; // Ethereum address format
-  amount: ethers.BigNumberish; // Can be a number, string, BigNumber, etc.
+  amount: BigNumberish; // Can be a number, string, BigNumber, etc.
 }
 
 interface UnstakeHopInput {
   role: string;
-  amount: ethers.BigNumberish; // Can be a number, string, BigNumber, etc.
+  amount: BigNumberish; // Can be a number, string, BigNumber, etc.
+}
+
+interface CalcAmountOutMinInput {
+  amountOut: BigNumberish,
+  slippageTolerance: number
 }
 
 export class LiquidityHub extends StakingRegistry {
@@ -128,6 +133,22 @@ export class LiquidityHub extends StakingRegistry {
   }
 
   async bond (input: BondInput) {
+    const { tokenBusId, to, amount, minAmountOut, sourceClaimsSent } = input
+
+    const tokenBus = await this.getTokenBusInfo({ tokenBusId })
+    const tokenBusTokenAddress = tokenBus.token
+    const tokenContract = ERC20__factory.connect(tokenBusTokenAddress, this.signer)
+    const signerAddress = await this.getSignerAddress()
+    const balance = await tokenContract.balanceOf(signerAddress)
+    if (balance.lt(amount)) {
+      const approvalTx = await tokenContract.approve(this.address, amount)
+      await approvalTx.wait()
+    }
+
+    return this._bond(input)
+  }
+
+  async _bond (input: BondInput) {
     const { tokenBusId, to, amount, minAmountOut, sourceClaimsSent } = input
     const contract = this.getLiquidityHubContract()
     return contract.bond(tokenBusId, to, amount, minAmountOut, sourceClaimsSent)
@@ -254,5 +275,13 @@ export class LiquidityHub extends StakingRegistry {
     if (this.signer) {
       return this.signer.getAddress()
     }
+  }
+
+  calcAmountOutMin (input: CalcAmountOutMinInput): BigNumber {
+    let { amountOut, slippageTolerance } = input
+    amountOut = BigNumber.from(amountOut.toString())
+    const slippageToleranceBps = slippageTolerance * 100
+    const minBps = Math.ceil(10000 - slippageToleranceBps)
+    return amountOut.mul(minBps).div(10000)
   }
 }
