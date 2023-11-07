@@ -1,4 +1,5 @@
-import { Contract, Signer, providers } from 'ethers'
+import { Contract, Signer, ethers, providers } from 'ethers'
+import { ERC20__factory } from '@hop-protocol/v2-core/contracts/factories/static/ERC20__factory'
 import { LiquidityHub__factory } from '@hop-protocol/v2-core/contracts/factories/generated/LiquidityHub__factory'
 import { StakingRegistry } from './StakingRegistry'
 
@@ -56,6 +57,17 @@ interface GetFeeInput {
 // getTokenBusInfo input type
 interface GetTokenBusInfoInput {
   tokenBusId: string
+}
+
+interface StakeHopInput {
+  role: string;
+  staker?: string; // Ethereum address format
+  amount: ethers.BigNumberish; // Can be a number, string, BigNumber, etc.
+}
+
+interface UnstakeHopInput {
+  role: string;
+  amount: ethers.BigNumberish; // Can be a number, string, BigNumber, etc.
 }
 
 export class LiquidityHub extends StakingRegistry {
@@ -181,5 +193,66 @@ export class LiquidityHub extends StakingRegistry {
     const { tokenBusId } = input
     const contract = this.getLiquidityHubContract()
     return contract.getTokenBusInfo(tokenBusId)
+  }
+
+  async getHopBalance (address?: string) {
+    if (!address) {
+      address = await this.getSignerAddress()
+    }
+    if (!address) {
+      throw new Error('Address not set')
+    }
+    const contract = await this.getHopTokenContract()
+    return contract.balanceOf(address)
+  }
+
+  async getHopTokenContract () {
+    const hopTokenAddress = await this.getHopTokenAddress()
+    const contract = ERC20__factory.connect(hopTokenAddress, this.provider)
+    return contract
+  }
+
+  async stakeHop (input: StakeHopInput) {
+    let { role, staker, amount } = input
+    if (!staker) {
+      staker = await this.getSignerAddress()
+    }
+    if (!staker) {
+      throw new Error('Staker address not set')
+    }
+    const minRequired = await this.getMinHopStakeForRole({ role })
+    const balance = await this.getHopBalance(staker)
+
+    if (balance.lt(amount)) {
+      throw new Error(`Insufficient balance to stake ${amount.toString()} HOP`)
+    }
+
+    const hopTokenContract = await this.getHopTokenContract()
+    if (balance.lt(minRequired)) {
+      const approvalTx = await hopTokenContract.approve(this.address, minRequired)
+      await approvalTx.wait()
+    }
+
+    return this._stakeHop({ role, staker, amount })
+  }
+
+  async unstakeHop (input: UnstakeHopInput) {
+    const { role, amount } = input
+    const staker = await this.getSignerAddress()
+    const balance = await this.getWithdrawableStakeBalance({ role, staker })
+
+    if (balance.lt(amount)) {
+      throw new Error('Insufficient balance to unstake')
+    }
+
+    const unstakeTx = await this._unstakeHop({ role, amount })
+    await unstakeTx.wait()
+    return this.withdraw({ role, staker })
+  }
+
+  async getSignerAddress () {
+    if (this.signer) {
+      return this.signer.getAddress()
+    }
   }
 }

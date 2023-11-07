@@ -19,12 +19,13 @@ interface GetWithdrawableEthInput {
   address: string; // Ethereum address format
 }
 
-interface StakeHopInput {
+interface _StakeHopInput {
   role: string;
   staker: string; // Ethereum address format
+  amount: ethers.BigNumberish; // Can be a number, string, BigNumber, etc.
 }
 
-interface UnstakeHopInput {
+interface _UnstakeHopInput {
   role: string;
   amount: ethers.BigNumberish; // Can be a number, string, BigNumber, etc.
 }
@@ -169,13 +170,13 @@ export class StakingRegistry {
     return contract.getWithdrawableEth(address)
   }
 
-  async stakeHop (input: StakeHopInput) {
+  protected async _stakeHop (input: _StakeHopInput) {
     const { role, staker } = input
     const contract = this.getStakingRegistryContract()
     return contract.stakeHop(role, staker)
   }
 
-  async unstakeHop (input: UnstakeHopInput) {
+  async _unstakeHop (input: _UnstakeHopInput) {
     const { role, amount } = input
     const contract = this.getStakingRegistryContract()
     return contract.unstakeHop(role, amount)
@@ -184,7 +185,7 @@ export class StakingRegistry {
   async withdraw (input: WithdrawInput) {
     const { role, staker } = input
     const contract = this.getStakingRegistryContract()
-    return contract.unstakeHop(role, staker)
+    return contract.withdraw(role, staker)
   }
 
   async createChallenge (input: CreateChallengeInput) {
