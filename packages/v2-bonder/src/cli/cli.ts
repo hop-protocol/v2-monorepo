@@ -2,11 +2,13 @@ import '../moduleAlias'
 import packageJson from '../../package.json'
 import { program } from './shared'
 
+import './bond'
 import './keystore'
 import './nftWorker'
-import './worker'
+import './sendTransfer'
 import './stake'
 import './unstake'
+import './worker'
 
 program.version(packageJson.version)
 program.parse(process.argv)

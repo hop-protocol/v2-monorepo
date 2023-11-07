@@ -124,6 +124,20 @@ export class LiquidityHub extends StakingRegistry {
   }
 
   async send (input: SendBondPostClaimInput) {
+    const { tokenBusId, amount } = input
+    const tokenBus = await this.getTokenBusInfo({ tokenBusId })
+    const tokenBusTokenAddress = tokenBus.token
+    const tokenContract = ERC20__factory.connect(tokenBusTokenAddress, this.signer)
+    const signerAddress = await this.getSignerAddress()
+    const balance = await tokenContract.balanceOf(signerAddress)
+    if (balance.lt(amount)) {
+      const approvalTx = await tokenContract.approve(this.address, amount)
+      await approvalTx.wait()
+    }
+    return this._send(input)
+  }
+
+  async _send (input: SendBondPostClaimInput) {
     const { tokenBusId, to, amount, minAmountOut } = input
     const contract = this.getLiquidityHubContract()
     const value = 0

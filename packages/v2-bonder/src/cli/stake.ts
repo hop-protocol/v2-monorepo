@@ -1,7 +1,7 @@
-import { actionHandler, parseBool, parseNumber, parseString, root } from './shared'
 import { LiquidityHub } from '@hop-protocol/v2-sdk'
-import { parseUnits } from 'ethers/lib/utils'
+import { actionHandler, parseNumber, parseString, root } from './shared'
 import { getSigner } from '../signer'
+import { parseUnits } from 'ethers/lib/utils'
 
 root
   .command('stake')
