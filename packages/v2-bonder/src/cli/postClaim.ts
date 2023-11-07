@@ -5,15 +5,15 @@ import { parseUnits } from 'ethers/lib/utils'
 import { getSigner } from '../signer'
 
 root
-  .command('bond')
-  .description('Bond transfer')
+  .command('post-claim')
+  .description('Post claim')
   .option('--chain-id <number>', 'Chain', parseString)
   .option('--token <address>', 'Token', parseString)
-  .option('--claim-id <string>', 'Claim ID', parseString)
+  .option('--token-bus-id <string>', 'Token Bus ID', parseString)
   .action(actionHandler(main))
 
 async function main (source: any) {
-  const { chainId, token, claimId } = source
+  const { chainId, token, tokenBusId } = source
 
   if (!token) {
     throw new Error('token is required')
@@ -21,11 +21,11 @@ async function main (source: any) {
   if (!chainId) {
     throw new Error('chainId is required')
   }
-  if (!claimId) {
-    throw new Error('claim ID is required')
+  if (!tokenBusId) {
+    throw new Error('token bus ID is required')
   }
 
-  console.log('bond', chainId, token)
+  console.log('post claim', chainId, token)
   const address = '' // TODO: liquidity hub address
   const signer = getSigner()
   if (!signer) {
@@ -37,12 +37,11 @@ async function main (source: any) {
   })
 
   const slippageTolerance = 0.05
-  const tokenBusId = '' // TODO
   const to = '' // TODO
   const amount = BigNumber.from(0) // TODO
   const minAmountOut = liquidityHub.calcAmountOutMin({ amountOut: amount, slippageTolerance })
   const sourceClaimsSent = BigNumber.from(0) // TODO
-  const tx = await liquidityHub.bond({ tokenBusId, to, amount, minAmountOut, sourceClaimsSent })
+  const tx = await liquidityHub.postClaim({ tokenBusId, to, amount, minAmountOut, sourceClaimsSent })
   console.log('stake hop tx:', tx.hash)
   await tx.wait()
   console.log('stake hop tx confirmed')
