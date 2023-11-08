@@ -16,13 +16,17 @@ interface TransferEventInput {
   endBlock: number
 }
 
-// send, bond, postClaim, and getClaimId input type
-interface SendBondPostClaimInput {
+// SendBondPostClaimInput
+
+// send input type
+interface SendInput {
   tokenBusId: string
   to: string
   amount: BigNumberish
   minAmountOut: BigNumberish
-  sourceClaimsSent?: BigNumberish
+  attestedCheckpoint: string
+  attestedNonce: BigNumberish
+  attestedTotalSent: BigNumberish
 }
 
 // bond input type
@@ -31,7 +35,37 @@ interface BondInput {
   to: string
   amount: BigNumberish
   minAmountOut: BigNumberish
-  sourceClaimsSent: BigNumberish
+  totalSent: BigNumberish
+  nonce: BigNumberish
+  attestedCheckpoint: string
+  attestedNonce: BigNumberish
+  attestedTotalSent: BigNumberish
+}
+
+// postClaim input type
+interface PostClaimInput {
+  tokenBusId: string
+  to: string
+  amount: BigNumberish
+  minAmountOut: BigNumberish
+  totalSent: BigNumberish
+  nonce: BigNumberish
+  attestedCheckpoint: string
+  attestedNonce: BigNumberish
+  attestedTotalSent: BigNumberish
+}
+
+// getClaimId input type
+interface GetClaimIdInput {
+  tokenBusId: string
+  to: string
+  amount: BigNumberish
+  minAmountOut: BigNumberish
+  totalSent: BigNumberish
+  nonce: BigNumberish
+  attestedCheckpoint: string
+  attestedNonce: BigNumberish
+  attestedTotalSent: BigNumberish
 }
 
 // withdrawClaims and getWithdrawableBalance input type
@@ -123,7 +157,7 @@ export class LiquidityHub extends StakingRegistry {
     return contract
   }
 
-  async send (input: SendBondPostClaimInput) {
+  async send (input: SendInput) {
     const { tokenBusId, amount } = input
     const tokenBus = await this.getTokenBusInfo({ tokenBusId })
     const tokenBusTokenAddress = tokenBus.token
@@ -137,17 +171,17 @@ export class LiquidityHub extends StakingRegistry {
     return this._send(input)
   }
 
-  async _send (input: SendBondPostClaimInput) {
-    const { tokenBusId, to, amount, minAmountOut } = input
+  async _send (input: SendInput) {
+    const { tokenBusId, to, amount, minAmountOut, attestedCheckpoint, attestedNonce, attestedTotalSent } = input
     const contract = this.getLiquidityHubContract()
     const value = 0
-    return contract.send(tokenBusId, to, amount, minAmountOut, {
+    return contract.send(tokenBusId, to, amount, minAmountOut, attestedCheckpoint, attestedNonce, attestedTotalSent, {
       value
     })
   }
 
   async bond (input: BondInput) {
-    const { tokenBusId, to, amount, minAmountOut, sourceClaimsSent } = input
+    const { tokenBusId, amount } = input
 
     const tokenBus = await this.getTokenBusInfo({ tokenBusId })
     const tokenBusTokenAddress = tokenBus.token
@@ -163,15 +197,15 @@ export class LiquidityHub extends StakingRegistry {
   }
 
   async _bond (input: BondInput) {
-    const { tokenBusId, to, amount, minAmountOut, sourceClaimsSent } = input
+    const { tokenBusId, to, amount, minAmountOut, totalSent, nonce, attestedCheckpoint, attestedNonce, attestedTotalSent } = input
     const contract = this.getLiquidityHubContract()
-    return contract.bond(tokenBusId, to, amount, minAmountOut, sourceClaimsSent)
+    return contract.bond(tokenBusId, to, amount, minAmountOut, totalSent, nonce, attestedCheckpoint, attestedNonce, attestedTotalSent)
   }
 
-  async postClaim (input: SendBondPostClaimInput) {
-    const { tokenBusId, to, amount, minAmountOut, sourceClaimsSent } = input
+  async postClaim (input: PostClaimInput) {
+    const { tokenBusId, to, amount, minAmountOut, totalSent, nonce, attestedCheckpoint, attestedNonce, attestedTotalSent } = input
     const contract = this.getLiquidityHubContract()
-    return contract.postClaim(tokenBusId, to, amount, minAmountOut, sourceClaimsSent)
+    return contract.postClaim(tokenBusId, to, amount, minAmountOut, totalSent, nonce, attestedCheckpoint, attestedNonce, attestedTotalSent)
   }
 
   async withdrawClaims (input: WithdrawBalanceInput) {
@@ -186,10 +220,10 @@ export class LiquidityHub extends StakingRegistry {
     return contract.getWithdrawableBalance(tokenBusId, recipient, timeWindow)
   }
 
-  async getClaimId (input: SendBondPostClaimInput) {
-    const { tokenBusId, to, amount, minAmountOut, sourceClaimsSent } = input
+  async getClaimId (input: GetClaimIdInput) {
+    const { tokenBusId, to, amount, minAmountOut, totalSent, nonce, attestedCheckpoint, attestedNonce, attestedTotalSent } = input
     const contract = this.getLiquidityHubContract()
-    return contract.getClaimId(tokenBusId, to, amount, minAmountOut, sourceClaimsSent)
+    return contract.getClaimId(tokenBusId, to, amount, minAmountOut, totalSent, nonce, attestedCheckpoint, attestedNonce, attestedTotalSent)
   }
 
   async replaceClaim () {
@@ -228,6 +262,29 @@ export class LiquidityHub extends StakingRegistry {
     const { tokenBusId } = input
     const contract = this.getLiquidityHubContract()
     return contract.getTokenBusInfo(tokenBusId)
+  }
+
+  async getTokenBusAttestationInfo (input: GetTokenBusInfoInput) {
+    const attestedCheckpoint = await this.getLatestAttestedCheckpoint(input)
+    const attestedNonce = await this.getLatestAttestedNonce(input)
+    const attestedTotalSent = await this.getLatestAttestedTotalSent(input)
+    return {
+      attestedCheckpoint,
+      attestedNonce,
+      attestedTotalSent
+    }
+  }
+
+  async getLatestAttestedCheckpoint (input: GetTokenBusInfoInput) {
+    // TODO: needs to be exposed in contract
+  }
+
+  async getLatestAttestedNonce (input: GetTokenBusInfoInput) {
+    // TODO: needs to be exposed in contract
+  }
+
+  async getLatestAttestedTotalSent (input: GetTokenBusInfoInput) {
+    // TODO: needs to be exposed in contract
   }
 
   async getHopBalance (address?: string) {
